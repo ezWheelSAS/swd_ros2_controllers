@@ -10,21 +10,10 @@ Checks: >
   performance-*,
   portability-*,
   readability-*,
-  -google-readability-braces-around-statements,
-  -google-readability-namespace-comments,
-  -google-runtime-references,
-  -misc-non-private-member-variables-in-classes,
-  -modernize-return-braced-init-list,
-  -modernize-use-trailing-return-type,
-  -modernize-avoid-c-arrays,
   -modernize-avoid-bind,
-  -performance-move-const-arg,
-  -readability-braces-around-statements,
   -readability-magic-numbers,
-  -readability-redundant-declaration,
   -readability-function-cognitive-complexity,
   -readability-isolate-declaration,
-  -bugprone-narrowing-conversions
 
 # Turn all the warnings from the checks above into errors.
 #WarningsAsErrors: "*"
@@ -32,64 +21,32 @@ Checks: >
 HeaderFilterRegex: ''
 
 CheckOptions:
-  - key:             readability-identifier-naming.ConstexprVariableCase
-    value:           lower_case
-  - key:             readability-identifier-naming.ConstexprVariablePrefix
-    value:           k_
+  # type names
+  - key:             readability-identifier-naming.ClassCase
+    value:           CamelCase
   - key:             readability-identifier-naming.EnumCase
+    value:           CamelCase
+  - key:             readability-identifier-naming.UnionCase
+    value:           CamelCase
+  # method names
+  - key:             readability-identifier-naming.MethodCase
+    value:           camelBack
+  # variable names
+  - key:             readability-identifier-naming.VariableCase
     value:           lower_case
+  - key:             readability-identifier-naming.ClassMemberSuffix
+    value:           m_
+  - key:             readability-identifier-naming.ParameterPrefix
+    value:           p_
+  # enum
   - key:             readability-identifier-naming.EnumConstantCase
     value:           lower_case
   - key:             readability-identifier-naming.EnumConstantPrefix
     value:           k_
-  - key:             readability-identifier-naming.FunctionCase
-    value:           camelBack
-  - key:             readability-identifier-naming.GlobalConstantCase
-    value:           lower_case
-  - key:             readability-identifier-naming.GlobalConstantPrefix
-    value:           k_
+  # const static or global variables are UPPER_CASE
   - key:             readability-identifier-naming.StaticConstantCase
-    value:           lower_case
-  - key:             readability-identifier-naming.StaticConstantPrefix
-    value:           k_
-  - key:             readability-identifier-naming.StaticVariableCase
-    value:           lower_case
-  - key:             readability-identifier-naming.StaticVariablePrefix
-    value:           s_
-  - key:             readability-identifier-naming.MacroDefinitionCase
     value:           UPPER_CASE
-  - key:             readability-identifier-naming.MacroDefinitionIgnoredRegexp
-    value:           '^[A-Z]+(_[A-Z]+)*_$'
-  - key:             readability-identifier-naming.MemberCase
-    value:           lower_case
-  - key:             readability-identifier-naming.MemberPrefix
-    value:           m_      
-  - key:             readability-identifier-naming.NamespaceCase
-    value:           lower_case
-  - key:             readability-identifier-naming.ParameterCase
-    value:           lower_case
-  - key:             readability-identifier-naming.ParameterPrefix
-    value:           p_
-  - key:             readability-identifier-naming.TypeAliasCase
-    value:           CamelCase
-  - key:             readability-identifier-naming.TypedefCase
-    value:           CamelCase
-  - key:             readability-identifier-naming.VariableCase
-    value:           lower_case
-  - key:             readability-identifier-naming.VariablePrefix
-    value:           l_
-  - key:             readability-identifier-naming.IgnoreMainLikeFunctions
-    value:           1
-  - { key: readability-implicit-bool-conversion.AllowIntegerConditions,  value: 1 }
-  - { key: readability-implicit-bool-conversion.AllowPointerConditions,  value: 1 }
-  - { key: readability-identifier-naming.ClassCase,                      value: CamelCase }
-  - { key: readability-identifier-naming.ClassMemberPrefix,              value: m_ }
-  - { key: readability-identifier-naming.ClassMemberCase,                value: lower_case }
-  - { key: readability-identifier-naming.PrivateMemberPrefix,            value: m_ }
-  - { key: readability-identifier-naming.PrivateMemberCase,              value: lower_case }
-  - { key: readability-identifier-naming.ProtectedMemberPrefix,          value: m_ }
-  - { key: readability-identifier-naming.ProtectedMemberCase,            value: lower_case }
-  - { key: readability-identifier-naming.PublicMemberPrefix,             value: m_ }
-  - { key: readability-identifier-naming.PublicMemberCase,               value: lower_case }
-  - { key: readability-identifier-naming.LocalVariableCase,              value: lower_case }
-
+  - key:             readability-identifier-naming.ClassConstantCase
+    value:           UPPER_CASE
+  - key:             readability-identifier-naming.GlobalVariableCase
+    value:           UPPER_CASE
