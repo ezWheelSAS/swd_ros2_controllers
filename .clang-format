@@ -5,3 +5,4 @@ BasedOnStyle: Google
 BreakBeforeBraces: Stroustrup
 ColumnLimit: 0
 IndentWidth: 4
+NamespaceIndentation: All
