@@ -22,9 +22,6 @@ find_package(geometry_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_msgs REQUIRED)
 
-find_package(builtin_interfaces REQUIRED)
-find_package(rosidl_default_generators REQUIRED)
-
 #------------------------------------------------------------------------------
 # Project definition, variable and dependencies
 #------------------------------------------------------------------------------
@@ -55,11 +52,24 @@ set(EZW_SMC_CORE_PKG_CONFIG_NAME "ezw-smc-core" CACHE STRING "Module EZW_SMC_COR
 
 find_package(PkgConfig REQUIRED)
 
+#############
+## Clang ##
+#############
+
+# Allow Clang-tidy
+set(CMAKE_CXX_CLANG_TIDY clang-tidy-12 --config-file=${CMAKE_SOURCE_DIR}/.clang-tidy --use-color --header-filter=${CMAKE_SOURCE_DIR}/${CMAKE_PROJECT_NAME}/include/)
+set(DCMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+
 #------------------------------------------------------------------------------
 # Project configuration
 #------------------------------------------------------------------------------
 
-include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(
+  ${CMAKE_SOURCE_DIR}/include
+  ${CMAKE_SOURCE_DIR}/msg
+  ${CMAKE_SOURCE_DIR}/msg/${PROJECT_NAME}
+)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
@@ -132,21 +142,10 @@ target_link_libraries(
   ${EZW_SMC_CORE_LIBRARIES}
 )
 
-# rosidl_generate_interfaces(new_msg
-#   "msg/SafetyFunctions.msg"
-#   DEPENDENCIES builtin_interfaces
-# )
+find_package(rosidl_default_generators REQUIRED)
 
-#############
-## Install ##
-#############
-
-install(TARGETS swd_diff_drive_controller
-  DESTINATION lib/${PROJECT_NAME}
-)
-
-install(DIRECTORY include/
-  DESTINATION include
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/SafetyFunctions.msg"
 )
 
 ament_package()

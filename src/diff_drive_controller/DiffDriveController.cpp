@@ -6,3 +6,5 @@
  */
 
 #include "diff_drive_controller/DiffDriveController.hpp"
+
+#include "msg/safety_functions.hpp"
