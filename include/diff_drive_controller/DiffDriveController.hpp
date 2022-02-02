@@ -4,26 +4,26 @@
   * @file DiffDriveController.hpp
 */
 
-//#ifndef EZW_ROSCONTROLLERS_DIFFDRIVECONTROLLER_HPP
-#define EZW_ROSCONTROLLERS_DIFFDRIVECONTROLLER_HPP
+// //#ifndef EZW_ROSCONTROLLERS_DIFFDRIVECONTROLLER_HPP
+// #define EZW_ROSCONTROLLERS_DIFFDRIVECONTROLLER_HPP
 
-#include <geometry_msgs/msg/point.h>
-#include <geometry_msgs/msg/twist.h>
-#include <std_msgs/msg/bool.h>
-#include <std_msgs/msg/string.h>
-//#include <swd_ros2_controllers/SafetyFunctions.h>
-#include <tf2_ros/transform_broadcaster.h>
+// #include <geometry_msgs/msg/point.h>
+// #include <geometry_msgs/msg/twist.h>
+// #include <std_msgs/msg/bool.h>
+// #include <std_msgs/msg/string.h>
+// //#include <swd_ros2_controllers/SafetyFunctions.h>
+// #include <tf2_ros/transform_broadcaster.h>
 
-#include <cmath>
-#include <mutex>
+// #include <cmath>
+// #include <mutex>
 
-#include "ezw-smc-core/Config.hpp"
-#include "ezw-smc-core/Controller.hpp"
+// #include "ezw-smc-core/Config.hpp"
+// #include "ezw-smc-core/Controller.hpp"
 
-#define M_MAX(a, b) ((a) > (b) ? (a) : (b))
-#define M_MIN(a, b) ((a) < (b) ? (a) : (b))
-#define M_SIGN(a) ((a) > 0 ? 1 : -1)
-#define M_BOUND_ANGLE(a) (((a) > M_PI) ? ((a)-2. * M_PI) : (((a) < -M_PI) ? ((a) + 2. * M_PI) : (a)))
+// #define M_MAX(a, b) ((a) > (b) ? (a) : (b))
+// #define M_MIN(a, b) ((a) < (b) ? (a) : (b))
+// #define M_SIGN(a) ((a) > 0 ? 1 : -1)
+// #define M_BOUND_ANGLE(a) (((a) > M_PI) ? ((a)-2. * M_PI) : (((a) < -M_PI) ? ((a) + 2. * M_PI) : (a)))
 
 // namespace ezw
 // {

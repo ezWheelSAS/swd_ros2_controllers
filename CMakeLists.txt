@@ -15,57 +15,15 @@ find_package(ament_cmake REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
-find_package(rclcpp REQUIRED) # new name of roscpp
+find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
-find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
-find_package(tf2_ros REQUIRED)
-find_package(rosidl_default_generators REQUIRED) # new name of message_generation
+find_package(tf2 REQUIRED)
+find_package(tf2_msgs REQUIRED)
 
-
-add_executable(swd_diff_drive_controller src/DiffDriveController.cpp)
-
-target_include_directories(swd_diff_drive_controller PRIVATE include)
-
-ament_target_dependencies(swd_diff_drive_controller
-  geometry_msgs
-  std_msgs
-  rclcpp
-)
-
-
-#------------------------------------------------------------------------------
-# Build definition (to do before calling 'project()')
-#------------------------------------------------------------------------------
-
-# Build type
-if(NOT CMAKE_BUILD_TYPE)
-  set(
-    CMAKE_BUILD_TYPE Release CACHE STRING
-    "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
-    FORCE
-  )
-endif(NOT CMAKE_BUILD_TYPE)
-
-# CASE OF C PROJECT
-set(CMAKE_C_STANDARD 99)
-if(NOT CMAKE_C_FLAGS)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wformat-security " CACHE STRING "C99 compilation flags" FORCE)
-endif(NOT CMAKE_C_FLAGS)
-
-# CASE OF CPP PROJECT
-set(CMAKE_CXX_STANDARD 11)
-if(NOT CMAKE_CXX_FLAGS)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wformat-security" CACHE STRING "C++11 compilation flags" FORCE)
-endif(NOT CMAKE_CXX_FLAGS)
-
-
-# The code needs C++14 to work!
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
+find_package(builtin_interfaces REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
 
 #------------------------------------------------------------------------------
 # Project definition, variable and dependencies
@@ -76,22 +34,9 @@ set(CMAKE_SYSTEM_NAME Linux)
 
 set(CMAKE_PROJECT_BRIEF "ez-Wheel SWD ROS2 Controllers package")
 
-# if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-#     set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/image CACHE PATH "" FORCE)
-# endif (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-
 set(PKG_CONFIG_PATH /opt/ezw/usr/lib/pkgconfig CACHE PATH "")
 set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:${PKG_CONFIG_PATH}")
 message(STATUS "Pkgconfig extra path are: $ENV{PKG_CONFIG_PATH} ")
-
-# Allow CTest
-enable_testing()
-
-# Allow subdirectory test and config
-option(ENABLE_TESTS "Enable Tests" 1)
-
-# find_package(Doxygen)
-# option(ENABLE_DOCS "Build API documentation" ${DOXYGEN_FOUND})
 
 # Module dependencies used as pkgconfig or direct filepath/dirpath
 set(LIST_MODULES_PKG_CONFIG_NAME "ezw-types ezwLog ezw-smc-core" CACHE STRING "Lists of pkgconfig modules dependencies" FORCE)
@@ -104,45 +49,20 @@ set(EZW_TYPES_PKG_CONFIG_NAME "ezw-types" CACHE STRING "ezw-types pkg config nam
 set(EZW_LOG_PKG_CONFIG_NAME "ezwLog" CACHE STRING "ezwLog pkg config name")
 set(EZW_SMC_CORE_PKG_CONFIG_NAME "ezw-smc-core" CACHE STRING "Module EZW_SMC_CORE_CONFIG pkg config name")
 
-
-#------------------------------------------------------------------------------
-# Project version
-#------------------------------------------------------------------------------
-
-# Get the latest abbreviated commit hash of the working branch
-execute_process(
-  COMMAND git log -1 --format=%h
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-  OUTPUT_VARIABLE GIT_COMMIT_HASH
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-
 #------------------------------------------------------------------------------
 # pkgconfig
 #------------------------------------------------------------------------------
 
 find_package(PkgConfig REQUIRED)
 
-
-
-
 #------------------------------------------------------------------------------
 # Project configuration
 #------------------------------------------------------------------------------
 
-include_directories(include)
-include_directories(/opt/ezw/usr/include/dbus-1.0)
-
 include_directories(${CMAKE_SOURCE_DIR}/include)
-
-if(HAS_CONFIG)
-  message(STATUS "Adding config from ${CMAKE_SOURCE_DIR}/config/")
-  include_directories(${CMAKE_SOURCE_DIR}/config)
-endif(HAS_CONFIG)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
-
 
 # Use project pkg config
 pkg_check_modules(EZW_TYPES REQUIRED ezw-types)
@@ -193,23 +113,40 @@ add_definitions(
   ${EZW_SMC_CORE_LDFLAGS}
 )
 
+file(GLOB_RECURSE SOURCES_DIFF_DRIVE_CRTL src/diff_drive_controller/*.cpp)
 
-######
+add_executable(swd_diff_drive_controller ${SOURCES_DIFF_DRIVE_CRTL})
+
+ament_target_dependencies(swd_diff_drive_controller
+  rclcpp
+  std_msgs
+  nav_msgs
+  geometry_msgs
+  tf2
+  tf2_msgs
+)
 
 target_link_libraries(
   swd_diff_drive_controller
   ${EZW_LOG_LIBRARIES}
   ${EZW_SMC_CORE_LIBRARIES}
-
 )
 
+# rosidl_generate_interfaces(new_msg
+#   "msg/SafetyFunctions.msg"
+#   DEPENDENCIES builtin_interfaces
+# )
+
+#############
+## Install ##
+#############
 
 install(TARGETS swd_diff_drive_controller
-  DESTINATION lib/${PROJECT_NAME})
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 install(DIRECTORY include/
-  DESTINATION include)
-
-
+  DESTINATION include
+)
 
 ament_package()
