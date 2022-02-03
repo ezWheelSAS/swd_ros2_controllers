@@ -1,7 +1,12 @@
+/**
+ * Copyright (C) 2022 ez-Wheel S.A.S.
+ *
+ * @file main.cpp
+ */
+
 #include <cstdio>
 
 #include "diff_drive_controller/DiffDriveController.hpp"
-#include "diff_drive_controller/LifeCycleTalker.hpp"
 
 auto main(int argc, char** argv) -> int
 {
@@ -17,7 +22,7 @@ auto main(int argc, char** argv) -> int
 
     rclcpp::executors::SingleThreadedExecutor exe;
 
-    auto lc_node = std::make_shared<ezw::swd::LifecycleTalker>("diff_drive_talker");
+    auto lc_node = std::make_shared<ezw::swd::DiffDriveController>("diff_drive_controller");
 
     exe.add_node(lc_node->get_node_base_interface());
 
