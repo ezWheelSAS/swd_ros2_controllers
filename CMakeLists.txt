@@ -16,6 +16,9 @@ find_package(ament_cmake REQUIRED)
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_lifecycle REQUIRED)
+find_package(lifecycle_msgs REQUIRED)
+
 find_package(std_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
@@ -129,6 +132,8 @@ add_executable(swd_diff_drive_controller ${SOURCES_DIFF_DRIVE_CRTL})
 
 ament_target_dependencies(swd_diff_drive_controller
   rclcpp
+  rclcpp_lifecycle
+  lifecycle_msgs
   std_msgs
   nav_msgs
   geometry_msgs
