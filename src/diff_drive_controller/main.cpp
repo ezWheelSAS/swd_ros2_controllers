@@ -22,8 +22,10 @@ auto main(int argc, char** argv) -> int
 
     rclcpp::executors::SingleThreadedExecutor exe;
 
-    auto lc_node = std::make_shared<ezw::swd::DiffDriveController>("diff_drive_controller");
+    auto params_node = std::make_shared<ezw::swd::DiffDriveParameters>("diff_drive_parameters");
+    exe.add_node(params_node->get_node_base_interface());
 
+    auto lc_node = std::make_shared<ezw::swd::DiffDriveController>("diff_drive_controller", params_node);
     exe.add_node(lc_node->get_node_base_interface());
 
     exe.spin();

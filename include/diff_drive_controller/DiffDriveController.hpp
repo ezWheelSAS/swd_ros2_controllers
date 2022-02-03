@@ -11,6 +11,7 @@
 #include <thread>
 #include <utility>
 
+#include "diff_drive_controller/DiffDriveParameters.hpp"
 #include "lifecycle_msgs/msg/transition.hpp"
 #include "rclcpp/publisher.hpp"
 #include "rclcpp/rclcpp.hpp"
@@ -50,10 +51,10 @@ namespace ezw {
             /**
              * @brief Construct a new Diff Drive Controller object
              * 
-             * @param node_name Node name
-             * @param intra_process_comms  
+             * @param p_node_name Node name
+             * @param p_intra_process_comms  
              */
-            explicit DiffDriveController(const std::string &node_name, bool intra_process_comms = false);
+            explicit DiffDriveController(const std::string &p_node_name, std::shared_ptr<DiffDriveParameters> p_params, bool p_intra_process_comms = false);
 
             /**
              * @brief 
@@ -212,6 +213,8 @@ namespace ezw {
             // lifecycle timer will be created which obeys the same lifecycle management as the
             // lifecycle publisher.
             std::shared_ptr<rclcpp::TimerBase> m_timer;
+
+            std::shared_ptr<DiffDriveParameters> m_params;
         };
 
     }  // namespace swd

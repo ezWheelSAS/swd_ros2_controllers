@@ -27,7 +27,8 @@ using namespace std::chrono_literals;
 
 namespace ezw {
     namespace swd {
-        DiffDriveController::DiffDriveController(const std::string &node_name, bool intra_process_comms) : rclcpp_lifecycle::LifecycleNode(node_name, rclcpp::NodeOptions().use_intra_process_comms(intra_process_comms))
+        DiffDriveController::DiffDriveController(const std::string &p_node_name, std::shared_ptr<DiffDriveParameters> p_params, bool p_intra_process_comms) : rclcpp_lifecycle::LifecycleNode(p_node_name, rclcpp::NodeOptions().use_intra_process_comms(p_intra_process_comms)),
+                                                                                                                                                              m_params(p_params)
         {
         }
 
@@ -73,6 +74,9 @@ namespace ezw {
             // TODO(LDA) : 4 timers
 
             RCLCPP_INFO(get_logger(), "on_configure() is called.");
+
+            auto parameter1 = m_params->getParameter1();
+            RCLCPP_INFO(get_logger(), "lParameter1 : %s", parameter1.c_str());
 
             // We return a success and hence invoke the transition to the next
             // step: "inactive".
