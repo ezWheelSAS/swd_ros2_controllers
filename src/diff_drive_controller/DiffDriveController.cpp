@@ -14,77 +14,50 @@
 #include <thread>
 #include <utility>
 
-#include "lifecycle_msgs/msg/transition.hpp"
 #include "msg/safety_functions.hpp"
 #include "rclcpp/publisher.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include "rclcpp_lifecycle/lifecycle_node.hpp"
-#include "rclcpp_lifecycle/lifecycle_publisher.hpp"
 #include "rcutils/logging_macros.h"
 #include "std_msgs/msg/string.hpp"
 
 using namespace std::chrono_literals;
+using std::placeholders::_1;
+
+namespace {
+    constexpr auto DEFAULT_COMMAND_TOPIC = "cmd_vel";
+}
 
 namespace ezw {
     namespace swd {
-        DiffDriveController::DiffDriveController(const std::string &p_node_name, const std::shared_ptr<const DiffDriveParameters> p_params, bool p_intra_process_comms) : rclcpp_lifecycle::LifecycleNode(p_node_name, rclcpp::NodeOptions().use_intra_process_comms(p_intra_process_comms)),
-                                                                                                                                                                          m_params(p_params)
+        DiffDriveController::DiffDriveController(const std::string &p_node_name, const std::shared_ptr<const DiffDriveParameters> p_params) : Node(p_node_name),
+                                                                                                                                              m_params(p_params)
         {
-        }
-
-        void DiffDriveController::publish()
-        {
-            // static size_t count = 0;
-            // auto msg = std::make_unique<std_msgs::msg::String>();
-            // msg->data = "Lifecycle HelloWorld #" + std::to_string(++count);
-
-            // // Print the current state for demo purposes
-            // if (!m_pub->is_activated()) {
-            //     RCLCPP_INFO(
-            //         get_logger(), "Lifecycle publisher is currently inactive. Messages are not published.");
-            // }
-            // else {
-            //     RCLCPP_INFO(
-            //         get_logger(), "Lifecycle publisher is active. Publishing: [%s]", msg->data.c_str());
-            // }
-
-            // // We independently from the current state call publish on the lifecycle
-            // // publisher.
-            // // Only if the publisher is in an active state, the message transfer is
-            // // enabled and the message actually published.
-            // m_pub->publish(std::move(msg));
-            ;
-        }
-
-        rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn DiffDriveController::on_configure(const rclcpp_lifecycle::State &)
-        {
-            // This callback is supposed to be used for initialization and
-            // configuring purposes.
-            // We thus initialize and configure our publishers and timers.
-            // The lifecycle node API does return lifecycle components such as
-            // lifecycle publishers. These entities obey the lifecycle and
-            // can comply to the current state of the node.
-            // As of the beta version, there is only a lifecycle publisher
-            // available.
-
-            // m_pub = this->create_publisher<std_msgs::msg::String>("lifecycle_chatter", 10);
-            // m_timer = this->create_wall_timer(
-            //     1s, std::bind(&DiffDriveController::publish, this));
-
-            // TODO(LDA) : 4 timers
-
             RCLCPP_INFO(get_logger(), "on_configure() is called.");
 
-            auto parameter1 = m_params->getParameter1();
-            RCLCPP_INFO(get_logger(), "lParameter1 : %s", parameter1.c_str());
+            m_publisher = create_publisher<std_msgs::msg::String>("topic1", 5);
+            m_timer = create_wall_timer(500ms, std::bind(&DiffDriveController::cbTopic1, this));
 
-            // We return a success and hence invoke the transition to the next
-            // step: "inactive".
-            // If we returned TRANSITION_CALLBACK_FAILURE instead, the state machine
-            // would stay in the "unconfigured" state.
-            // In case of TRANSITION_CALLBACK_ERROR or any thrown exception within
-            // this callback, the state machine transitions to state "errorprocessing".
-            return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+            m_velocity_command_subscriber = create_subscription<geometry_msgs::msg::Twist>(DEFAULT_COMMAND_TOPIC, 5, std::bind(&DiffDriveController::cbCmdVel, this, _1));
+
+            auto parameter1 = m_params->getParameter1();
+        }  // namespace swd
+
+        void DiffDriveController::cbTopic1()
+        {
+            static auto count = 0;
+            auto message = std_msgs::msg::String();
+            message.data = "topic1 : " + std::to_string(count++);
+            RCLCPP_INFO(get_logger(), "Publishing: '%s'", message.data.c_str());
+            m_publisher->publish(message);
         }
+
+        ///
+        /// \brief Change robot velocity (linear [m/s], angular [rad/s])
+        ///
+        void DiffDriveController::cbCmdVel(const geometry_msgs::msg::Twist::SharedPtr p_cmd_vel)
+        {
+            RCLCPP_INFO(get_logger(), "Got Twist command: linear = %f m/s, angular = %f rad/s. ", p_cmd_vel->linear.x, p_cmd_vel->angular.z);
+        }
+
     }  // namespace swd
 }  // namespace ezw
