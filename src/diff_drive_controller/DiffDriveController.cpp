@@ -34,9 +34,11 @@ namespace ezw {
         {
             RCLCPP_INFO(get_logger(), "on_configure() is called.");
 
+            //Publisher
             m_publisher = create_publisher<std_msgs::msg::String>("topic1", 5);
             m_timer = create_wall_timer(500ms, std::bind(&DiffDriveController::cbTopic1, this));
 
+            //Subscriber
             m_velocity_command_subscriber = create_subscription<geometry_msgs::msg::Twist>(DEFAULT_COMMAND_TOPIC, 5, std::bind(&DiffDriveController::cbCmdVel, this, _1));
 
             auto parameter1 = m_params->getParameter1();
