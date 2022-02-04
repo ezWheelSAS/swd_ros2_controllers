@@ -27,8 +27,8 @@ using namespace std::chrono_literals;
 
 namespace ezw {
     namespace swd {
-        DiffDriveController::DiffDriveController(const std::string &p_node_name, std::shared_ptr<DiffDriveParameters> p_params, bool p_intra_process_comms) : rclcpp_lifecycle::LifecycleNode(p_node_name, rclcpp::NodeOptions().use_intra_process_comms(p_intra_process_comms)),
-                                                                                                                                                              m_params(p_params)
+        DiffDriveController::DiffDriveController(const std::string &p_node_name, const std::shared_ptr<const DiffDriveParameters> p_params, bool p_intra_process_comms) : rclcpp_lifecycle::LifecycleNode(p_node_name, rclcpp::NodeOptions().use_intra_process_comms(p_intra_process_comms)),
+                                                                                                                                                                          m_params(p_params)
         {
         }
 

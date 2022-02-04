@@ -34,19 +34,9 @@ namespace ezw {
                 return m_timer;
             }
 
-            void setTimer(rclcpp::TimerBase::SharedPtr p_timer)
-            {
-                m_timer = p_timer;
-            }
-
             auto getParameter1() const -> std::string
             {
                 return m_parameter1;
-            }
-
-            void setParameter1(std::string p_parameter1)
-            {
-                m_parameter1 = p_parameter1;
             }
 
            private:

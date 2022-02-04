@@ -147,6 +147,11 @@ target_link_libraries(
   ${EZW_SMC_CORE_LIBRARIES}
 )
 
+install(TARGETS
+  swd_diff_drive_controller
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}

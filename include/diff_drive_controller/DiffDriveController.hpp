@@ -54,7 +54,7 @@ namespace ezw {
              * @param p_node_name Node name
              * @param p_intra_process_comms  
              */
-            explicit DiffDriveController(const std::string &p_node_name, std::shared_ptr<DiffDriveParameters> p_params, bool p_intra_process_comms = false);
+            explicit DiffDriveController(const std::string &p_node_name, const std::shared_ptr<const DiffDriveParameters> p_params, bool p_intra_process_comms = false);
 
             /**
              * @brief 
@@ -214,7 +214,7 @@ namespace ezw {
             // lifecycle publisher.
             std::shared_ptr<rclcpp::TimerBase> m_timer;
 
-            std::shared_ptr<DiffDriveParameters> m_params;
+            const std::shared_ptr<const DiffDriveParameters> m_params;
         };
 
     }  // namespace swd
