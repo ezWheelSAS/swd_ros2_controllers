@@ -6,10 +6,13 @@
 
 #include <chrono>
 #include <functional>
-#include <rclcpp/rclcpp.hpp>
 #include <string>
+#include <thread>
+
+#include "rclcpp/rclcpp.hpp"
 
 using namespace std::chrono_literals;
+using lg_t = std::lock_guard<std::mutex>;
 
 namespace ezw {
     namespace swd {
@@ -20,22 +23,20 @@ namespace ezw {
             {
                 declare_parameter<std::string>("parameter1", "world");
                 m_timer = create_wall_timer(
-                    1000ms, std::bind(&DiffDriveParameters::respond, this));
+                    1000ms, std::bind(&DiffDriveParameters::update, this));
             }
 
-            void respond()
+            void update()
             {
+                const lg_t lock(m_mutex);
+
                 get_parameter("parameter1", m_parameter1);
                 RCLCPP_INFO(get_logger(), "Parameter1 : %s", m_parameter1.c_str());
             }
 
-            auto getTimer() -> rclcpp::TimerBase::SharedPtr
-            {
-                return m_timer;
-            }
-
             auto getParameter1() const -> std::string
             {
+                lg_t lock(m_mutex);
                 return m_parameter1;
             }
 
@@ -43,6 +44,7 @@ namespace ezw {
             std::string m_parameter1;
 
             rclcpp::TimerBase::SharedPtr m_timer;
+            mutable std::mutex m_mutex;
         };
     }  // namespace swd
 }  // namespace ezw
