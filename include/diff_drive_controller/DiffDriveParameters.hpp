@@ -36,7 +36,6 @@ namespace ezw {
             explicit DiffDriveParameters(const std::string &p_node_name)
                 : Node(p_node_name)
             {
-                declare_parameter<std::string>("parameter1", "world");
                 m_timer = create_wall_timer(
                     1000ms, std::bind(&DiffDriveParameters::update, this));
 
@@ -62,9 +61,6 @@ namespace ezw {
             void update()
             {
                 const lg_t lock(m_mutex);
-
-                /*get_parameter("parameter1", m_parameter1);
-                RCLCPP_INFO(get_logger(), "Parameter1 : %s", m_parameter1.c_str());*/
 
                 // Baseline
                 auto l_baseline_m = m_baseline_m;
@@ -284,7 +280,6 @@ namespace ezw {
             }
 
            private:
-            std::string m_parameter1;
             double m_baseline_m;
             std::string m_left_config_file;
             std::string m_right_config_file;
