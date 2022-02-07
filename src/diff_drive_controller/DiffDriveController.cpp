@@ -41,7 +41,7 @@ namespace ezw {
             //Subscriber
             m_velocity_command_subscriber = create_subscription<geometry_msgs::msg::Twist>(DEFAULT_COMMAND_TOPIC, 5, std::bind(&DiffDriveController::cbCmdVel, this, _1));
 
-            auto parameter1 = m_params->getParameter1();
+            //auto parameter1 = m_params->getParameter1();
         }  // namespace swd
 
         void DiffDriveController::cbTopic1()

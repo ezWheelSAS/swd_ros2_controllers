@@ -63,17 +63,122 @@ namespace ezw {
             {
                 const lg_t lock(m_mutex);
 
-                get_parameter("parameter1", m_parameter1);
-                RCLCPP_INFO(get_logger(), "Parameter1 : %s", m_parameter1.c_str());
+                /*get_parameter("parameter1", m_parameter1);
+                RCLCPP_INFO(get_logger(), "Parameter1 : %s", m_parameter1.c_str());*/
 
+                // Baseline
+                auto l_baseline_m = m_baseline_m;
+                get_parameter("baseline_m", m_baseline_m);
+                if (m_baseline_m != l_baseline_m) {
+                    RCLCPP_INFO(get_logger(), "Baseline : %f", m_baseline_m);
+                }
+
+                // Config files
+                auto l_left_config_file = m_left_config_file;
+                get_parameter("left_config_file", m_left_config_file);
+                if (m_left_config_file != l_left_config_file) {
+                    RCLCPP_INFO(get_logger(), "Left config : %s", m_left_config_file.c_str());
+                }
+                auto l_right_config_file = m_right_config_file;
+                get_parameter("right_config_file", m_right_config_file);
+                if (m_right_config_file != l_right_config_file) {
+                    RCLCPP_INFO(get_logger(), "Right config : %s", m_right_config_file.c_str());
+                }
+
+                // Pub freq (Hz)
+                auto l_pub_freq_hz = m_pub_freq_hz;
+                get_parameter("pub_freq_hz", m_pub_freq_hz);
+                if (m_pub_freq_hz != l_pub_freq_hz) {
+                    RCLCPP_INFO(get_logger(), "Freq (Hz) : %f", m_pub_freq_hz);
+                }
+
+                // Watchdog receive (ms)
+                auto l_watchdog_receive_ms = m_watchdog_receive_ms;
+                get_parameter("control_timeout_ms", m_watchdog_receive_ms);
+                if (m_watchdog_receive_ms != l_watchdog_receive_ms) {
+                    RCLCPP_INFO(get_logger(), "Watchdog receive (ms): %f", m_watchdog_receive_ms);
+                }
+
+                // Frames
+                auto l_base_frame = m_base_frame;
+                get_parameter("base_frame", m_base_frame);
+                if (m_base_frame != l_base_frame) {
+                    RCLCPP_INFO(get_logger(), "Base frame : %s", m_base_frame.c_str());
+                }
+
+                auto l_odom_frame = m_odom_frame;
+                get_parameter("odom_frame", m_odom_frame);
+                if (m_odom_frame != l_odom_frame) {
+                    RCLCPP_INFO(get_logger(), "Odom frame : %s", m_odom_frame.c_str());
+                }
+
+                // Publish odom
+                auto l_publish_odom = m_publish_odom;
+                get_parameter("publish_odom", m_publish_odom);
+                if (m_publish_odom != l_publish_odom) {
+                    RCLCPP_INFO(get_logger(), "Publish odom : %d", m_publish_odom);
+                }
+
+                // Publish tf
+                auto l_publish_tf = m_publish_tf;
+                get_parameter("publish_tf", m_publish_tf);
+                if (m_publish_tf != l_publish_tf) {
+                    RCLCPP_INFO(get_logger(), "Publish tf : %d", m_publish_tf);
+                }
+
+                // Publish safety
+                auto l_publish_safety = m_publish_safety;
+                get_parameter("publish_safety_functions", m_publish_safety);
+                if (m_publish_safety != l_publish_safety) {
+                    RCLCPP_INFO(get_logger(), "Publish safety : %d", m_publish_safety);
+                }
+
+                // Have backward SLS
+                auto l_have_backward_sls = m_have_backward_sls;
+                get_parameter("have_backward_sls", m_have_backward_sls);
+                if (m_have_backward_sls != l_have_backward_sls) {
+                    RCLCPP_INFO(get_logger(), "Publish backward SLS : %d", m_have_backward_sls);
+                }
+
+                // Encoders relative error
+                auto l_left_encoder_relative_error = m_left_encoder_relative_error;
+                get_parameter("left_encoder_relative_error", m_left_encoder_relative_error);
+                if (m_left_encoder_relative_error != l_left_encoder_relative_error) {
+                    RCLCPP_INFO(get_logger(), "Left encoder relative error : %f", m_left_encoder_relative_error);
+                }
+
+                auto l_right_encoder_relative_error = m_right_encoder_relative_error;
+                get_parameter("right_encoder_relative_error", m_right_encoder_relative_error);
+                if (m_right_encoder_relative_error != l_right_encoder_relative_error) {
+                    RCLCPP_INFO(get_logger(), "Right encoder relative error : %f", m_right_encoder_relative_error);
+                }
+
+                // Max wheel speed rpm
+                auto l_max_wheel_speed_rpm = max_wheel_speed_rpm;
+                get_parameter("wheel_max_speed_rpm", max_wheel_speed_rpm);
+                if (max_wheel_speed_rpm != l_max_wheel_speed_rpm) {
+                    RCLCPP_INFO(get_logger(), "Max wheel speed RPM: %f", max_wheel_speed_rpm);
+                }
+
+                auto l_max_sls_wheel_speed_rpm = max_sls_wheel_speed_rpm;
+                get_parameter("wheel_safety_limited_speed_rpm", max_sls_wheel_speed_rpm);
+                if (max_sls_wheel_speed_rpm != l_max_sls_wheel_speed_rpm) {
+                    RCLCPP_INFO(get_logger(), "Max wheel SLS speed RPM: %f", max_sls_wheel_speed_rpm);
+                }
+
+                // Positive polarity wheel
+                auto l_positive_polarity_wheel = positive_polarity_wheel;
                 get_parameter("positive_polarity_wheel", positive_polarity_wheel);
-                RCLCPP_INFO(get_logger(), "Left : %s", positive_polarity_wheel.c_str());
-            }
+                if (positive_polarity_wheel != l_positive_polarity_wheel) {
+                    RCLCPP_INFO(get_logger(), "Positive polarity wheel: %s", positive_polarity_wheel.c_str());
+                }
 
-            auto getParameter1() const -> std::string
-            {
-                lg_t lock(m_mutex);
-                return m_parameter1;
+                // Control Mode
+                auto l_ctrl_mode = ctrl_mode;
+                get_parameter("control_mode", ctrl_mode);
+                if (ctrl_mode != l_ctrl_mode) {
+                    RCLCPP_INFO(get_logger(), "Control Mode : %s", ctrl_mode.c_str());
+                }
             }
 
             auto getBaseline() const -> double
@@ -160,7 +265,7 @@ namespace ezw {
                 return max_wheel_speed_rpm;
             }
 
-            auto getMawSlsWheelSpeedRpm() const -> double
+            auto getMaxSlsWheelSpeedRpm() const -> double
             {
                 lg_t lock(m_mutex);
                 return max_sls_wheel_speed_rpm;
