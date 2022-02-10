@@ -69,21 +69,18 @@ namespace ezw {
            private:
             rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr m_pub_odom;
             rclcpp::Publisher<swd_ros2_controllers::msg::SafetyFunctions>::SharedPtr m_pub_safety;
-            //rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr m_sub_command;
-            //rclcpp::Subscription<std_msgs::msg::Bool::ConstPtr> m_sub_brake;
+            rclcpp::Subscription<geometry_msgs::msg::Point>::SharedPtr m_sub_command_set_speed;
+            rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr m_sub_command_cmd_vel;
+            rclcpp::Subscription<std_msgs::msg::Bool::ConstPtr>::SharedPtr m_sub_brake;
 
             std::shared_ptr<tf2_ros::TransformBroadcaster> m_tf2_br;
 
-            void cbTopic1();
             void cbCmdVel(const geometry_msgs::msg::Twist::SharedPtr p_cmd_vel);
             void cbTimerOdom(), cbWatchdog(), cbTimerStateMachine(), cbTimerSafety();
             void cbSoftBrake(const std_msgs::msg::Bool::ConstPtr &msg);
             void cbSetSpeed(const geometry_msgs::msg::Point &speed);
             void setSpeeds(int32_t left_speed, int32_t right_speed);
 
-            rclcpp::TimerBase::SharedPtr m_timer;
-            rclcpp::Publisher<std_msgs::msg::String>::SharedPtr m_publisher;
-            rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr m_velocity_command_subscriber;
             rclcpp::TimerBase::SharedPtr m_timer_odom, m_timer_watchdog, m_timer_pds, m_timer_safety;
 
             std::mutex m_safety_msg_mtx;
@@ -96,9 +93,9 @@ namespace ezw {
             const std::shared_ptr<const DiffDriveParameters> m_params;
 
             //Params
-            double m_baseline_m, m_left_wheel_diameter_m, m_right_wheel_diameter_m, m_l_motor_reduction, m_r_motor_reduction, m_left_encoder_relative_error, m_right_encoder_relative_error;
+            double m_left_wheel_diameter_m, m_right_wheel_diameter_m, m_l_motor_reduction, m_r_motor_reduction, m_left_encoder_relative_error, m_right_encoder_relative_error;
             int m_left_wheel_polarity, m_max_motor_speed_rpm, m_motor_sls_rpm;
-            bool m_have_backward_sls, m_publish_odom, m_publish_tf, m_publish_safety, m_nmt_ok, m_pds_ok;
+            bool m_nmt_ok, m_pds_ok;
             ezw::smcservice::DBusClient m_left_controller, m_right_controller;
         };
 

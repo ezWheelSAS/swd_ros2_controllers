@@ -36,9 +36,6 @@ namespace ezw {
             explicit DiffDriveParameters(const std::string &p_node_name)
                 : Node(p_node_name)
             {
-                m_timer = create_wall_timer(
-                    1000ms, std::bind(&DiffDriveParameters::update, this));
-
                 declare_parameter<double>("baseline_m", 0.0);
                 declare_parameter<std::string>("left_config_file", "");
                 declare_parameter<std::string>("right_config_file", "");
@@ -55,7 +52,6 @@ namespace ezw {
                 declare_parameter<float>("wheel_max_speed_rpm", DEFAULT_MAX_WHEEL_SPEED_RPM);
                 declare_parameter<float>("wheel_safety_limited_speed_rpm", DEFAULT_MAX_SLS_WHEEL_RPM);
                 declare_parameter<std::string>("positive_polarity_wheel", DEFAULT_POSITIVE_POLARITY_WHEEL);
-                declare_parameter<std::string>("control_mode", DEFAULT_CTRL_MODE);
             }
 
             void update()
@@ -168,13 +164,6 @@ namespace ezw {
                 if (positive_polarity_wheel != l_positive_polarity_wheel) {
                     RCLCPP_INFO(get_logger(), "Positive polarity wheel: %s", positive_polarity_wheel.c_str());
                 }
-
-                // Control Mode
-                auto l_ctrl_mode = ctrl_mode;
-                get_parameter("control_mode", ctrl_mode);
-                if (ctrl_mode != l_ctrl_mode) {
-                    RCLCPP_INFO(get_logger(), "Control Mode : %s", ctrl_mode.c_str());
-                }
             }
 
             auto getBaseline() const -> double
@@ -273,12 +262,6 @@ namespace ezw {
                 return positive_polarity_wheel;
             }
 
-            auto getCtrlMode() const -> std::string
-            {
-                lg_t lock(m_mutex);
-                return ctrl_mode;
-            }
-
            private:
             double m_baseline_m;
             std::string m_left_config_file;
@@ -296,9 +279,7 @@ namespace ezw {
             double max_wheel_speed_rpm;
             double max_sls_wheel_speed_rpm;
             std::string positive_polarity_wheel;
-            std::string ctrl_mode;
 
-            rclcpp::TimerBase::SharedPtr m_timer;
             mutable std::mutex m_mutex;
         };
     }  // namespace swd

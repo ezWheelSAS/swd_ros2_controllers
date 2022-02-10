@@ -39,9 +39,6 @@ namespace ezw {
             m_tf2_br = std::make_shared<tf2_ros::TransformBroadcaster>(this);
 
             //Publisher
-            m_publisher = create_publisher<std_msgs::msg::String>("topic1", 5);
-            m_timer = create_wall_timer(500ms, std::bind(&DiffDriveController::cbTopic1, this));
-
             if (m_params->getPublishOdom()) {
                 auto m_pub_odom = create_publisher<nav_msgs::msg::Odometry>("odom", 5);
             }
@@ -51,38 +48,10 @@ namespace ezw {
             }
 
             //Subscriber
-            m_velocity_command_subscriber = create_subscription<geometry_msgs::msg::Twist>(DEFAULT_COMMAND_TOPIC, 5, std::bind(&DiffDriveController::cbCmdVel, this, _1));
-            //m_sub_brake = create_subscription<std_msgs::msg::Bool>("soft_brake", 5, std::bind(&DiffDriveController::cbSoftBrake, this, _1));
-            /*
-            if ("LeftRightSpeeds" == ctrl_mode) {
-                m_sub_command = m_nh->subscribe("set_speed", 5, &DiffDriveController::cbSetSpeed, this);
-            }
-            else {
-                m_sub_command = m_nh->subscribe("cmd_vel", 5, &DiffDriveController::cbCmdVel, this);
-                if ("Twist" != ctrl_mode) {
-                    ROS_WARN(
-                        "Invalid value '%s' for parameter 'control_mode', accepted values: ['Twist' or 'LeftRightSpeeds']."
-                        "Falling back to default (%s).",
-                        ctrl_mode.c_str(), DEFAULT_CTRL_MODE.c_str());
-                }
-            }
+            m_sub_brake = create_subscription<std_msgs::msg::Bool>("soft_brake", 5, std::bind(&DiffDriveController::cbSoftBrake, this, _1));
+            m_sub_command_set_speed = create_subscription<geometry_msgs::msg::Point>("set_speed", 5, std::bind(&DiffDriveController::cbSetSpeed, this, _1));
+            m_sub_command_cmd_vel = create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 5, std::bind(&DiffDriveController::cbCmdVel, this, _1));
 
-            if (max_wheel_speed_rpm < 0.) {
-                max_wheel_speed_rpm = DEFAULT_MAX_WHEEL_SPEED_RPM;
-                ROS_ERROR(
-                    "Invalid value %f for parameter 'wheel_max_speed_rpm', it should be a positive value. "
-                    "Falling back to default (%f)",
-                    max_wheel_speed_rpm, DEFAULT_MAX_WHEEL_SPEED_RPM);
-            }
-
-            if (max_sls_wheel_speed_rpm < 0.) {
-                max_sls_wheel_speed_rpm = DEFAULT_MAX_SLS_WHEEL_RPM;
-                ROS_ERROR(
-                    "Invalid value %f for parameter 'wheel_safety_limited_speed_rpm', it should be a positive value. "
-                    "Falling back to default (%f)",
-                    max_sls_wheel_speed_rpm, DEFAULT_MAX_SLS_WHEEL_RPM);
-            }
-*/
             //auto parameter1 = m_params->getParameter1();
             double max_wheel_speed_rpm = m_params->getMaxWheelSpeedRpm();
             double max_sls_wheel_speed_rpm = m_params->getMaxSlsWheelSpeedRpm();
@@ -614,7 +583,7 @@ namespace ezw {
             RCLCPP_INFO(get_logger(), "STO: %d, SDI+: %d, SDI-: %d, SLS: %d", msg.safe_torque_off, msg.safe_direction_indication_forward, msg.safe_direction_indication_backward, msg.safety_limited_speed);
 #endif
 
-            if (m_publish_safety) {
+            if (m_params->getPublishSafety()) {
                 m_pub_safety.publish(msg);
             }
 #else
@@ -742,7 +711,7 @@ namespace ezw {
                 m_safety_msg = msg;
                 m_safety_msg_mtx.unlock();
 
-                if (m_publish_safety) {
+                if (m_params->getPublishSafety()) {
                     m_pub_safety->publish(msg);
                 }
             }
@@ -759,15 +728,6 @@ namespace ezw {
         void DiffDriveController::cbWatchdog()
         {
             setSpeeds(0, 0);
-        }
-
-        void DiffDriveController::cbTopic1()
-        {
-            static auto count = 0;
-            auto message = std_msgs::msg::String();
-            message.data = "topic1 : " + std::to_string(count++);
-            RCLCPP_INFO(get_logger(), "Publishing: '%s'", message.data.c_str());
-            m_publisher->publish(message);
         }
 
     }  // namespace swd
