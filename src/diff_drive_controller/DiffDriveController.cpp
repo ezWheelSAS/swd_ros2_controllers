@@ -589,8 +589,8 @@ namespace ezw {
             }
 #else
             if (m_nmt_ok) {
-                //msg.header.stamp = rclcpp::Node::now();
-                //msg.header.frame_id = m_params->getBaseFrame();
+                msg.header.stamp = rclcpp::Node::now();
+                msg.header.frame_id = m_params->getBaseFrame();
 
                 // Reading SBC
                 err = m_left_controller.getSafetyFunctionCommand(ezw::smccore::ISafeMotionService::SafetyFunctionId::SBC_1, res_l);

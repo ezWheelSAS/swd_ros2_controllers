@@ -1,3 +1,4 @@
+std_msgs/Header header
 bool safe_torque_off
 bool safe_brake_control
 bool safety_limited_speed
