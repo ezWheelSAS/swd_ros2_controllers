@@ -11,20 +11,24 @@
 
 #include "rclcpp/rclcpp.hpp"
 
-#define DEFAULT_PUB_FREQ_HZ 50
-#define DEFAULT_MAX_WHEEL_SPEED_RPM 75.0  // 75 rpm Wheel => Motor (75 * 14 = 1050 rpm)
-#define DEFAULT_MAX_SLS_WHEEL_RPM 30.0    // 30 rpm Wheel => Motor (30 * 14 = 490 rpm)
-#define DEFAULT_WATCHDOG_MS 1000
-#define DEFAULT_ODOM_FRAME std::string("odom")
-#define DEFAULT_BASE_FRAME std::string("base_link")
-#define DEFAULT_POSITIVE_POLARITY_WHEEL std::string("Right")
-#define DEFAULT_CTRL_MODE std::string("Twist")
-#define DEFAULT_PUBLISH_ODOM true
-#define DEFAULT_PUBLISH_TF true
-#define DEFAULT_PUBLISH_SAFETY_FCNS true
-#define DEFAULT_BACKWARD_SLS false
-#define DEFAULT_LEFT_RELATIVE_ERROR 0.05  // 5% of error
-#define DEFAULT_RIGHT_RELATIVE_ERROR 0.05
+namespace {
+    constexpr auto DEFAULT_PUB_FREQ_HZ = 50;
+    constexpr auto DEFAULT_MAX_WHEEL_SPEED_RPM = 75.0;  // 75 rpm Wheel => Motor (75 * 14 = 1050 rpm)
+    constexpr auto DEFAULT_MAX_SLS_WHEEL_RPM = 30.0;    // 30 rpm Wheel => Motor (30 * 14 = 490 rpm)
+    constexpr auto DEFAULT_WATCHDOG_MS = 1000;
+    constexpr auto DEFAULT_ODOM_FRAME = "odom";
+    constexpr auto DEFAULT_BASE_FRAME = "base_link";
+    constexpr auto DEFAULT_POSITIVE_POLARITY_WHEEL = "Right";
+    constexpr auto DEFAULT_CTRL_MODE = "Twist";
+    constexpr auto DEFAULT_PUBLISH_ODOM = true;
+    constexpr auto DEFAULT_PUBLISH_TF = true;
+    constexpr auto DEFAULT_PUBLISH_SAFETY_FCNS = true;
+    constexpr auto DEFAULT_BACKWARD_SLS = false;
+    constexpr auto DEFAULT_LEFT_RELATIVE_ERROR = 0.05;  // 5% of error
+    constexpr auto DEFAULT_RIGHT_RELATIVE_ERROR = 0.05;
+    constexpr auto DEFAULT_LEFT_CONFIG_FILE = "/opt/ezw/usr/etc/ezw-smc-core/swd_left_config.ini";
+    constexpr auto DEFAULT_RIGHT_CONFIG_FILE = "/opt/ezw/usr/etc/ezw-smc-core/swd_right_config.ini";
+}  // namespace
 
 using namespace std::chrono_literals;
 using lg_t = std::lock_guard<std::mutex>;
@@ -36,11 +40,15 @@ namespace ezw {
             explicit DiffDriveParameters(const std::string &p_node_name)
                 : Node(p_node_name)
             {
+                RCLCPP_INFO(get_logger(), "DiffDriveParameters() is called.");
+
+                m_timer = create_wall_timer(1000ms, std::bind(&DiffDriveParameters::update, this));
+
                 declare_parameter<double>("baseline_m", 0.0);
-                declare_parameter<std::string>("left_config_file", "");
-                declare_parameter<std::string>("right_config_file", "");
-                declare_parameter<float>("pub_freq_hz", DEFAULT_PUB_FREQ_HZ);
-                declare_parameter<float>("control_timeout_ms", DEFAULT_WATCHDOG_MS);
+                declare_parameter<std::string>("left_config_file", DEFAULT_LEFT_CONFIG_FILE);
+                declare_parameter<std::string>("right_config_file", DEFAULT_RIGHT_CONFIG_FILE);
+                declare_parameter<int>("pub_freq_hz", DEFAULT_PUB_FREQ_HZ);
+                declare_parameter<int>("control_timeout_ms", DEFAULT_WATCHDOG_MS);
                 declare_parameter<std::string>("base_frame", DEFAULT_BASE_FRAME);
                 declare_parameter<std::string>("odom_frame", DEFAULT_ODOM_FRAME);
                 declare_parameter<bool>("publish_odom", DEFAULT_PUBLISH_ODOM);
@@ -52,11 +60,15 @@ namespace ezw {
                 declare_parameter<float>("wheel_max_speed_rpm", DEFAULT_MAX_WHEEL_SPEED_RPM);
                 declare_parameter<float>("wheel_safety_limited_speed_rpm", DEFAULT_MAX_SLS_WHEEL_RPM);
                 declare_parameter<std::string>("positive_polarity_wheel", DEFAULT_POSITIVE_POLARITY_WHEEL);
+
+                update();
             }
 
             void update()
             {
                 const lg_t lock(m_mutex);
+
+                RCLCPP_INFO(get_logger(), "Update() is called.");
 
                 // Baseline
                 auto l_baseline_m = m_baseline_m;
@@ -280,6 +292,7 @@ namespace ezw {
             double max_sls_wheel_speed_rpm;
             std::string positive_polarity_wheel;
 
+            rclcpp::TimerBase::SharedPtr m_timer;
             mutable std::mutex m_mutex;
         };
     }  // namespace swd

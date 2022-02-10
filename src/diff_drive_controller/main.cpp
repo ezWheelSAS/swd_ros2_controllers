@@ -7,6 +7,7 @@
 #include <cstdio>
 
 #include "diff_drive_controller/DiffDriveController.hpp"
+#include "rclcpp/rclcpp.hpp"
 
 auto main(int argc, char** argv) -> int
 {
@@ -20,13 +21,13 @@ auto main(int argc, char** argv) -> int
 
     rclcpp::init(argc, argv);
 
-    rclcpp::executors::SingleThreadedExecutor exe;
+    rclcpp::executors::MultiThreadedExecutor exe;
 
     auto params_node = std::make_shared<ezw::swd::DiffDriveParameters>("diff_drive_parameters");
-    exe.add_node(params_node->get_node_base_interface());
+    exe.add_node(params_node);
 
     auto lc_node = std::make_shared<ezw::swd::DiffDriveController>("diff_drive_controller", params_node);
-    exe.add_node(lc_node->get_node_base_interface());
+    exe.add_node(lc_node);
 
     exe.spin();
 

@@ -34,7 +34,7 @@ namespace ezw {
         DiffDriveController::DiffDriveController(const std::string &p_node_name, const std::shared_ptr<const DiffDriveParameters> p_params) : Node(p_node_name),
                                                                                                                                               m_params(p_params)
         {
-            RCLCPP_INFO(get_logger(), "on_configure() is called.");
+            RCLCPP_INFO(get_logger(), "DiffDriveController() is called.");
 
             m_tf2_br = std::make_shared<tf2_ros::TransformBroadcaster>(this);
 
