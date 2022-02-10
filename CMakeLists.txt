@@ -22,10 +22,14 @@ find_package(geometry_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
-find_package(rosidl_runtime_cpp REQUIRED)
-find_package(rosidl_typesupport_cpp REQUIRED)
 
+find_package(rosidl_default_generators REQUIRED)
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/SafetyFunctions.msg"
+  DEPENDENCIES builtin_interfaces
+)
 
+ament_export_dependencies(rosidl_default_runtime)
 
 #------------------------------------------------------------------------------
 # Project definition, variable and dependencies
@@ -140,9 +144,10 @@ ament_target_dependencies(swd_diff_drive_controller
   tf2
   tf2_msgs
   tf2_ros
-  rosidl_runtime_cpp
-  rosidl_typesupport_cpp
 )
+
+rosidl_target_interfaces(swd_diff_drive_controller
+  ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
 target_link_libraries(
   swd_diff_drive_controller
@@ -153,12 +158,6 @@ target_link_libraries(
 install(TARGETS
   swd_diff_drive_controller
   DESTINATION lib/${PROJECT_NAME}
-)
-
-find_package(rosidl_default_generators REQUIRED)
-
-rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/SafetyFunctions.msg"
 )
 
 ament_package()

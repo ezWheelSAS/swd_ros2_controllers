@@ -19,7 +19,6 @@
 #include "geometry_msgs/msg/twist.hpp"
 #include "geometry_msgs/msg/twist_with_covariance.hpp"
 #include "lifecycle_msgs/msg/transition.hpp"
-#include "msg/safety_functions.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "rclcpp/publisher.hpp"
 #include "rclcpp/rclcpp.hpp"
@@ -28,6 +27,7 @@
 #include "rcutils/logging_macros.h"
 #include "std_msgs/msg/bool.hpp"
 #include "std_msgs/msg/string.hpp"
+#include "swd_ros2_controllers/msg/safety_functions.hpp"
 
 #define M_MAX(a, b) ((a) > (b) ? (a) : (b))
 #define M_MIN(a, b) ((a) < (b) ? (a) : (b))

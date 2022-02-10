@@ -45,11 +45,10 @@ namespace ezw {
             if (m_params->getPublishOdom()) {
                 auto m_pub_odom = create_publisher<nav_msgs::msg::Odometry>("odom", 5);
             }
-            /*
+
             if (m_params->getPublishSafety()) {
                 m_pub_safety = create_publisher<swd_ros2_controllers::msg::SafetyFunctions>("safety", 5);
             }
-            */
 
             //Subscriber
             m_velocity_command_subscriber = create_subscription<geometry_msgs::msg::Twist>(DEFAULT_COMMAND_TOPIC, 5, std::bind(&DiffDriveController::cbCmdVel, this, _1));
