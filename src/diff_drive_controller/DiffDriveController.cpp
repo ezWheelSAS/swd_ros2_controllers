@@ -597,8 +597,6 @@ namespace ezw {
 
         void DiffDriveController::cbTimerSafety()
         {
-            ;
-            /*
             swd_ros2_controllers::msg::SafetyFunctions msg;
             ezw_error_t err;
             bool res_l, res_r;
@@ -753,7 +751,6 @@ namespace ezw {
                 RCLCPP_WARN(get_logger(), "NMT state machine is not OK, no valid SafetyFunctions message to publish");
             }
 #endif
-*/
         }
 
         ///
