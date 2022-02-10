@@ -85,14 +85,14 @@ namespace ezw {
                 auto l_pub_freq_hz = m_pub_freq_hz;
                 get_parameter("pub_freq_hz", m_pub_freq_hz);
                 if (m_pub_freq_hz != l_pub_freq_hz) {
-                    RCLCPP_INFO(get_logger(), "Freq (Hz) : %f", m_pub_freq_hz);
+                    RCLCPP_INFO(get_logger(), "Freq (Hz) : %d", m_pub_freq_hz);
                 }
 
                 // Watchdog receive (ms)
                 auto l_watchdog_receive_ms = m_watchdog_receive_ms;
                 get_parameter("control_timeout_ms", m_watchdog_receive_ms);
                 if (m_watchdog_receive_ms != l_watchdog_receive_ms) {
-                    RCLCPP_INFO(get_logger(), "Watchdog receive (ms): %f", m_watchdog_receive_ms);
+                    RCLCPP_INFO(get_logger(), "Watchdog receive (ms): %d", m_watchdog_receive_ms);
                 }
 
                 // Frames
@@ -195,13 +195,13 @@ namespace ezw {
                 return m_right_config_file;
             }
 
-            auto getPubFreqHz() const -> float
+            auto getPubFreqHz() const -> int
             {
                 lg_t lock(m_mutex);
                 return m_pub_freq_hz;
             }
 
-            auto getWatchdogReceiveMs() const -> float
+            auto getWatchdogReceiveMs() const -> int
             {
                 lg_t lock(m_mutex);
                 return m_watchdog_receive_ms;
@@ -283,8 +283,8 @@ namespace ezw {
             double m_baseline_m;
             std::string m_left_config_file;
             std::string m_right_config_file;
-            float m_pub_freq_hz;
-            float m_watchdog_receive_ms;
+            int m_pub_freq_hz;
+            int m_watchdog_receive_ms;
             std::string m_base_frame;
             std::string m_odom_frame;
             bool m_publish_odom;

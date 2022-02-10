@@ -21,6 +21,11 @@ find_package(nav_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(rosidl_runtime_cpp REQUIRED)
+find_package(rosidl_typesupport_cpp REQUIRED)
+
+
 
 #------------------------------------------------------------------------------
 # Project definition, variable and dependencies
@@ -36,15 +41,15 @@ set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:${PKG_CONFIG_PATH}")
 message(STATUS "Pkgconfig extra path are: $ENV{PKG_CONFIG_PATH} ")
 
 # Module dependencies used as pkgconfig or direct filepath/dirpath
-set(LIST_MODULES_PKG_CONFIG_NAME "ezw-types ezwLog ezw-smc-core" CACHE STRING "Lists of pkgconfig modules dependencies" FORCE)
+set(LIST_MODULES_PKG_CONFIG_NAME "ezw-types ezwLog ezw-smc-service-client" CACHE STRING "Lists of pkgconfig modules dependencies" FORCE)
 
 unset(__pkg_config_checked_EZW_TYPES CACHE)
 unset(__pkg_config_checked_EZW_LOG CACHE)
-unset(__pkg_config_checked_EZW_SMC_CORE CACHE)
+unset(__pkg_config_checked_EZW_SMC_SERVICE_CLIENT CACHE)
 
 set(EZW_TYPES_PKG_CONFIG_NAME "ezw-types" CACHE STRING "ezw-types pkg config name")
 set(EZW_LOG_PKG_CONFIG_NAME "ezwLog" CACHE STRING "ezwLog pkg config name")
-set(EZW_SMC_CORE_PKG_CONFIG_NAME "ezw-smc-core" CACHE STRING "Module EZW_SMC_CORE_CONFIG pkg config name")
+set(EZW_SMC_SERVICE_CLIENT_PKG_CONFIG_NAME "ezw-smc-service-client" CACHE STRING "Module EZW_SMC_SERVICE_CLIENT_CONFIG pkg config name")
 
 #------------------------------------------------------------------------------
 # pkgconfig
@@ -77,34 +82,34 @@ find_package(Threads REQUIRED)
 # Use project pkg config
 pkg_check_modules(EZW_TYPES REQUIRED ezw-types)
 pkg_check_modules(EZW_LOG REQUIRED ezwLog)
-pkg_check_modules(EZW_SMC_CORE REQUIRED ezw-smc-core)
+pkg_check_modules(EZW_SMC_SERVICE_CLIENT REQUIRED ezw-smc-service-client)
 
 # Add include dirs. The case not configured will be empty
 message(STATUS "
 Add inc directory:
 EZW_TYPES_INCLUDE_DIRS : ${EZW_TYPES_INCLUDE_DIRS}
 EZW_LOG_INCLUDE_DIRS : ${EZW_LOG_INCLUDE_DIRS}
-EZW_SMC_CORE_INCLUDE_DIRS : ${EZW_SMC_CORE_INCLUDE_DIRS}
+EZW_SMC_SERVICE_CLIENT_INCLUDE_DIRS : ${EZW_SMC_SERVICE_CLIENT_INCLUDE_DIRS}
 target_include_directories(target include ${Boost_INCLUDE_DIRS})
 -------------------")
 
 include_directories(
   ${EZW_TYPES_INCLUDE_DIRS}
   ${EZW_LOG_INCLUDE_DIRS}
-  ${EZW_SMC_CORE_INCLUDE_DIRS}
+  ${EZW_SMC_SERVICE_CLIENT_INCLUDE_DIRS}
 )
 
 # Add library dirs. The case not configured will be empty
 message(STATUS "
 Add library directory:
 EZW_LOG_LIBRARY_DIRS : ${EZW_LOG_LIBRARY_DIRS}
-EZW_SMC_CORE_LIBRARY_DIRS : ${EZW_SMC_CORE_LIBRARY_DIRS}
+EZW_SMC_SERVICE_CLIENT_INCLUDE_DIRS : ${EZW_SMC_SERVICE_CLIENT_INCLUDE_DIRS}
 ------------------------------")
 
 link_directories(
   ${EZW_LOG_LIBRARY_DIRS}
   ${EZW_TOOLS_LIBRARY_DIRS}
-  ${EZW_SMC_CORE_LIBRARY_DIRS}
+  ${EZW_SMC_SERVICE_CLIENT_INCLUDE_DIRS}
 )
 
 # Add required definitions from pkgconfig
@@ -112,15 +117,15 @@ message(STATUS "
 Add definitions:
 EZW_LOG_CFLAGS : ${EZW_LOG_CFLAGS}
 EZW_LOG_LDFLAGS : ${EZW_LOG_LDFLAGS}
-EZW_SMC_CORE_CFLAGS : ${EZW_SMC_CORE_CFLAGS}
-EZW_SMC_CORE_LDFLAGS : ${EZW_SMC_CORE_LDFLAGS}
+EZW_SMC_SERVICE_CLIENT_CFLAGS : ${EZW_SMC_SERVICE_CLIENT_CFLAGS}
+EZW_SMC_SERVICE_CLIENT_LDFLAGS : ${EZW_SMC_SERVICE_CLIENT_LDFLAGS}
 ------------------------------")
 
 add_definitions(
   ${EZW_LOG_CFLAGS}
   ${EZW_LOG_LDFLAGS}
-  ${EZW_SMC_CORE_CFLAGS}
-  ${EZW_SMC_CORE_LDFLAGS}
+  ${EZW_SMC_SERVICE_CLIENT_CFLAGS}
+  ${EZW_SMC_SERVICE_CLIENT_LDFLAGS}
 )
 
 file(GLOB_RECURSE SOURCES_DIFF_DRIVE_CRTL src/diff_drive_controller/*.cpp)
@@ -134,12 +139,15 @@ ament_target_dependencies(swd_diff_drive_controller
   geometry_msgs
   tf2
   tf2_msgs
+  tf2_ros
+  rosidl_runtime_cpp
+  rosidl_typesupport_cpp
 )
 
 target_link_libraries(
   swd_diff_drive_controller
   ${EZW_LOG_LIBRARIES}
-  ${EZW_SMC_CORE_LIBRARIES}
+  ${EZW_SMC_SERVICE_CLIENT_LIBRARIES}
 )
 
 install(TARGETS
