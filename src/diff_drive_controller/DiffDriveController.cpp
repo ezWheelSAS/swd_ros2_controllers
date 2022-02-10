@@ -40,7 +40,7 @@ namespace ezw {
 
             //Publisher
             if (m_params->getPublishOdom()) {
-                auto m_pub_odom = create_publisher<nav_msgs::msg::Odometry>("odom", 5);
+                m_pub_odom = create_publisher<nav_msgs::msg::Odometry>("odom", 5);
             }
 
             if (m_params->getPublishSafety()) {
@@ -249,8 +249,7 @@ namespace ezw {
             }
 
             if (smccore::IPDSService::PDSState::OPERATION_ENABLED != pds_state_l || smccore::IPDSService::PDSState::OPERATION_ENABLED != pds_state_r) {
-                err_l = m_left_controller.setNMTState(smccore::INMTService::NMTCommand::OPER);
-                err_l = m_right_controller.setNMTState(smccore::INMTService::NMTCommand::OPER);
+                system("cansend can0 000#0100");
             }
 
             // If NMT is operational and no STO detected (to avoid infinite log), check the PDS state

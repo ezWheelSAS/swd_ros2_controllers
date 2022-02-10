@@ -68,8 +68,6 @@ namespace ezw {
             {
                 const lg_t lock(m_mutex);
 
-                RCLCPP_INFO(get_logger(), "Update() is called.");
-
                 // Baseline
                 auto l_baseline_m = m_baseline_m;
                 get_parameter("baseline_m", m_baseline_m);
