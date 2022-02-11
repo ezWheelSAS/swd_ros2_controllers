@@ -50,18 +50,18 @@ namespace ezw {
 
             if (max_wheel_speed_rpm < 0.) {
                 max_wheel_speed_rpm = DEFAULT_MAX_WHEEL_SPEED_RPM;
-                RCLCPP_ERROR(get_logger(),
-                             "Invalid value %f for parameter 'wheel_max_speed_rpm', it should be a positive value. "
-                             "Falling back to default (%f)",
-                             max_wheel_speed_rpm, DEFAULT_MAX_WHEEL_SPEED_RPM);
+                RCLCPP_WARN(get_logger(),
+                            "Invalid value %f for parameter 'wheel_max_speed_rpm', it should be a positive value. "
+                            "Falling back to default (%f)",
+                            max_wheel_speed_rpm, DEFAULT_MAX_WHEEL_SPEED_RPM);
             }
 
             if (max_sls_wheel_speed_rpm < 0.) {
                 max_sls_wheel_speed_rpm = DEFAULT_MAX_SLS_WHEEL_RPM;
-                RCLCPP_ERROR(get_logger(),
-                             "Invalid value %f for parameter 'wheel_safety_limited_speed_rpm', it should be a positive value. "
-                             "Falling back to default (%f)",
-                             max_sls_wheel_speed_rpm, DEFAULT_MAX_SLS_WHEEL_RPM);
+                RCLCPP_WARN(get_logger(),
+                            "Invalid value %f for parameter 'wheel_safety_limited_speed_rpm', it should be a positive value. "
+                            "Falling back to default (%f)",
+                            max_sls_wheel_speed_rpm, DEFAULT_MAX_SLS_WHEEL_RPM);
             }
 
             // Initialize motors
