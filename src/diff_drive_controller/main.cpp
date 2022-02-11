@@ -4,10 +4,8 @@
  * @file main.cpp
  */
 
-#include <cstdio>
-
+#include "cstdio"
 #include "diff_drive_controller/DiffDriveController.hpp"
-#include "rclcpp/rclcpp.hpp"
 
 auto main(int argc, char** argv) -> int
 {

@@ -4,21 +4,15 @@
  * @file DiffDriveController.hpp
  */
 
-#include <tf2_ros/transform_broadcaster.h>
-
-#include <chrono>
-#include <iostream>
-#include <memory>
-#include <string>
-#include <thread>
-#include <utility>
-
+#include "chrono"
 #include "diff_drive_controller/DiffDriveParameters.hpp"
 #include "ezw-smc-service/DBusClient.hpp"
 #include "geometry_msgs/msg/transform_stamped.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "geometry_msgs/msg/twist_with_covariance.hpp"
+#include "iostream"
 #include "lifecycle_msgs/msg/transition.hpp"
+#include "memory"
 #include "nav_msgs/msg/odometry.hpp"
 #include "rclcpp/publisher.hpp"
 #include "rclcpp/rclcpp.hpp"
@@ -27,14 +21,16 @@
 #include "rcutils/logging_macros.h"
 #include "std_msgs/msg/bool.hpp"
 #include "std_msgs/msg/string.hpp"
+#include "string"
 #include "swd_ros2_controllers/msg/safety_functions.hpp"
+#include "tf2_ros/transform_broadcaster.h"
+#include "thread"
+#include "utility"
 
 #define M_MAX(a, b) ((a) > (b) ? (a) : (b))
 #define M_MIN(a, b) ((a) < (b) ? (a) : (b))
 #define M_SIGN(a) ((a) > 0 ? 1 : -1)
 #define M_BOUND_ANGLE(a) (((a) > M_PI) ? ((a)-2. * M_PI) : (((a) < -M_PI) ? ((a) + 2. * M_PI) : (a)))
-
-using namespace std::chrono_literals;
 
 namespace ezw {
     namespace swd {
@@ -75,11 +71,11 @@ namespace ezw {
 
             std::shared_ptr<tf2_ros::TransformBroadcaster> m_tf2_br;
 
-            void cbCmdVel(const geometry_msgs::msg::Twist::SharedPtr p_cmd_vel);
+            void cbCmdVel(geometry_msgs::msg::Twist::SharedPtr p_cmd_vel);
             void cbTimerOdom(), cbWatchdog(), cbTimerStateMachine(), cbTimerSafety();
-            void cbSoftBrake(const std_msgs::msg::Bool &msg);
-            void cbSetSpeed(const geometry_msgs::msg::Point &speed);
-            void setSpeeds(int32_t left_speed, int32_t right_speed);
+            void cbSoftBrake(const std_msgs::msg::Bool &p_msg);
+            void cbSetSpeed(const geometry_msgs::msg::Point &p_speed);
+            void setSpeeds(int32_t p_left_speed, int32_t p_right_speed);
 
             rclcpp::TimerBase::SharedPtr m_timer_odom, m_timer_watchdog, m_timer_pds, m_timer_safety;
 

@@ -7,17 +7,9 @@
 
 #include "diff_drive_controller/DiffDriveController.hpp"
 
-#include <tf2/LinearMath/Quaternion.h>
-
-#include <chrono>
-#include <iostream>
-#include <memory>
-#include <string>
-#include <thread>
-#include <utility>
-
 #include "ezw-smc-core/Config.hpp"
 #include "ezw-smc-core/INMTService.hpp"
+#include "tf2/LinearMath/Quaternion.h"
 
 #define TIMER_STATE_MACHINE_MS 1000
 #define TIMER_SAFETY_MS 200
