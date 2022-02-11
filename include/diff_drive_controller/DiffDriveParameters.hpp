@@ -42,8 +42,7 @@ namespace ezw {
             {
                 RCLCPP_INFO(get_logger(), "DiffDriveParameters() is called.");
 
-                m_timer = create_wall_timer(1000ms, std::bind(&DiffDriveParameters::update, this));
-
+                // Declare all parameters
                 declare_parameter<double>("baseline_m", 0.0);
                 declare_parameter<std::string>("left_config_file", DEFAULT_LEFT_CONFIG_FILE);
                 declare_parameter<std::string>("right_config_file", DEFAULT_RIGHT_CONFIG_FILE);
@@ -61,9 +60,17 @@ namespace ezw {
                 declare_parameter<float>("wheel_safety_limited_speed_rpm", DEFAULT_MAX_SLS_WHEEL_RPM);
                 declare_parameter<std::string>("positive_polarity_wheel", DEFAULT_POSITIVE_POLARITY_WHEEL);
 
+                // Read all parameters
                 update();
+
+                // Start a timer to update cyclically parameters
+                m_timer = create_wall_timer(1000ms, std::bind(&DiffDriveParameters::update, this));
             }
 
+            /**
+             * @brief Read all parameters
+             * 
+             */
             void update()
             {
                 const lg_t lock(m_mutex);
@@ -75,12 +82,14 @@ namespace ezw {
                     RCLCPP_INFO(get_logger(), "Baseline : %f", m_baseline_m);
                 }
 
-                // Config files
+                // Left config file
                 auto l_left_config_file = m_left_config_file;
                 get_parameter("left_config_file", m_left_config_file);
                 if (m_left_config_file != l_left_config_file) {
                     RCLCPP_INFO(get_logger(), "Left config : %s", m_left_config_file.c_str());
                 }
+
+                // Right config file
                 auto l_right_config_file = m_right_config_file;
                 get_parameter("right_config_file", m_right_config_file);
                 if (m_right_config_file != l_right_config_file) {
@@ -101,13 +110,14 @@ namespace ezw {
                     RCLCPP_INFO(get_logger(), "Watchdog receive (ms): %d", m_watchdog_receive_ms);
                 }
 
-                // Frames
+                // Base frame
                 auto l_base_frame = m_base_frame;
                 get_parameter("base_frame", m_base_frame);
                 if (m_base_frame != l_base_frame) {
                     RCLCPP_INFO(get_logger(), "Base frame : %s", m_base_frame.c_str());
                 }
 
+                // Odom frame
                 auto l_odom_frame = m_odom_frame;
                 get_parameter("odom_frame", m_odom_frame);
                 if (m_odom_frame != l_odom_frame) {
@@ -142,13 +152,14 @@ namespace ezw {
                     RCLCPP_INFO(get_logger(), "Publish backward SLS : %d", m_have_backward_sls);
                 }
 
-                // Encoders relative error
+                // Left encoder relative error
                 auto l_left_encoder_relative_error = m_left_encoder_relative_error;
                 get_parameter("left_encoder_relative_error", m_left_encoder_relative_error);
                 if (m_left_encoder_relative_error != l_left_encoder_relative_error) {
                     RCLCPP_INFO(get_logger(), "Left encoder relative error : %f", m_left_encoder_relative_error);
                 }
 
+                // Right encoder relative error
                 auto l_right_encoder_relative_error = m_right_encoder_relative_error;
                 get_parameter("right_encoder_relative_error", m_right_encoder_relative_error);
                 if (m_right_encoder_relative_error != l_right_encoder_relative_error) {
@@ -162,6 +173,7 @@ namespace ezw {
                     RCLCPP_INFO(get_logger(), "Max wheel speed RPM: %f", max_wheel_speed_rpm);
                 }
 
+                // Max wheel speed rpm when SLS enabled
                 auto l_max_sls_wheel_speed_rpm = max_sls_wheel_speed_rpm;
                 get_parameter("wheel_safety_limited_speed_rpm", max_sls_wheel_speed_rpm);
                 if (max_sls_wheel_speed_rpm != l_max_sls_wheel_speed_rpm) {
