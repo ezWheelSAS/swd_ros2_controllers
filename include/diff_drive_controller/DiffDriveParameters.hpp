@@ -11,30 +11,28 @@
 
 #include "rclcpp/rclcpp.hpp"
 
-namespace {
-    constexpr auto DEFAULT_PUB_FREQ_HZ = 50;
-    constexpr auto DEFAULT_MAX_WHEEL_SPEED_RPM = 75.0;  // 75 rpm Wheel => Motor (75 * 14 = 1050 rpm)
-    constexpr auto DEFAULT_MAX_SLS_WHEEL_RPM = 30.0;    // 30 rpm Wheel => Motor (30 * 14 = 490 rpm)
-    constexpr auto DEFAULT_WATCHDOG_MS = 1000;
-    constexpr auto DEFAULT_ODOM_FRAME = "odom";
-    constexpr auto DEFAULT_BASE_FRAME = "base_link";
-    constexpr auto DEFAULT_POSITIVE_POLARITY_WHEEL = "Right";
-    constexpr auto DEFAULT_CTRL_MODE = "Twist";
-    constexpr auto DEFAULT_PUBLISH_ODOM = true;
-    constexpr auto DEFAULT_PUBLISH_TF = true;
-    constexpr auto DEFAULT_PUBLISH_SAFETY_FCNS = true;
-    constexpr auto DEFAULT_BACKWARD_SLS = false;
-    constexpr auto DEFAULT_LEFT_RELATIVE_ERROR = 0.05;  // 5% of error
-    constexpr auto DEFAULT_RIGHT_RELATIVE_ERROR = 0.05;
-    constexpr auto DEFAULT_LEFT_CONFIG_FILE = "/opt/ezw/usr/etc/ezw-smc-core/swd_left_config.ini";
-    constexpr auto DEFAULT_RIGHT_CONFIG_FILE = "/opt/ezw/usr/etc/ezw-smc-core/swd_right_config.ini";
-}  // namespace
-
-using namespace std::chrono_literals;
-using lg_t = std::lock_guard<std::mutex>;
+constexpr auto DEFAULT_PUB_FREQ_HZ = 50;
+constexpr auto DEFAULT_MAX_WHEEL_SPEED_RPM = 75.0;  // 75 rpm Wheel => Motor (75 * 14 = 1050 rpm)
+constexpr auto DEFAULT_MAX_SLS_WHEEL_RPM = 30.0;    // 30 rpm Wheel => Motor (30 * 14 = 490 rpm)
+constexpr auto DEFAULT_WATCHDOG_MS = 1000;
+constexpr auto DEFAULT_ODOM_FRAME = "odom";
+constexpr auto DEFAULT_BASE_FRAME = "base_link";
+constexpr auto DEFAULT_POSITIVE_POLARITY_WHEEL = "Right";
+constexpr auto DEFAULT_CTRL_MODE = "Twist";
+constexpr auto DEFAULT_PUBLISH_ODOM = true;
+constexpr auto DEFAULT_PUBLISH_TF = true;
+constexpr auto DEFAULT_PUBLISH_SAFETY_FCNS = true;
+constexpr auto DEFAULT_BACKWARD_SLS = false;
+constexpr auto DEFAULT_LEFT_RELATIVE_ERROR = 0.05;  // 5% of error
+constexpr auto DEFAULT_RIGHT_RELATIVE_ERROR = 0.05;
+constexpr auto DEFAULT_LEFT_CONFIG_FILE = "/opt/ezw/usr/etc/ezw-smc-core/swd_left_config.ini";
+constexpr auto DEFAULT_RIGHT_CONFIG_FILE = "/opt/ezw/usr/etc/ezw-smc-core/swd_right_config.ini";
 
 namespace ezw {
     namespace swd {
+        using namespace std::chrono_literals;
+        using lg_t = std::lock_guard<std::mutex>;
+
         class DiffDriveParameters : public rclcpp::Node {
            public:
             explicit DiffDriveParameters(const std::string &p_node_name)

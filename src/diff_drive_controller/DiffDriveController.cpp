@@ -77,7 +77,7 @@ namespace ezw {
 
             ezw_error_t err;
 
-            if ("" != m_params->getRightConfigFile()) {
+            if (!m_params->getRightConfigFile().empty()) {
                 /* Config init */
                 auto lConfig = std::make_shared<ezw::smccore::Config>();
                 err = lConfig->load(m_params->getRightConfigFile());
@@ -121,7 +121,7 @@ namespace ezw {
                 throw std::runtime_error("Please specify the 'right_swd_config_file' parameter");
             }
 
-            if ("" != m_params->getLeftConfigFile()) {
+            if (!m_params->getLeftConfigFile().empty()) {
                 /* Config init */
                 auto lConfig = std::make_shared<ezw::smccore::Config>();
                 err = lConfig->load(m_params->getLeftConfigFile());
@@ -173,6 +173,7 @@ namespace ezw {
                              "Controller::getOdometryValue() return error code : %d",
                              (int)err);
                 ;
+                // TODO GME : read again in cb timer function
             }
 
             err = m_right_controller.getOdometryValue(m_dist_right_prev_mm);
@@ -182,6 +183,7 @@ namespace ezw {
                              "Controller::getOdometryValue() return error code : %d",
                              (int)err);
                 ;
+                // TODO GME : read again in cb timer function
             }
 
             // Set m_max_motor_speed_rpm from wheel_sls and motor_reduction
@@ -288,24 +290,24 @@ namespace ezw {
             }
         }
 
-        void DiffDriveController::cbSoftBrake(const std_msgs::msg::Bool::ConstPtr &msg)
+        void DiffDriveController::cbSoftBrake(const std_msgs::msg::Bool &msg)
         {
             // true => Enable brake
             // false => Release brake
-            ezw_error_t err = m_left_controller.setHalt(msg->data);
+            ezw_error_t err = m_left_controller.setHalt(msg.data);
             if (ERROR_NONE != err) {
-                RCLCPP_ERROR(get_logger(), "SoftBrake: Failed %s left wheel, EZW_ERR: %d", msg->data ? "braking" : "releasing", (int)err);
+                RCLCPP_ERROR(get_logger(), "SoftBrake: Failed %s left wheel, EZW_ERR: %d", msg.data ? "braking" : "releasing", (int)err);
             }
             else {
-                RCLCPP_INFO(get_logger(), "SoftBrake: Left motor's soft brake %s", msg->data ? "activated" : "disabled");
+                RCLCPP_INFO(get_logger(), "SoftBrake: Left motor's soft brake %s", msg.data ? "activated" : "disabled");
             }
 
-            err = m_right_controller.setHalt(msg->data);
+            err = m_right_controller.setHalt(msg.data);
             if (ERROR_NONE != err) {
-                RCLCPP_ERROR(get_logger(), "SoftBrake: Failed %s right wheel, EZW_ERR: %d", msg->data ? "braking" : "releasing", (int)err);
+                RCLCPP_ERROR(get_logger(), "SoftBrake: Failed %s right wheel, EZW_ERR: %d", msg.data ? "braking" : "releasing", (int)err);
             }
             else {
-                RCLCPP_INFO(get_logger(), "SoftBrake: Right motor's soft brake %s", msg->data ? "activated" : "disabled");
+                RCLCPP_INFO(get_logger(), "SoftBrake: Right motor's soft brake %s", msg.data ? "activated" : "disabled");
             }
         }
 
@@ -314,9 +316,9 @@ namespace ezw {
             nav_msgs::msg::Odometry msg_odom;
 
             int32_t left_dist_now_mm = 0, right_dist_now_mm = 0;
-            ezw_error_t err_l, err_r;
 
             /* FIXME GME
+            ezw_error_t err_l, err_r;
             err_l = m_left_controller.getOdometryValue(left_dist_now_mm);    // In mm
             err_r = m_right_controller.getOdometryValue(right_dist_now_mm);  // In mm
 

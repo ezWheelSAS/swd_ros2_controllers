@@ -44,17 +44,6 @@ set(PKG_CONFIG_PATH /opt/ezw/usr/lib/pkgconfig CACHE PATH "")
 set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:${PKG_CONFIG_PATH}")
 message(STATUS "Pkgconfig extra path are: $ENV{PKG_CONFIG_PATH} ")
 
-# Module dependencies used as pkgconfig or direct filepath/dirpath
-set(LIST_MODULES_PKG_CONFIG_NAME "ezw-types ezwLog ezw-smc-service-client" CACHE STRING "Lists of pkgconfig modules dependencies" FORCE)
-
-unset(__pkg_config_checked_EZW_TYPES CACHE)
-unset(__pkg_config_checked_EZW_LOG CACHE)
-unset(__pkg_config_checked_EZW_SMC_SERVICE_CLIENT CACHE)
-
-set(EZW_TYPES_PKG_CONFIG_NAME "ezw-types" CACHE STRING "ezw-types pkg config name")
-set(EZW_LOG_PKG_CONFIG_NAME "ezwLog" CACHE STRING "ezwLog pkg config name")
-set(EZW_SMC_SERVICE_CLIENT_PKG_CONFIG_NAME "ezw-smc-service-client" CACHE STRING "Module EZW_SMC_SERVICE_CLIENT_CONFIG pkg config name")
-
 #------------------------------------------------------------------------------
 # pkgconfig
 #------------------------------------------------------------------------------
@@ -66,8 +55,8 @@ find_package(PkgConfig REQUIRED)
 #############
 
 # Allow Clang-tidy
-# set(CMAKE_CXX_CLANG_TIDY clang-tidy-12 --config-file=${CMAKE_SOURCE_DIR}/.clang-tidy --use-color --header-filter=${CMAKE_SOURCE_DIR}/${CMAKE_PROJECT_NAME}/include/)
-set(DCMAKE_EXPORT_COMPILE_COMMANDS ON)
+#set(CMAKE_CXX_CLANG_TIDY clang-tidy-12 --config-file=${CMAKE_SOURCE_DIR}/.clang-tidy --use-color --header-filter=${CMAKE_SOURCE_DIR}/${CMAKE_PROJECT_NAME}/include/)
+#set(DCMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 
 #------------------------------------------------------------------------------
@@ -89,14 +78,6 @@ pkg_check_modules(EZW_LOG REQUIRED ezwLog)
 pkg_check_modules(EZW_SMC_SERVICE_CLIENT REQUIRED ezw-smc-service-client)
 
 # Add include dirs. The case not configured will be empty
-message(STATUS "
-Add inc directory:
-EZW_TYPES_INCLUDE_DIRS : ${EZW_TYPES_INCLUDE_DIRS}
-EZW_LOG_INCLUDE_DIRS : ${EZW_LOG_INCLUDE_DIRS}
-EZW_SMC_SERVICE_CLIENT_INCLUDE_DIRS : ${EZW_SMC_SERVICE_CLIENT_INCLUDE_DIRS}
-target_include_directories(target include ${Boost_INCLUDE_DIRS})
--------------------")
-
 include_directories(
   ${EZW_TYPES_INCLUDE_DIRS}
   ${EZW_LOG_INCLUDE_DIRS}
@@ -104,12 +85,6 @@ include_directories(
 )
 
 # Add library dirs. The case not configured will be empty
-message(STATUS "
-Add library directory:
-EZW_LOG_LIBRARY_DIRS : ${EZW_LOG_LIBRARY_DIRS}
-EZW_SMC_SERVICE_CLIENT_INCLUDE_DIRS : ${EZW_SMC_SERVICE_CLIENT_INCLUDE_DIRS}
-------------------------------")
-
 link_directories(
   ${EZW_LOG_LIBRARY_DIRS}
   ${EZW_TOOLS_LIBRARY_DIRS}
@@ -117,14 +92,6 @@ link_directories(
 )
 
 # Add required definitions from pkgconfig
-message(STATUS "
-Add definitions:
-EZW_LOG_CFLAGS : ${EZW_LOG_CFLAGS}
-EZW_LOG_LDFLAGS : ${EZW_LOG_LDFLAGS}
-EZW_SMC_SERVICE_CLIENT_CFLAGS : ${EZW_SMC_SERVICE_CLIENT_CFLAGS}
-EZW_SMC_SERVICE_CLIENT_LDFLAGS : ${EZW_SMC_SERVICE_CLIENT_LDFLAGS}
-------------------------------")
-
 add_definitions(
   ${EZW_LOG_CFLAGS}
   ${EZW_LOG_LDFLAGS}

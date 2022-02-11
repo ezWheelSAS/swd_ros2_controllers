@@ -71,13 +71,13 @@ namespace ezw {
             rclcpp::Publisher<swd_ros2_controllers::msg::SafetyFunctions>::SharedPtr m_pub_safety;
             rclcpp::Subscription<geometry_msgs::msg::Point>::SharedPtr m_sub_command_set_speed;
             rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr m_sub_command_cmd_vel;
-            rclcpp::Subscription<std_msgs::msg::Bool::ConstPtr>::SharedPtr m_sub_brake;
+            rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr m_sub_brake;
 
             std::shared_ptr<tf2_ros::TransformBroadcaster> m_tf2_br;
 
             void cbCmdVel(const geometry_msgs::msg::Twist::SharedPtr p_cmd_vel);
             void cbTimerOdom(), cbWatchdog(), cbTimerStateMachine(), cbTimerSafety();
-            void cbSoftBrake(const std_msgs::msg::Bool::ConstPtr &msg);
+            void cbSoftBrake(const std_msgs::msg::Bool &msg);
             void cbSetSpeed(const geometry_msgs::msg::Point &speed);
             void setSpeeds(int32_t left_speed, int32_t right_speed);
 
@@ -92,7 +92,7 @@ namespace ezw {
 
             const std::shared_ptr<const DiffDriveParameters> m_params;
 
-            //Params
+            // Params
             double m_left_wheel_diameter_m, m_right_wheel_diameter_m, m_l_motor_reduction, m_r_motor_reduction, m_left_encoder_relative_error, m_right_encoder_relative_error;
             int m_left_wheel_polarity, m_max_motor_speed_rpm, m_motor_sls_rpm;
             bool m_nmt_ok, m_pds_ok;
