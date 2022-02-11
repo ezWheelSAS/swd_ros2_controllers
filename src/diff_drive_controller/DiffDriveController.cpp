@@ -714,7 +714,7 @@ namespace ezw {
 
         ///
         /// \brief A safety callback which gets activated if no control message
-        /// have been received since `control_timeout_ms`
+        /// have been received since `control_timeout_ms`str.empty()
         ///
         void DiffDriveController::cbWatchdog()
         {

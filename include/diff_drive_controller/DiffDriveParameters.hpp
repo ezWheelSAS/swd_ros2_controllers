@@ -18,7 +18,6 @@ constexpr auto DEFAULT_WATCHDOG_MS = 1000;
 constexpr auto DEFAULT_ODOM_FRAME = "odom";
 constexpr auto DEFAULT_BASE_FRAME = "base_link";
 constexpr auto DEFAULT_POSITIVE_POLARITY_WHEEL = "Right";
-constexpr auto DEFAULT_CTRL_MODE = "Twist";
 constexpr auto DEFAULT_PUBLISH_ODOM = true;
 constexpr auto DEFAULT_PUBLISH_TF = true;
 constexpr auto DEFAULT_PUBLISH_SAFETY_FCNS = true;
@@ -60,9 +59,6 @@ namespace ezw {
 
                 // Read all parameters
                 update();
-
-                // Start a timer to update cyclically parameters
-                m_timer = create_wall_timer(1000ms, std::bind(&DiffDriveParameters::update, this));
             }
 
             /**
@@ -284,23 +280,13 @@ namespace ezw {
 
            private:
             double m_baseline_m;
-            std::string m_left_config_file;
-            std::string m_right_config_file;
-            int m_pub_freq_hz;
-            int m_watchdog_receive_ms;
-            std::string m_base_frame;
-            std::string m_odom_frame;
-            bool m_publish_odom;
-            bool m_publish_tf;
-            bool m_publish_safety;
-            bool m_have_backward_sls;
-            float m_left_encoder_relative_error;
-            float m_right_encoder_relative_error;
-            double max_wheel_speed_rpm;
-            double max_sls_wheel_speed_rpm;
+            std::string m_left_config_file, m_right_config_file;
+            int m_pub_freq_hz, m_watchdog_receive_ms;
+            std::string m_base_frame, m_odom_frame;
+            bool m_publish_odom, m_publish_tf, m_publish_safety, m_have_backward_sls;
+            float m_left_encoder_relative_error, m_right_encoder_relative_error;
+            double max_wheel_speed_rpm, max_sls_wheel_speed_rpm;
             std::string positive_polarity_wheel;
-
-            rclcpp::TimerBase::SharedPtr m_timer;
             mutable std::mutex m_mutex;
         };
     }  // namespace swd

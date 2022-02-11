@@ -56,12 +56,6 @@ namespace ezw {
              */
             explicit DiffDriveController(const std::string &p_node_name, const std::shared_ptr<const DiffDriveParameters> p_params);
 
-            /**
-             * @brief 
-             * 
-             */
-            void publish();
-
            private:
             rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr m_pub_odom;
             rclcpp::Publisher<swd_ros2_controllers::msg::SafetyFunctions>::SharedPtr m_pub_safety;
