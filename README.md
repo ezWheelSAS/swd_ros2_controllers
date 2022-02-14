@@ -2,7 +2,7 @@
 # A METTRE A JOUR
 ## Overview
 
-This package has been tested on ROS Melodic and Noetic, it contains ROS nodes to control motors powered by the [ez-Wheel](https://www.ez-wheel.com) Safety Wheel Drive (SWD®) technology.
+This package has been tested on ROS2 Galactic, it contains ROS2 nodes to control motors powered by the [ez-Wheel](https://www.ez-wheel.com) Safety Wheel Drive (SWD®) technology.
 
 | <img src="https://www.ez-wheel.com/storage/image-product/visuels-swd-core-2-0-0.png" width="45%"></img> | <img src="https://www.ez-wheel.com/storage/image-product/roue-electrique-swd-150-2-0-0-0.png" width="45%"></img> | <img src="https://www.ez-wheel.com/storage/image-product/starterkit-ez-wheel-web-0-0-0.png" width="45%"></img>       |
 | ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
@@ -11,18 +11,18 @@ This package has been tested on ROS Melodic and Noetic, it contains ROS nodes to
 ## Installation
 
 This package has been tested on **x64_86** and **armhf** machines.
-Pre-built packages are available for ROS Noetic on Ubuntu 20.04 (for **x64_86** and **armhf**).
+Pre-built packages are available for ROS2 Galactic on Ubuntu 20.04 (for **x64_86** and **armhf**).
 
 ### Prerequisites
 
 - A SWD® based wheel
 - Ubuntu 20.04
-- ROS Noetic
+- ROS2 Galactic
 - `swd-services (>= 0.1.0)`
 
 ### Ubuntu
 
-In order to install `swd_ros_controllers`, you need to add the ez-Wheel repository to `/etc/apt/sources.list`.
+In order to install `swd_ros2_controllers`, you need to add the ez-Wheel repository to `/etc/apt/sources.list`.
 
 ```shell
 echo "deb http://packages.ez-wheel.com:8081/apt-repo focal main" | sudo tee -a /etc/apt/sources.list
@@ -34,10 +34,10 @@ Then download and add the GPG key using following command:
 wget -qO - http://packages.ez-wheel.com:8081/archive.key | sudo apt-key add -
 ```
 
-Now, you should be able to install the `ros-noetic-swd-ros-controllers` package using `apt`:
+Now, you should be able to install the `ros-galactic-swd-ros-controllers` package using `apt`:
 
 ```shell
-sudo apt update && sudo apt install ros-noetic-swd-ros-controllers
+sudo apt update && sudo apt install ros-galactic-swd-ros-controllers
 ```
 
 ### Compiling from source
@@ -49,12 +49,12 @@ Then you need to install `swd-services` using:
 sudo apt-get update && sudo apt install swd-services
 ```
 
-In the following instructions, replace `<rosdistro>` with the name of your ROS distro (e.g., `noetic`).
+In the following instructions, replace `<rosdistro>` with the name of your ROS2 distro (e.g., `galactic`).
 
 ```shell
 source /opt/ros/<rosdistro>/setup.bash
-mkdir -p ~/ros_ws/src/
-cd ~/ros_ws/src/
+mkdir -p ~/ros2_ws/src/
+cd ~/ros2_ws/src/
 git clone https://github.com/ezWheelSAS/swd_ros_controllers.git
 cd ..
 catkin_make install
@@ -73,13 +73,13 @@ roslaunch swd_ros_controllers swd_diff_drive_controller.launch
 - `swd_drive_controller.launch`: A sample configuration for a single SWD® based wheel ([SWD® Core wheel](https://www.ez-wheel.com/en/safety-gear-motor) or [SWD® 150](https://www.ez-wheel.com/en/swd-150-safety-wheel-drive). To use it, run the following command:
 
 ```shell
-roslaunch swd_ros_controllers swd_drive_controller.launch
+roslaunch swd_ros2_controllers swd_drive_controller.launch
 ```
 
 
-You can always use the nodes with the `rosrun` command, the minimum required parameters are:
+You can always use the nodes with the `ros2 run` command, the minimum required parameters are:
 
-- For `swd_diff_drive_controller`:
+- For `swd_ros2_controllers`:
 
 ```shell
 rosrun swd_ros_controllers swd_diff_drive_controller \
@@ -95,7 +95,7 @@ rosrun swd_ros_controllers swd_drive_controller \
                            swd_config_file:="/path/to/swd_config_file.ini"
 ```
 
-## The `swd_diff_drive_controller` node
+## The `diff_drive_controller` node
 
 This controller drives two ez-Wheel SWD® wheels as a differential-drive robot.
 
@@ -105,14 +105,14 @@ This controller drives two ez-Wheel SWD® wheels as a differential-drive robot.
 - `right_swd_config_file` of type **`string`**: Path to the `.ini` configuration file of the right motor (mandatory parameter).
 - `baseline_m` of type **`double`**: The distance (in meters) between the 2 wheels (mandatory parameter).
 - `pub_freq_hz` of type **`int`**: Frequency (in Hz) of published odometry and TFs (default `50`).
-- `command_timeout_ms` of type **`int`**: The delay (in milliseconds) before stopping the wheels if no command is received (default `1000`).
+- `control_timeout_ms` of type **`int`**: The delay (in milliseconds) before stopping the wheels if no command is received (default `1000`).
 - `base_frame` of type **`string`**: Frame ID for the moving platform, used in odometry and TFs (default `'base_link'`) (see [REP-150](https://www.ros.org/reps/rep-0105.html) for more info).
 - `odom_frame` of type **`string`**: Frame ID for the `odom` fixed frame used in odometry and TFs (default `'odom'`) (see [REP-150](https://www.ros.org/reps/rep-0105.html) for more info).
 - `publish_odom` of type **`bool`**: Publish odometry messages (default `true`).
 - `publish_tf` of type **`bool`**: Publish odometry TF (default `true`).
 - `publish_safety_functions` of type **`bool`**: Publish **`swd_ros_controllers::SafetyFunctions`** message (default `true`).
 - `wheel_max_speed_rpm` of type **`double`**: Maximum allowed wheel speed (in RPM), if a target speed of one of the wheels is above this limit, the controller will limit the speed of the two wheels without changing the robot's trajectory (default `75.0`).
-- `wheel_safety_limited_speed_rpm` of type **`double`**: Wheel safety limited speed (SLS) (in RPM), if an SLS signal is detected (from a security LiDAR for example), the wheel will be limited internally to the configured SLS limit, the ROS controller uses this value to limit the target speed sent to the motor in the SLS case (default `30.0`).
+- `wheel_safety_limited_speed_rpm` of type **`double`**: Wheel safety limited speed (SLS) (in RPM), if an SLS signal is detected (from a security LiDAR for example), the wheel will be limited internally to the configured SLS limit, the ROS2 controller uses this value to limit the target speed sent to the motor in the SLS case (default `30.0`).
 - `have_backward_sls` of type **`bool`**: Specifies if the robot have a backward SLS signal, coming for example from a back-facing security LiDAR. If an SLS signal is available for backward movements, set this to `true` to take it into account. Otherwise, set the parameter to `false`, this will limit all backward movements to the selected `wheel_safety_limited_speed_rpm` (default `false`).
 - `positive_polarity_wheel` of type **`string`**: Internal parameter, used to select which wheels is set to a positive polarity (default `'Right'`).
 - `control_mode` of type **`string`**: This parameter selects the control mode of the robot, if `'Twist'` is selected, the node will subscribe to the `~cmd_vel` topic, if `'LeftRightSpeeds'` is selected, the node subscribe to `~set_speed` (default `'Twist'`).
@@ -143,7 +143,7 @@ This controller controlles a single SWD® based wheel.
 - `publish_joint_state` of type **`bool`**: Publish **`sensor_msgs::JointState`** messages (default `true`).
 - `publish_safety_functions` of type **`bool`**: Publish **`swd_ros_controllers::SafetyFunctions`** message (default `true`).
 - `wheel_max_speed_rpm` of type **`double`**: Maximum allowed wheel speed (in RPM), if a target speed of the wheels is above this limit, the controller will limit the speed to this maximum limit (default `75.0`).
-- `wheel_safety_limited_speed_rpm` of type **`double`**: Wheel safety limited speed (SLS) (in RPM), if an SLS signal is detected (from a security LiDAR for example), the wheel will be limited internally to the configured SLS limit, the ROS controller uses this value to limit the target speed sent to the motor in the SLS case (default `30.0`).
+- `wheel_safety_limited_speed_rpm` of type **`double`**: Wheel safety limited speed (SLS) (in RPM), if an SLS signal is detected (from a security LiDAR for example), the wheel will be limited internally to the configured SLS limit, the ROS2 controller uses this value to limit the target speed sent to the motor in the SLS case (default `30.0`).
 - `have_backward_sls` of type **`bool`**: Specifies if the wheel have a backward SLS signal, coming for example from a back-facing security LiDAR. If an SLS signal is available for backward movements, set this to `true` to take it into account. Otherwise, set the parameter to `false`, this will limit all backward movements to the selected `wheel_safety_limited_speed_rpm` (default `false`).
 - `control_mode` of type **`string`**: This parameter selects the control mode of the wheel, if `'Twist'` is selected, the node will subscribe to the `~cmd_vel` topic, if `'Float64'` is selected, the node subscribe to `~set_speed` (default `'Twist'`).
 
