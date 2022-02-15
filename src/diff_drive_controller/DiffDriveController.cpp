@@ -30,7 +30,7 @@ namespace ezw {
 
             m_tf2_br = std::make_shared<tf2_ros::TransformBroadcaster>(this);
 
-            //Publisher
+            //Publishers
             if (m_params->getPublishOdom()) {
                 m_pub_odom = create_publisher<nav_msgs::msg::Odometry>("odom", 5);
             }
@@ -39,7 +39,7 @@ namespace ezw {
                 m_pub_safety = create_publisher<swd_ros2_controllers::msg::SafetyFunctions>("safety", 5);
             }
 
-            //Subscriber
+            //Subscribers
             m_sub_brake = create_subscription<std_msgs::msg::Bool>("soft_brake", 5, std::bind(&DiffDriveController::cbSoftBrake, this, _1));
             m_sub_command_set_speed = create_subscription<geometry_msgs::msg::Point>("set_speed", 5, std::bind(&DiffDriveController::cbSetSpeed, this, _1));
             m_sub_command_cmd_vel = create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 5, std::bind(&DiffDriveController::cbCmdVel, this, _1));

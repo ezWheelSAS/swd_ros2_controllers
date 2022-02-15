@@ -52,7 +52,7 @@ namespace ezw {
              * @brief Construct a new Diff Drive Controller object
              * 
              * @param p_node_name Node name
-             * @param p_intra_process_comms  
+             * @param p_params  
              */
             explicit DiffDriveController(const std::string &p_node_name, const std::shared_ptr<const DiffDriveParameters> p_params);
 

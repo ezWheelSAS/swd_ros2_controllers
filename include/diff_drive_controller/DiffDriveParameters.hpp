@@ -34,6 +34,12 @@ namespace ezw {
 
         class DiffDriveParameters : public rclcpp::Node {
            public:
+            /**
+             * @brief Construct a new Diff Drive Parameters object
+             * 
+             * @param p_node_name Node name
+             */
+
             explicit DiffDriveParameters(const std::string &p_node_name)
                 : Node(p_node_name)
             {
