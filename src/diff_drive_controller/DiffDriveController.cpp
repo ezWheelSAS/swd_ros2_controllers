@@ -432,7 +432,7 @@ namespace ezw {
         ///
         void DiffDriveController::cbSetSpeed(const geometry_msgs::msg::Point &speed)
         {
-            m_timer_watchdog.reset();
+            m_timer_watchdog->reset();
 
             // Convert rad/s wheel speed to rpm motor speed
             int32_t left = static_cast<int32_t>(speed.x * m_l_motor_reduction * 60.0 / (2.0 * M_PI));
@@ -453,7 +453,7 @@ namespace ezw {
         ///
         void DiffDriveController::cbCmdVel(const geometry_msgs::msg::Twist::SharedPtr p_cmd_vel)
         {
-            m_timer_watchdog.reset();
+            m_timer_watchdog->reset();
 
             double left_vel, right_vel;
 
