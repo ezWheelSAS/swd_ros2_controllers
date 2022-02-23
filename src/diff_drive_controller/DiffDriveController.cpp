@@ -317,7 +317,6 @@ namespace ezw {
 
             int32_t left_dist_now_mm = 0, right_dist_now_mm = 0;
 
-            /* FIXME GME
             ezw_error_t err_l, err_r;
             err_l = m_left_controller.getOdometryValue(left_dist_now_mm);    // In mm
             err_r = m_right_controller.getOdometryValue(right_dist_now_mm);  // In mm
@@ -337,7 +336,6 @@ namespace ezw {
                              (int)err_r);
                 return;
             }
-            */
 
             // Encoder difference between t and t-1
             double d_dist_left = static_cast<double>(left_dist_now_mm - m_dist_left_prev_mm) / 1000.0;
