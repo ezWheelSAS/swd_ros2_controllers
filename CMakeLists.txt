@@ -55,8 +55,8 @@ find_package(PkgConfig REQUIRED)
 #############
 
 # Allow Clang-tidy
-#set(CMAKE_CXX_CLANG_TIDY clang-tidy-12 --config-file=${CMAKE_SOURCE_DIR}/.clang-tidy --use-color --header-filter=${CMAKE_SOURCE_DIR}/${CMAKE_PROJECT_NAME}/include/)
-#set(DCMAKE_EXPORT_COMPILE_COMMANDS ON)
+# set(CMAKE_CXX_CLANG_TIDY clang-tidy-12 --config-file=${CMAKE_SOURCE_DIR}/.clang-tidy --use-color --header-filter=${CMAKE_SOURCE_DIR}/include/)
+# set(DCMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 
 #------------------------------------------------------------------------------
