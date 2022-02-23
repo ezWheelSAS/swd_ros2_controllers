@@ -172,8 +172,7 @@ namespace ezw {
                              "Failed initial reading from left motor, EZW_ERR: SMCService : "
                              "Controller::getOdometryValue() return error code : %d",
                              (int)err);
-                ;
-                // TODO GME : read again in cb timer function
+                throw std::runtime_error("Initial reading from left motor failed");
             }
 
             err = m_right_controller.getOdometryValue(m_dist_right_prev_mm);
@@ -182,8 +181,7 @@ namespace ezw {
                              "Failed initial reading from right motor, EZW_ERR: SMCService : "
                              "Controller::getOdometryValue() return error code : %d",
                              (int)err);
-                ;
-                // TODO GME : read again in cb timer function
+                throw std::runtime_error("Initial reading from right motor failed");
             }
 
             // Set m_max_motor_speed_rpm from wheel_sls and motor_reduction
@@ -205,7 +203,7 @@ namespace ezw {
             m_timer_pds = create_wall_timer(std::chrono::milliseconds(TIMER_STATE_MACHINE_MS), std::bind(&DiffDriveController::cbTimerStateMachine, this));
 
             if (m_params->getPublishOdom() || m_params->getPublishTf()) {
-                m_timer_odom = create_wall_timer(std::chrono::milliseconds(1 / m_params->getPubFreqHz()), std::bind(&DiffDriveController::cbTimerOdom, this));
+                m_timer_odom = create_wall_timer(std::chrono::milliseconds(1000 / m_params->getPubFreqHz()), std::bind(&DiffDriveController::cbTimerOdom, this));
             }
 
             m_timer_safety = create_wall_timer(std::chrono::milliseconds(TIMER_SAFETY_MS), std::bind(&DiffDriveController::cbTimerSafety, this));
