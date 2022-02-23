@@ -41,7 +41,7 @@ namespace ezw {
                 RCLCPP_INFO(get_logger(), "DiffDriveParameters() is called.");
 
                 // Declare all parameters
-                declare_parameter<double>("baseline_m", 0.485);
+                declare_parameter<double>("baseline_m", 0.0);
                 declare_parameter<std::string>("left_config_file", DEFAULT_LEFT_CONFIG_FILE);
                 declare_parameter<std::string>("right_config_file", DEFAULT_RIGHT_CONFIG_FILE);
                 declare_parameter<int>("pub_freq_hz", DEFAULT_PUB_FREQ_HZ);
