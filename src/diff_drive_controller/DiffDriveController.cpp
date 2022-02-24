@@ -44,26 +44,6 @@ namespace ezw {
             m_sub_command_set_speed = create_subscription<geometry_msgs::msg::Point>("set_speed", 5, std::bind(&DiffDriveController::cbSetSpeed, this, _1));
             m_sub_command_cmd_vel = create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 5, std::bind(&DiffDriveController::cbCmdVel, this, _1));
 
-            //auto parameter1 = m_params->getParameter1();
-            double max_wheel_speed_rpm = m_params->getMaxWheelSpeedRpm();
-            double max_sls_wheel_speed_rpm = m_params->getMaxSlsWheelSpeedRpm();
-
-            if (max_wheel_speed_rpm < 0.) {
-                max_wheel_speed_rpm = DEFAULT_MAX_WHEEL_SPEED_RPM;
-                RCLCPP_WARN(get_logger(),
-                            "Invalid value %f for parameter 'wheel_max_speed_rpm', it should be a positive value. "
-                            "Falling back to default (%f)",
-                            max_wheel_speed_rpm, DEFAULT_MAX_WHEEL_SPEED_RPM);
-            }
-
-            if (max_sls_wheel_speed_rpm < 0.) {
-                max_sls_wheel_speed_rpm = DEFAULT_MAX_SLS_WHEEL_RPM;
-                RCLCPP_WARN(get_logger(),
-                            "Invalid value %f for parameter 'wheel_safety_limited_speed_rpm', it should be a positive value. "
-                            "Falling back to default (%f)",
-                            max_sls_wheel_speed_rpm, DEFAULT_MAX_SLS_WHEEL_RPM);
-            }
-
             // Initialize motors
             RCLCPP_INFO(get_logger(), "Motors config files, right : %s, left : %s", m_params->getRightConfigFile().c_str(), m_params->getLeftConfigFile().c_str());
 
@@ -175,20 +155,6 @@ namespace ezw {
                              (int)err);
                 throw std::runtime_error("Initial reading from right motor failed");
             }
-
-            // Set m_max_motor_speed_rpm from wheel_sls and motor_reduction
-            m_max_motor_speed_rpm = static_cast<int32_t>(max_wheel_speed_rpm * m_l_motor_reduction);
-            m_motor_sls_rpm = static_cast<int32_t>(max_sls_wheel_speed_rpm * m_l_motor_reduction);
-
-            RCLCPP_INFO(get_logger(),
-                        "Got parameter 'wheel_max_speed_rpm' = %f rpm. "
-                        "Setting maximum motor speed to %d rpm",
-                        max_wheel_speed_rpm, m_max_motor_speed_rpm);
-
-            RCLCPP_INFO(get_logger(),
-                        "Got parameter 'wheel_safety_limited_speed_rpm' = %f rpm. "
-                        "Setting maximum motor safety limited speed to %d rpm",
-                        max_sls_wheel_speed_rpm, m_motor_sls_rpm);
 
             m_timer_watchdog = create_wall_timer(std::chrono::milliseconds(m_params->getWatchdogReceiveMs()), std::bind(&DiffDriveController::cbWatchdog, this));
 
@@ -473,16 +439,16 @@ namespace ezw {
             int32_t speed_limit = -1;
 
             // Limit to the maximum allowed speed
-            if (faster_wheel_speed > m_max_motor_speed_rpm) {
-                speed_limit = m_max_motor_speed_rpm;
+            if (faster_wheel_speed > m_params->getMaxSpeedRpm()) {
+                speed_limit = m_params->getMaxSpeedRpm();
             }
 
             // Impose the safety limited speed (SLS) in backward movement when the robot doesn't have backward SLS signal.
             // For example, if it has only one forward-facing safety LiDAR, when the robot move backwards, there's no
             // safety guarantees, hence speed is limited to SLS, otherwise, the safety limit will be decided by the
             // presence of the SLS signal.
-            if (!m_params->getHaveBackwardSls() && (left_speed < 0) && (right_speed < 0) && (faster_wheel_speed > m_motor_sls_rpm)) {
-                speed_limit = m_motor_sls_rpm;
+            if (!m_params->getHaveBackwardSls() && (left_speed < 0) && (right_speed < 0) && (faster_wheel_speed > m_params->getMaxSlsSpeedRpm())) {
+                speed_limit = m_params->getMaxSlsSpeedRpm();
             }
 
             m_safety_msg_mtx.lock();
@@ -490,8 +456,8 @@ namespace ezw {
             m_safety_msg_mtx.unlock();
 
             // If SLS detected, impose the safety limited speed (SLS)
-            if (sls_signal && (faster_wheel_speed > m_motor_sls_rpm)) {
-                speed_limit = m_motor_sls_rpm;
+            if (sls_signal && (faster_wheel_speed > m_params->getMaxSlsSpeedRpm())) {
+                speed_limit = m_params->getMaxSlsSpeedRpm();
             }
 
             // The left and right wheels may have different speeds.

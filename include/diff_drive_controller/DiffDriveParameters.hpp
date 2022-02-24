@@ -12,8 +12,8 @@
 #include "rclcpp/rclcpp.hpp"
 
 constexpr auto DEFAULT_PUB_FREQ_HZ = 50;
-constexpr auto DEFAULT_MAX_WHEEL_SPEED_RPM = 75.0;  // 75 rpm Wheel => Motor (75 * 14 = 1050 rpm)
-constexpr auto DEFAULT_MAX_SLS_WHEEL_RPM = 30.0;    // 30 rpm Wheel => Motor (30 * 14 = 490 rpm)
+constexpr auto DEFAULT_MAX_SPEED_RPM = 1050;
+constexpr auto DEFAULT_MAX_SLS_RPM = 490;
 constexpr auto DEFAULT_WATCHDOG_MS = 1000;
 constexpr auto DEFAULT_ODOM_FRAME = "odom";
 constexpr auto DEFAULT_BASE_FRAME = "base_link";
@@ -35,7 +35,7 @@ namespace ezw {
         class DiffDriveParameters : public rclcpp::Node {
            public:
             /**
-             * @brief Construct a new Diff Drive Parameters object
+             * @brief Construct a new Diff Drive Parameters
              * 
              * @param p_node_name Node name
              */
@@ -59,8 +59,8 @@ namespace ezw {
                 declare_parameter<bool>("have_backward_sls", DEFAULT_BACKWARD_SLS);
                 declare_parameter<float>("left_encoder_relative_error", DEFAULT_LEFT_RELATIVE_ERROR);
                 declare_parameter<float>("right_encoder_relative_error", DEFAULT_RIGHT_RELATIVE_ERROR);
-                declare_parameter<float>("wheel_max_speed_rpm", DEFAULT_MAX_WHEEL_SPEED_RPM);
-                declare_parameter<float>("wheel_safety_limited_speed_rpm", DEFAULT_MAX_SLS_WHEEL_RPM);
+                declare_parameter<int>("max_speed_rpm", DEFAULT_MAX_SPEED_RPM);
+                declare_parameter<int>("safety_limited_speed_rpm", DEFAULT_MAX_SLS_RPM);
                 declare_parameter<std::string>("positive_polarity_wheel", DEFAULT_POSITIVE_POLARITY_WHEEL);
 
                 // Read all parameters
@@ -166,18 +166,34 @@ namespace ezw {
                     RCLCPP_INFO(get_logger(), "Right encoder relative error : %f", m_right_encoder_relative_error);
                 }
 
-                // Max wheel speed rpm
-                auto l_max_wheel_speed_rpm = max_wheel_speed_rpm;
-                get_parameter("wheel_max_speed_rpm", max_wheel_speed_rpm);
-                if (max_wheel_speed_rpm != l_max_wheel_speed_rpm) {
-                    RCLCPP_INFO(get_logger(), "Max wheel speed RPM: %f", max_wheel_speed_rpm);
+                // Max speed rpm
+                auto l_max_speed_rpm = max_speed_rpm;
+                get_parameter("max_speed_rpm", max_speed_rpm);
+                if (max_speed_rpm != l_max_speed_rpm) {
+                    RCLCPP_INFO(get_logger(), "Max speed RPM: %d", max_speed_rpm);
                 }
 
-                // Max wheel speed rpm when SLS enabled
-                auto l_max_sls_wheel_speed_rpm = max_sls_wheel_speed_rpm;
-                get_parameter("wheel_safety_limited_speed_rpm", max_sls_wheel_speed_rpm);
-                if (max_sls_wheel_speed_rpm != l_max_sls_wheel_speed_rpm) {
-                    RCLCPP_INFO(get_logger(), "Max wheel SLS speed RPM: %f", max_sls_wheel_speed_rpm);
+                if (max_speed_rpm < 0.) {
+                    max_speed_rpm = DEFAULT_MAX_SPEED_RPM;
+                    RCLCPP_WARN(get_logger(),
+                                "Invalid value %d for parameter 'max_speed_rpm', it should be a positive value. "
+                                "Falling back to default (%d)",
+                                max_speed_rpm, DEFAULT_MAX_SPEED_RPM);
+                }
+
+                // Max speed rpm when SLS enabled
+                auto l_max_sls_speed_rpm = max_sls_speed_rpm;
+                get_parameter("safety_limited_speed_rpm", max_sls_speed_rpm);
+                if (max_sls_speed_rpm != l_max_sls_speed_rpm) {
+                    RCLCPP_INFO(get_logger(), "Max SLS speed RPM: %d", max_sls_speed_rpm);
+                }
+
+                if (max_sls_speed_rpm < 0.) {
+                    max_sls_speed_rpm = DEFAULT_MAX_SLS_RPM;
+                    RCLCPP_WARN(get_logger(),
+                                "Invalid value %d for parameter 'safety_limited_speed_rpm', it should be a positive value. "
+                                "Falling back to default (%d)",
+                                max_sls_speed_rpm, DEFAULT_MAX_SLS_RPM);
                 }
 
                 // Positive polarity wheel
@@ -190,7 +206,7 @@ namespace ezw {
 
             //Getters
             /**
-             * @brief Get the Baseline object (m)
+             * @brief Get the Baseline (m)
              * 
              * @return double 
              */
@@ -201,7 +217,7 @@ namespace ezw {
             }
 
             /**
-             * @brief Get the Left Config File object
+             * @brief Get the Left Config File
              * 
              * @return std::string 
              */
@@ -212,7 +228,7 @@ namespace ezw {
             }
 
             /**
-             * @brief Get the Right Config File object
+             * @brief Get the Right Config File
              * 
              * @return std::string 
              */
@@ -223,7 +239,7 @@ namespace ezw {
             }
 
             /**
-             * @brief Get the Pub Freq object (Hz)
+             * @brief Get the Pub Freq (Hz)
              * 
              * @return int 
              */
@@ -234,7 +250,7 @@ namespace ezw {
             }
 
             /**
-             * @brief Get the Watchdog Receive object (ms)
+             * @brief Get the Watchdog Receive (ms)
              * 
              * @return int 
              */
@@ -245,7 +261,7 @@ namespace ezw {
             }
 
             /**
-             * @brief Get the Base Frame object
+             * @brief Get the Base Frame
              * 
              * @return std::string 
              */
@@ -256,7 +272,7 @@ namespace ezw {
             }
 
             /**
-             * @brief Get the Odom Frame object
+             * @brief Get the Odom Frame
              * 
              * @return std::string 
              */
@@ -267,7 +283,7 @@ namespace ezw {
             }
 
             /**
-             * @brief Get the Publish Odom object
+             * @brief Get the Publish Odom
              * 
              * @return true 
              * @return false 
@@ -279,7 +295,7 @@ namespace ezw {
             }
 
             /**
-             * @brief Get the Publish Tf object
+             * @brief Get the Publish Tf
              * 
              * @return true 
              * @return false 
@@ -291,7 +307,7 @@ namespace ezw {
             }
 
             /**
-             * @brief Get the Publish Safety object
+             * @brief Get the Publish Safety
              * 
              * @return true 
              * @return false 
@@ -303,7 +319,7 @@ namespace ezw {
             }
 
             /**
-             * @brief Get the Have Backward Sls object
+             * @brief Get the Have Backward Sls
              * 
              * @return true 
              * @return false 
@@ -315,7 +331,7 @@ namespace ezw {
             }
 
             /**
-             * @brief Get the Left Encoder Relative Error object
+             * @brief Get the Left Encoder Relative Error
              * 
              * @return float 
              */
@@ -326,7 +342,7 @@ namespace ezw {
             }
 
             /**
-             * @brief Get the Right Encoder Relative Error object
+             * @brief Get the Right Encoder Relative Error
              * 
              * @return float 
              */
@@ -337,29 +353,29 @@ namespace ezw {
             }
 
             /**
-             * @brief Get the Max Wheel Speed Rpm object
+             * @brief Get the Max Speed Rpm
              * 
-             * @return double 
+             * @return int 
              */
-            auto getMaxWheelSpeedRpm() const -> double
+            auto getMaxSpeedRpm() const -> int
             {
                 lg_t lock(m_mutex);
-                return max_wheel_speed_rpm;
+                return max_speed_rpm;
             }
 
             /**
-             * @brief Get the Max Sls Wheel Speed Rpm object
+             * @brief Get the Max Sls Speed Rpm
              * 
-             * @return double 
+             * @return int 
              */
-            auto getMaxSlsWheelSpeedRpm() const -> double
+            auto getMaxSlsSpeedRpm() const -> int
             {
                 lg_t lock(m_mutex);
-                return max_sls_wheel_speed_rpm;
+                return max_sls_speed_rpm;
             }
 
             /**
-             * @brief Get the Positive Polarity Wheel object
+             * @brief Get the Positive Polarity Wheel
              * 
              * @return std::string 
              */
@@ -376,7 +392,7 @@ namespace ezw {
             std::string m_base_frame, m_odom_frame;
             bool m_publish_odom, m_publish_tf, m_publish_safety, m_have_backward_sls;
             float m_left_encoder_relative_error, m_right_encoder_relative_error;
-            double max_wheel_speed_rpm, max_sls_wheel_speed_rpm;
+            int max_speed_rpm, max_sls_speed_rpm;
             std::string positive_polarity_wheel;
             mutable std::mutex m_mutex;
         };
