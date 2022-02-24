@@ -102,14 +102,14 @@ This controller drives two ez-Wheel SWD® wheels as a differential-drive robot.
 
 ### Subscribed Topics
 
-- `~cmd_vel` of type **`geometry_msgs::msg::Twist`**: Target linear and angular velocities (when `control_mode:='Twist'`, this is the default).
-- `~set_speed` of type **`geometry_msgs::msg::Point`**: Target speeds in rad/s for left (`Point.x`) and right (`Point.y`) wheels (when `control_mode:='LeftRightSpeeds'`).
-- `~soft_brake` of type **`std_msgs::msg::Bool`**: Activate or release the soft brake, send `false` to release the brake, or `true` to activate it.
+- `/cmd_vel` of type **`geometry_msgs/msg/Twist`**: Target linear and angular velocities.
+- `/set_speed` of type **`geometry_msgs/msg/Point`**: Target speeds in rad/s for left (`Point.x`) and right (`Point.y`) wheels.
+- `/soft_brake` of type **`std_msgs/msg/Bool`**: Activate or release the soft brake, send `false` to release the brake, or `true` to activate it.
 
 ### Published Topics
 
-- `~odom` of type **`nav_msgs::msg::Odometry`**: Odometry message based on wheels encoders, containing the pose and velocity of the robot with their's associated uncertainties. Unless disabled by the `publish_tf` parameter, TFs with the same information are also published.
-- `~safety` of type **`swd_ros2_controllers::msg::SafetyFunctions`**: Safety messages communicated by the wheels via CANOpen, the message includes information about Safe Torque Off (STO), Safety Limited Speed (SLS), Safe Direction Indication (forward/backward) (SDI+/-), and Safe Brake Control (SBC).
+- `/odom` of type **`nav_msgs/msg/Odometry`**: Odometry message based on wheels encoders, containing the pose and velocity of the robot with their's associated uncertainties. Unless disabled by the `publish_tf` parameter, TFs with the same information are also published.
+- `/safety` of type **`swd_ros2_controllers/msg/SafetyFunctions`**: Safety messages communicated by the wheels via CANOpen, the message includes information about Safe Torque Off (STO), Safety Limited Speed (SLS), Safe Direction Indication (forward/backward) (SDI+/-), and Safe Brake Control (SBC).
 
 ## Custom message types
 
