@@ -50,7 +50,7 @@ namespace ezw {
             ezw_error_t err;
 
             if (!m_params->getRightConfigFile().empty()) {
-                /* Config init */
+                /* Config init right motor */
                 auto lConfig = std::make_shared<ezw::smccore::Config>();
                 err = lConfig->load(m_params->getRightConfigFile());
                 if (err != ERROR_NONE) {
@@ -70,6 +70,7 @@ namespace ezw {
 
                 std::string lServiceInstanceName = "commonapi.ezw.smcservice." + lHWEntry;
 
+                /* Check init right motor */
                 err = m_right_controller.init(lConfig->getContextId(), "local", lServiceInstanceName);
                 if (err != ERROR_NONE) {
                     RCLCPP_ERROR(get_logger(),
@@ -94,7 +95,7 @@ namespace ezw {
             }
 
             if (!m_params->getLeftConfigFile().empty()) {
-                /* Config init */
+                /* Config init left motor */
                 auto lConfig = std::make_shared<ezw::smccore::Config>();
                 err = lConfig->load(m_params->getLeftConfigFile());
                 if (err != ERROR_NONE) {
@@ -114,6 +115,7 @@ namespace ezw {
 
                 std::string lServiceInstanceName = "commonapi.ezw.smcservice." + lHWEntry;
 
+                /* Check init left motor */
                 err = m_left_controller.init(lConfig->getContextId(), "local", lServiceInstanceName);
                 if (err != ERROR_NONE) {
                     RCLCPP_ERROR(get_logger(),
@@ -157,7 +159,6 @@ namespace ezw {
             }
 
             m_timer_watchdog = create_wall_timer(std::chrono::milliseconds(m_params->getWatchdogReceiveMs()), std::bind(&DiffDriveController::cbWatchdog, this));
-
             m_timer_pds = create_wall_timer(std::chrono::milliseconds(TIMER_STATE_MACHINE_MS), std::bind(&DiffDriveController::cbTimerStateMachine, this));
 
             if (m_params->getPublishOdom() || m_params->getPublishTf()) {
@@ -169,6 +170,10 @@ namespace ezw {
             RCLCPP_INFO(get_logger(), "ez-Wheel's swd_diff_drive_controller initialized successfully!");
         }  // namespace swd
 
+        /**
+         * @brief Callback for State Machine
+         * 
+         */
         void DiffDriveController::cbTimerStateMachine()
         {
             // NMT state machine
@@ -176,6 +181,43 @@ namespace ezw {
             ezw_error_t err_l, err_r;
 
             pds_state_l = pds_state_r = smccore::IPDSService::PDSState::SWITCH_ON_DISABLED;
+
+            // err_l = m_left_controller.getNMTState(nmt_state_l);
+            // err_r = m_right_controller.getNMTState(nmt_state_r);
+
+            // if (ERROR_NONE != err_l) {
+            //     RCLCPP_ERROR(get_logger(),"Failed to get the NMT state for left motor, EZW_ERR: SMCService : "
+            //               "Controller::getPDSState() return error code : %d",
+            //               (int)err_l);
+            // }
+
+            // if (ERROR_NONE != err_r) {
+            //     RCLCPP_ERROR(get_logger(),"Failed to get the NMT state for right motor, EZW_ERR: SMCService : "
+            //               "Controller::getPDSState() return error code : %d",
+            //               (int)err_r);
+            // }
+
+            // if (smccore::INMTService::NMTState::OPER != nmt_state_l) {
+            //     err_l = m_left_controller.setNMTState(smccore::INMTService::NMTCommand::OPER);
+            // }
+
+            // if (smccore::INMTService::NMTState::OPER != nmt_state_r) {
+            //     err_r = m_right_controller.setNMTState(smccore::INMTService::NMTCommand::OPER);
+            // }
+
+            // if (ERROR_NONE != err_l && smccore::INMTService::NMTState::OPER != nmt_state_l) {
+            //     RCLCPP_ERROR(get_logger(),"Failed to set NMT state for left motor, EZW_ERR: SMCService : "
+            //               "Controller::setNMTState() return error code : %d",
+            //               (int)err_l);
+            // }
+
+            // if (ERROR_NONE != err_r && smccore::INMTService::NMTState::OPER != nmt_state_r) {
+            //     RCLCPP_ERROR(get_logger(),"Failed to set NMT state for right motor, EZW_ERR: SMCService : "
+            //               "Controller::setNMTState() return error code : %d",
+            //               (int)err_r);
+            // }
+
+            // m_nmt_ok = (smccore::INMTService::NMTState::OPER == nmt_state_l) && (smccore::INMTService::NMTState::OPER == nmt_state_r);
 
             m_nmt_ok = true;
             bool sto_signal = true;
