@@ -68,14 +68,14 @@ namespace ezw {
             }
 
             /**
-             * @brief Read all parameters
+             * @brief Read all parameters and update
              * 
              */
             void update()
             {
                 const lg_t lock(m_mutex);
 
-                // Baseline
+                // Baseline, distance between wheels (m)
                 auto l_baseline_m = m_baseline_m;
                 get_parameter("baseline_m", m_baseline_m);
                 if (m_baseline_m != l_baseline_m) {
@@ -188,96 +188,181 @@ namespace ezw {
                 }
             }
 
+            //Getters
+            /**
+             * @brief Get the Baseline object (m)
+             * 
+             * @return double 
+             */
             auto getBaseline() const -> double
             {
                 lg_t lock(m_mutex);
                 return m_baseline_m;
             }
 
+            /**
+             * @brief Get the Left Config File object
+             * 
+             * @return std::string 
+             */
             auto getLeftConfigFile() const -> std::string
             {
                 lg_t lock(m_mutex);
                 return m_left_config_file;
             }
 
+            /**
+             * @brief Get the Right Config File object
+             * 
+             * @return std::string 
+             */
             auto getRightConfigFile() const -> std::string
             {
                 lg_t lock(m_mutex);
                 return m_right_config_file;
             }
 
+            /**
+             * @brief Get the Pub Freq object (Hz)
+             * 
+             * @return int 
+             */
             auto getPubFreqHz() const -> int
             {
                 lg_t lock(m_mutex);
                 return m_pub_freq_hz;
             }
 
+            /**
+             * @brief Get the Watchdog Receive object (ms)
+             * 
+             * @return int 
+             */
             auto getWatchdogReceiveMs() const -> int
             {
                 lg_t lock(m_mutex);
                 return m_watchdog_receive_ms;
             }
 
+            /**
+             * @brief Get the Base Frame object
+             * 
+             * @return std::string 
+             */
             auto getBaseFrame() const -> std::string
             {
                 lg_t lock(m_mutex);
                 return m_base_frame;
             }
 
+            /**
+             * @brief Get the Odom Frame object
+             * 
+             * @return std::string 
+             */
             auto getOdomFrame() const -> std::string
             {
                 lg_t lock(m_mutex);
                 return m_odom_frame;
             }
 
+            /**
+             * @brief Get the Publish Odom object
+             * 
+             * @return true 
+             * @return false 
+             */
             auto getPublishOdom() const -> bool
             {
                 lg_t lock(m_mutex);
                 return m_publish_odom;
             }
 
+            /**
+             * @brief Get the Publish Tf object
+             * 
+             * @return true 
+             * @return false 
+             */
             auto getPublishTf() const -> bool
             {
                 lg_t lock(m_mutex);
                 return m_publish_tf;
             }
 
+            /**
+             * @brief Get the Publish Safety object
+             * 
+             * @return true 
+             * @return false 
+             */
             auto getPublishSafety() const -> bool
             {
                 lg_t lock(m_mutex);
                 return m_publish_safety;
             }
 
+            /**
+             * @brief Get the Have Backward Sls object
+             * 
+             * @return true 
+             * @return false 
+             */
             auto getHaveBackwardSls() const -> bool
             {
                 lg_t lock(m_mutex);
                 return m_have_backward_sls;
             }
 
+            /**
+             * @brief Get the Left Encoder Relative Error object
+             * 
+             * @return float 
+             */
             auto getLeftEncoderRelativeError() const -> float
             {
                 lg_t lock(m_mutex);
                 return m_left_encoder_relative_error;
             }
 
+            /**
+             * @brief Get the Right Encoder Relative Error object
+             * 
+             * @return float 
+             */
             auto getRightEncoderRelativeError() const -> float
             {
                 lg_t lock(m_mutex);
                 return m_right_encoder_relative_error;
             }
 
+            /**
+             * @brief Get the Max Wheel Speed Rpm object
+             * 
+             * @return double 
+             */
             auto getMaxWheelSpeedRpm() const -> double
             {
                 lg_t lock(m_mutex);
                 return max_wheel_speed_rpm;
             }
 
+            /**
+             * @brief Get the Max Sls Wheel Speed Rpm object
+             * 
+             * @return double 
+             */
             auto getMaxSlsWheelSpeedRpm() const -> double
             {
                 lg_t lock(m_mutex);
                 return max_sls_wheel_speed_rpm;
             }
 
+            /**
+             * @brief Get the Positive Polarity Wheel object
+             * 
+             * @return std::string 
+             */
             auto getPositivePolarityWheel() const -> std::string
             {
                 lg_t lock(m_mutex);
