@@ -32,17 +32,21 @@ namespace ezw::swd {
     using namespace std::chrono_literals;
     using lg_t = std::lock_guard<std::mutex>;
 
+    /**
+     * @brief This class provides the parameters of the swd_diff_drive_controller node.
+     * 
+     */
     class DiffDriveParameters : public rclcpp::Node {
        public:
         /**
-         * @brief Construct a new Diff Drive Parameters
+         * @brief Construct a new Diff Drive Parameters object
          * 
          * @param p_node_name Node name
          */
         explicit DiffDriveParameters(const std::string &p_node_name);
 
         /**
-         * @brief Read all parameters and update
+         * @brief Read and update all parameters
          * 
          */
         void update();
@@ -99,7 +103,7 @@ namespace ezw::swd {
         /**
          * @brief Get the Publish Odom
          * 
-         * @return true 
+         * @return true if publish enabled
          * @return false 
          */
         auto getPublishOdom() const -> bool;
@@ -107,7 +111,7 @@ namespace ezw::swd {
         /**
          * @brief Get the Publish Tf
          * 
-         * @return true 
+         * @return true if publish enabled
          * @return false 
          */
         auto getPublishTf() const -> bool;
@@ -115,15 +119,15 @@ namespace ezw::swd {
         /**
          * @brief Get the Publish Safety
          * 
-         * @return true 
+         * @return true if publish enabled
          * @return false 
          */
         auto getPublishSafety() const -> bool;
 
         /**
-         * @brief Get the Have Backward Sls
+         * @brief Get the Have Backward SLS
          * 
-         * @return true 
+         * @return true if a backward SLS is handled by a LIDAR sensor
          * @return false 
          */
         auto getHaveBackwardSls() const -> bool;
@@ -150,7 +154,7 @@ namespace ezw::swd {
         auto getMaxSpeedRpm() const -> int;
 
         /**
-         * @brief Get the Max Sls Speed Rpm
+         * @brief Get the Max SLS Speed Rpm
          * 
          * @return int 
          */

@@ -32,74 +32,111 @@
 #define M_SIGN(a) ((a) > 0 ? 1 : -1)
 #define M_BOUND_ANGLE(a) (((a) > M_PI) ? ((a)-2. * M_PI) : (((a) < -M_PI) ? ((a) + 2. * M_PI) : (a)))
 
-namespace ezw {
-    namespace swd {
+namespace ezw::swd {
+
+    /**
+         * @brief Differential Drive Controller for ez-Wheel Safety Wheel Drive.
+         * It subscribes to the `/set_speed` or `/cmd_vel` or `/soft_brake` topics:
+         * - `/set_speed` of type `geometry_msgs::msg::Point`: the `x` and `y` represent respectively the left and right motor speed in (rad/s)
+         * - `/cmd_vel` of type `geometry_msgs::msg::Twist`: The linear and angular velocities
+         * - `/soft_brake` of type `std_msgs::msg::Bool`: To active or release the soft brake.
+         * It publishes :
+         * - the odometry to `/odom`, type `nav_msgs::msg::Odometry` and the associated TFs
+         * - the safety functions to `/safety`, type `swd_ros2_controllers::msg::SafetyFunctions`.
+        **/
+    class DiffDriveController : public rclcpp::Node {
+       public:
+        /**
+         * @brief Construct a new Diff Drive Controller object
+         * 
+         * @param p_node_name Node name
+         * @param p_params Node parameters
+         */
+        explicit DiffDriveController(const std::string &p_node_name, const std::shared_ptr<const DiffDriveParameters> p_params);
+
+       private:
+        /**
+         * @brief Callback for State Machine timer
+         * 
+         */
+        void cbTimerStateMachine();
 
         /**
-         * @brief Differential Drive Controller for ez-Wheel Gen2 wheels
-         * It subscribes to the `/node/set_speed` or `/node/cmd_vel` or `/node/soft_brake` topics:
-         * - `/node/set_speed` of type `geometry_msgs::msg::Point`: The `x`, `y`
-         *   components of the `/set_speed` message
-         *   represents respectively the left and right motor speed in (rad/s)
-         * - `/node/cmd_vel` of type `geometry_msgs::msg::Twist`: The linear and angular
-         *   velocities
-         * - `/node/soft_brake` of type `std_msgs::msg::Bool`: To active or release the brake.
-         * The controller publishes :
-         * - the odometry to `/node/odom`, type `nav_msgs::msg::Odometry`
-         * - TFs, the safety functions to `/node/safety`, type `swd_ros2_controllers::msg::SafetyFunctions`.
-        **/
-        class DiffDriveController : public rclcpp::Node {
-           public:
-            /**
-             * @brief Construct a new Diff Drive Controller object
-             * 
-             * @param p_node_name Node name
-             * @param p_params  
-             */
-            explicit DiffDriveController(const std::string &p_node_name, const std::shared_ptr<const DiffDriveParameters> p_params);
+         * @brief Callback for SoftBrake
+         * 
+         */
+        void cbSoftBrake(const std_msgs::msg::Bool &p_msg);
 
-           private:
-            // Publishers
-            rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr m_pub_odom;
-            rclcpp::Publisher<swd_ros2_controllers::msg::SafetyFunctions>::SharedPtr m_pub_safety;
-            // Subscribers
-            rclcpp::Subscription<geometry_msgs::msg::Point>::SharedPtr m_sub_command_set_speed;
-            rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr m_sub_command_cmd_vel;
-            rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr m_sub_brake;
+        /**
+         * @brief Callback for Odom timer
+         * 
+         */
+        void cbTimerOdom();
 
-            // TF broadcaster
-            std::shared_ptr<tf2_ros::TransformBroadcaster> m_tf2_br;
+        /**
+         * @brief Change wheel speed (msg.x = left wheel, msg.y = right wheel) [rad/s]
+         * 
+         * @param p_speed 
+         */
+        void cbSetSpeed(const geometry_msgs::msg::Point &p_speed);
 
-            // Callbacks
-            void cbCmdVel(geometry_msgs::msg::Twist::SharedPtr p_cmd_vel);
-            void cbTimerOdom(), cbWatchdog(), cbTimerStateMachine(), cbTimerSafety();
-            void cbSoftBrake(const std_msgs::msg::Bool &p_msg);
-            void cbSetSpeed(const geometry_msgs::msg::Point &p_speed);
+        /**
+         * @brief Change robot velocity (linear [m/s], angular [rad/s])
+         * 
+         * @param p_cmd_vel 
+         */
+        void cbCmdVel(geometry_msgs::msg::Twist::SharedPtr p_cmd_vel);
 
-            // Change wheels speed
-            void setSpeeds(int32_t p_left_speed, int32_t p_right_speed);
+        /**
+         * @brief Change robot velocity (left in rpm, right in rpm)
+         * 
+         * @param left_speed 
+         * @param right_speed 
+         */
+        void setSpeeds(int32_t p_left_speed, int32_t p_right_speed);
 
-            // Timers
-            rclcpp::TimerBase::SharedPtr m_timer_odom, m_timer_watchdog, m_timer_pds, m_timer_safety;
+        /**
+         * @brief Callback for Safety timer
+         * 
+         */
+        void cbTimerSafety();
 
-            // Mutex
-            std::mutex m_safety_msg_mtx;
+        /**
+         * @brief A safety callback which gets activated if no control message
+         * have been received since `control_timeout_ms`
+         * 
+         */
+        void cbTimerWatchdogReceive();
 
-            // Ezw message : SafetyFunctions
-            swd_ros2_controllers::msg::SafetyFunctions m_safety_msg;
+        // Publishers
+        rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr m_pub_odom;
+        rclcpp::Publisher<swd_ros2_controllers::msg::SafetyFunctions>::SharedPtr m_pub_safety;
+        // Subscribers
+        rclcpp::Subscription<geometry_msgs::msg::Point>::SharedPtr m_sub_command_set_speed;
+        rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr m_sub_command_cmd_vel;
+        rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr m_sub_brake;
 
-            // DiffDriveParameters object
-            const std::shared_ptr<const DiffDriveParameters> m_params;
+        // TF broadcaster
+        std::shared_ptr<tf2_ros::TransformBroadcaster> m_tf2_br;
 
-            // Params
-            double m_x_prev = 0.0, m_y_prev = 0.0, m_theta_prev = 0.0;
-            double m_x_prev_err = 0.0, m_y_prev_err = 0.0, m_theta_prev_err = 0.0;
-            int32_t m_dist_left_prev_mm = 0, m_dist_right_prev_mm = 0;
-            double m_left_wheel_diameter_m, m_right_wheel_diameter_m, m_l_motor_reduction, m_r_motor_reduction, m_left_encoder_relative_error, m_right_encoder_relative_error;
-            int m_left_wheel_polarity, m_max_motor_speed_rpm, m_motor_sls_rpm;
-            bool m_nmt_ok, m_pds_ok;
-            ezw::smcservice::DBusClient m_left_controller, m_right_controller;
-        };
+        // Timers
+        rclcpp::TimerBase::SharedPtr m_timer_odom, m_timer_watchdog, m_timer_pds, m_timer_safety;
 
-    }  // namespace swd
-}  // namespace ezw
+        // Mutex for the SafetyFunctions message
+        std::mutex m_safety_msg_mtx;
+
+        // SafetyFunctions message
+        swd_ros2_controllers::msg::SafetyFunctions m_safety_msg;
+
+        // Node parameters
+        const std::shared_ptr<const DiffDriveParameters> m_params;
+
+        double m_x_prev = 0.0, m_y_prev = 0.0, m_theta_prev = 0.0;
+        double m_x_prev_err = 0.0, m_y_prev_err = 0.0, m_theta_prev_err = 0.0;
+        int32_t m_dist_left_prev_mm = 0, m_dist_right_prev_mm = 0;
+        double m_left_wheel_diameter_m, m_right_wheel_diameter_m, m_l_motor_reduction, m_r_motor_reduction, m_left_encoder_relative_error, m_right_encoder_relative_error;
+        int m_left_wheel_polarity, m_max_motor_speed_rpm, m_motor_sls_rpm;
+        bool m_nmt_ok, m_pds_ok;
+        ezw::smcservice::DBusClient m_left_controller, m_right_controller;
+    };
+}  // namespace ezw::swd
