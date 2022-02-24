@@ -593,156 +593,137 @@ namespace ezw {
             ezw_error_t err;
             bool res_l, res_r;
 
-#if USE_SAFETY_CONTROL_WORD
-            ezw::smccore::ISafeMotionService::SafetyWordType res;
-
-            err = m_left_controller.getSafetyControlWord(ezw::smccore::ISafeMotionService::SafetyControlWordId::SAFEIN_1, res);
-
-            msg.safe_torque_off = res.safety_function_2 && res.safety_function_3;
-            // TODO: Add an equivalent value for msg.safe_direction_indication_backward
-            msg.safe_direction_indication_forward = res.safety_function_2 && res.safety_function_3;
-            msg.safety_limited_speed = res.safety_function_4 && res.safety_function_5;
-
-#if VERBOSE_OUTPUT
-            RCLCPP_INFO(get_logger(), "STO: %d, SDI+: %d, SDI-: %d, SLS: %d", msg.safe_torque_off, msg.safe_direction_indication_forward, msg.safe_direction_indication_backward, msg.safety_limited_speed);
-#endif
-
-            if (m_params->getPublishSafety()) {
-                m_pub_safety.publish(msg);
+            if (!m_nmt_ok) {
+                RCLCPP_WARN(get_logger(), "NMT state machine is not OK, no valid SafetyFunctions message to publish");
+                return;
             }
-#else
-            if (m_nmt_ok) {
-                msg.header.stamp = rclcpp::Node::now();
-                msg.header.frame_id = m_params->getBaseFrame();
 
-                // Reading SBC
-                err = m_left_controller.getSafetyFunctionCommand(ezw::smccore::ISafeMotionService::SafetyFunctionId::SBC_1, res_l);
-                if (ERROR_NONE != err) {
-                    RCLCPP_ERROR(get_logger(),
-                                 "Error reading SBC from left motor, EZW_ERR: SMCService : "
-                                 "Controller::getSafetyFunctionCommand() return error code : %d",
-                                 (int)err);
-                }
+            msg.header.stamp = rclcpp::Node::now();
+            msg.header.frame_id = m_params->getBaseFrame();
 
-                err = m_right_controller.getSafetyFunctionCommand(ezw::smccore::ISafeMotionService::SafetyFunctionId::SBC_1, res_r);
-                if (ERROR_NONE != err) {
-                    RCLCPP_ERROR(get_logger(),
-                                 "Error reading SBC from right motor, EZW_ERR: SMCService : "
-                                 "Controller::getSafetyFunctionCommand() return error code : %d",
-                                 (int)err);
-                }
+            // Reading SBC
+            err = m_left_controller.getSafetyFunctionCommand(ezw::smccore::ISafeMotionService::SafetyFunctionId::SBC_1, res_l);
+            if (ERROR_NONE != err) {
+                RCLCPP_ERROR(get_logger(),
+                             "Error reading SBC from left motor, EZW_ERR: SMCService : "
+                             "Controller::getSafetyFunctionCommand() return error code : %d",
+                             (int)err);
+            }
 
-                msg.safe_brake_control = !(res_l || res_r);
+            err = m_right_controller.getSafetyFunctionCommand(ezw::smccore::ISafeMotionService::SafetyFunctionId::SBC_1, res_r);
+            if (ERROR_NONE != err) {
+                RCLCPP_ERROR(get_logger(),
+                             "Error reading SBC from right motor, EZW_ERR: SMCService : "
+                             "Controller::getSafetyFunctionCommand() return error code : %d",
+                             (int)err);
+            }
 
-                if (res_l != res_r) {
-                    RCLCPP_ERROR(get_logger(), "Inconsistant SBC for left and right motors, left=%d, right=%d.", res_l, res_r);
-                }
+            msg.safe_brake_control = !(res_l || res_r);
 
-                // Reading STO
-                err = m_left_controller.getSafetyFunctionCommand(ezw::smccore::ISafeMotionService::SafetyFunctionId::STO, res_l);
-                if (ERROR_NONE != err) {
-                    RCLCPP_ERROR(get_logger(),
-                                 "Error reading STO from left motor, EZW_ERR: SMCService : "
-                                 "Controller::getSafetyFunctionCommand() return error code : %d",
-                                 (int)err);
-                }
+            if (res_l != res_r) {
+                RCLCPP_ERROR(get_logger(), "Inconsistant SBC for left and right motors, left=%d, right=%d.", res_l, res_r);
+            }
 
-                err = m_right_controller.getSafetyFunctionCommand(ezw::smccore::ISafeMotionService::SafetyFunctionId::STO, res_r);
-                if (ERROR_NONE != err) {
-                    RCLCPP_ERROR(get_logger(),
-                                 "Error reading STO from right motor, EZW_ERR: SMCService : "
-                                 "Controller::getSafetyFunctionCommand() return error code : %d",
-                                 (int)err);
-                }
+            // Reading STO
+            err = m_left_controller.getSafetyFunctionCommand(ezw::smccore::ISafeMotionService::SafetyFunctionId::STO, res_l);
+            if (ERROR_NONE != err) {
+                RCLCPP_ERROR(get_logger(),
+                             "Error reading STO from left motor, EZW_ERR: SMCService : "
+                             "Controller::getSafetyFunctionCommand() return error code : %d",
+                             (int)err);
+            }
 
-                msg.safe_torque_off = !(res_l || res_r);
+            err = m_right_controller.getSafetyFunctionCommand(ezw::smccore::ISafeMotionService::SafetyFunctionId::STO, res_r);
+            if (ERROR_NONE != err) {
+                RCLCPP_ERROR(get_logger(),
+                             "Error reading STO from right motor, EZW_ERR: SMCService : "
+                             "Controller::getSafetyFunctionCommand() return error code : %d",
+                             (int)err);
+            }
 
-                if (res_l != res_r) {
-                    RCLCPP_ERROR(get_logger(), "Inconsistant STO for left and right motors, left=%d, right=%d.", res_l, res_r);
-                }
+            msg.safe_torque_off = !(res_l || res_r);
 
-                // Reading SDI
-                bool sdi_l_p, sdi_l_n, sdi_r_p, sdi_r_n, sdi_p, sdi_n;
+            if (res_l != res_r) {
+                RCLCPP_ERROR(get_logger(), "Inconsistant STO for left and right motors, left=%d, right=%d.", res_l, res_r);
+            }
 
-                err = m_left_controller.getSafetyFunctionCommand(ezw::smccore::ISafeMotionService::SafetyFunctionId::SDIP_1, sdi_l_p);
-                if (ERROR_NONE != err) {
-                    RCLCPP_ERROR(get_logger(),
-                                 "Error reading SDI+ from left motor, EZW_ERR: SMCService : "
-                                 "Controller::getSafetyFunctionCommand() return error code : %d",
-                                 (int)err);
-                }
+            // Reading SDI
+            bool sdi_l_p, sdi_l_n, sdi_r_p, sdi_r_n, sdi_p, sdi_n;
 
-                err = m_left_controller.getSafetyFunctionCommand(ezw::smccore::ISafeMotionService::SafetyFunctionId::SDIN_1, sdi_l_n);
-                if (ERROR_NONE != err) {
-                    RCLCPP_ERROR(get_logger(),
-                                 "Error reading SDI- from left motor, EZW_ERR: SMCService : "
-                                 "Controller::getSafetyFunctionCommand() return error code : %d",
-                                 (int)err);
-                }
+            err = m_left_controller.getSafetyFunctionCommand(ezw::smccore::ISafeMotionService::SafetyFunctionId::SDIP_1, sdi_l_p);
+            if (ERROR_NONE != err) {
+                RCLCPP_ERROR(get_logger(),
+                             "Error reading SDI+ from left motor, EZW_ERR: SMCService : "
+                             "Controller::getSafetyFunctionCommand() return error code : %d",
+                             (int)err);
+            }
 
-                err = m_right_controller.getSafetyFunctionCommand(ezw::smccore::ISafeMotionService::SafetyFunctionId::SDIP_1, sdi_r_p);
-                if (ERROR_NONE != err) {
-                    RCLCPP_ERROR(get_logger(),
-                                 "Error reading SDI+ from right motor, EZW_ERR: SMCService : "
-                                 "Controller::getSafetyFunctionCommand() return error code : %d",
-                                 (int)err);
-                }
+            err = m_left_controller.getSafetyFunctionCommand(ezw::smccore::ISafeMotionService::SafetyFunctionId::SDIN_1, sdi_l_n);
+            if (ERROR_NONE != err) {
+                RCLCPP_ERROR(get_logger(),
+                             "Error reading SDI- from left motor, EZW_ERR: SMCService : "
+                             "Controller::getSafetyFunctionCommand() return error code : %d",
+                             (int)err);
+            }
 
-                err = m_right_controller.getSafetyFunctionCommand(ezw::smccore::ISafeMotionService::SafetyFunctionId::SDIN_1, sdi_r_n);
-                if (ERROR_NONE != err) {
-                    RCLCPP_ERROR(get_logger(),
-                                 "Error reading SDI- from right motor, EZW_ERR: SMCService : "
-                                 "Controller::getSafetyFunctionCommand() return error code : %d",
-                                 (int)err);
-                }
+            err = m_right_controller.getSafetyFunctionCommand(ezw::smccore::ISafeMotionService::SafetyFunctionId::SDIP_1, sdi_r_p);
+            if (ERROR_NONE != err) {
+                RCLCPP_ERROR(get_logger(),
+                             "Error reading SDI+ from right motor, EZW_ERR: SMCService : "
+                             "Controller::getSafetyFunctionCommand() return error code : %d",
+                             (int)err);
+            }
 
-                if (m_left_wheel_polarity == 1) {
-                    sdi_p = !(sdi_l_p || sdi_r_n);
-                    sdi_n = !(sdi_l_n || sdi_r_p);
-                }
-                else {
-                    sdi_p = !(sdi_l_n || sdi_r_p);
-                    sdi_n = !(sdi_l_p || sdi_r_n);
-                }
+            err = m_right_controller.getSafetyFunctionCommand(ezw::smccore::ISafeMotionService::SafetyFunctionId::SDIN_1, sdi_r_n);
+            if (ERROR_NONE != err) {
+                RCLCPP_ERROR(get_logger(),
+                             "Error reading SDI- from right motor, EZW_ERR: SMCService : "
+                             "Controller::getSafetyFunctionCommand() return error code : %d",
+                             (int)err);
+            }
 
-                msg.safe_direction_indication_forward = sdi_p;
-                msg.safe_direction_indication_backward = sdi_n;
-
-                // Reading SLS
-                err = m_left_controller.getSafetyFunctionCommand(ezw::smccore::ISafeMotionService::SafetyFunctionId::SLS_1, res_l);
-                if (ERROR_NONE != err) {
-                    RCLCPP_ERROR(get_logger(),
-                                 "Error reading SLS from left motor, EZW_ERR: SMCService : "
-                                 "Controller::getSafetyFunctionCommand() return error code : %d",
-                                 (int)err);
-                }
-
-                err = m_right_controller.getSafetyFunctionCommand(ezw::smccore::ISafeMotionService::SafetyFunctionId::SLS_1, res_r);
-                if (ERROR_NONE != err) {
-                    RCLCPP_ERROR(get_logger(),
-                                 "Error reading SLS from right motor, EZW_ERR: SMCService : "
-                                 "Controller::getSafetyFunctionCommand() return error code : %d",
-                                 (int)err);
-                }
-
-                msg.safety_limited_speed = !(res_r || res_l);
-
-#if VERBOSE_OUTPUT
-                ROS_INFO("STO: %d, SDI+: %d, SDI-: %d, SLS: %d", msg.safe_torque_off, msg.safe_direction_indication_forward, msg.safe_direction_indication_backward, msg.safety_limited_speed);
-#endif
-
-                m_safety_msg_mtx.lock();
-                m_safety_msg = msg;
-                m_safety_msg_mtx.unlock();
-
-                if (m_params->getPublishSafety()) {
-                    m_pub_safety->publish(msg);
-                }
+            if (m_left_wheel_polarity == 1) {
+                sdi_p = !(sdi_l_p || sdi_r_n);
+                sdi_n = !(sdi_l_n || sdi_r_p);
             }
             else {
-                RCLCPP_WARN(get_logger(), "NMT state machine is not OK, no valid SafetyFunctions message to publish");
+                sdi_p = !(sdi_l_n || sdi_r_p);
+                sdi_n = !(sdi_l_p || sdi_r_n);
             }
+
+            msg.safe_direction_indication_forward = sdi_p;
+            msg.safe_direction_indication_backward = sdi_n;
+
+            // Reading SLS
+            err = m_left_controller.getSafetyFunctionCommand(ezw::smccore::ISafeMotionService::SafetyFunctionId::SLS_1, res_l);
+            if (ERROR_NONE != err) {
+                RCLCPP_ERROR(get_logger(),
+                             "Error reading SLS from left motor, EZW_ERR: SMCService : "
+                             "Controller::getSafetyFunctionCommand() return error code : %d",
+                             (int)err);
+            }
+
+            err = m_right_controller.getSafetyFunctionCommand(ezw::smccore::ISafeMotionService::SafetyFunctionId::SLS_1, res_r);
+            if (ERROR_NONE != err) {
+                RCLCPP_ERROR(get_logger(),
+                             "Error reading SLS from right motor, EZW_ERR: SMCService : "
+                             "Controller::getSafetyFunctionCommand() return error code : %d",
+                             (int)err);
+            }
+
+            msg.safety_limited_speed = !(res_r || res_l);
+
+#if VERBOSE_OUTPUT
+            ROS_INFO("STO: %d, SDI+: %d, SDI-: %d, SLS: %d", msg.safe_torque_off, msg.safe_direction_indication_forward, msg.safe_direction_indication_backward, msg.safety_limited_speed);
 #endif
+
+            m_safety_msg_mtx.lock();
+            m_safety_msg = msg;
+            m_safety_msg_mtx.unlock();
+
+            if (m_params->getPublishSafety()) {
+                m_pub_safety->publish(msg);
+            }
         }
 
         /**
