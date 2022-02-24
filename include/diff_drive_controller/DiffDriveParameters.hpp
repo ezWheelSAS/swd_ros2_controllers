@@ -65,6 +65,9 @@ namespace ezw {
 
                 // Read all parameters
                 update();
+
+                // Start a timer to update cyclically parameters
+                m_timer = create_wall_timer(1000ms, std::bind(&DiffDriveParameters::update, this));
             }
 
             /**
@@ -394,6 +397,8 @@ namespace ezw {
             float m_left_encoder_relative_error, m_right_encoder_relative_error;
             int max_speed_rpm, max_sls_speed_rpm;
             std::string positive_polarity_wheel;
+
+            rclcpp::TimerBase::SharedPtr m_timer;
             mutable std::mutex m_mutex;
         };
     }  // namespace swd
