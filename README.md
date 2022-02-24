@@ -57,42 +57,25 @@ mkdir -p ~/ros2_ws/src/
 cd ~/ros2_ws/src/
 git clone https://github.com/ezWheelSAS/swd_ros_controllers.git
 cd ..
-catkin_make install
-source ~/ros_ws/install/setup.bash
+colcon build
+source ~/ros2_ws/install/setup.bash
 ```
 
 ## Usage
 
-The package comes with preconfigured `.launch` files which can be started using the `roslaunch` command:
-- `swd_diff_drive_controller.launch`: sample configuration for the [SWD® Starter Kit](https://www.ez-wheel.com/en/development-kit-for-agv-and-amr) differential drive robot. To use it, run the following command:
+The package comes with preconfigured `.launch` files which can be started using the `ros2 <launch` command:
+- `swd_diff_drive_controller_launch.py`: sample configuration for the [SWD® Starter Kit](https://www.ez-wheel.com/en/development-kit-for-agv-and-amr) differential drive robot. To use it, run the following command:
 
 ```shell
-roslaunch swd_ros_controllers swd_diff_drive_controller.launch
+roslaunch swd_ros2_controllers swd_diff_drive_controller_launch.py
 ```
-
-- `swd_drive_controller.launch`: A sample configuration for a single SWD® based wheel ([SWD® Core wheel](https://www.ez-wheel.com/en/safety-gear-motor) or [SWD® 150](https://www.ez-wheel.com/en/swd-150-safety-wheel-drive). To use it, run the following command:
-
-```shell
-roslaunch swd_ros2_controllers swd_drive_controller.launch
-```
-
 
 You can always use the nodes with the `ros2 run` command, the minimum required parameters are:
 
 - For `swd_ros2_controllers`:
 
 ```shell
-rosrun swd_ros_controllers swd_diff_drive_controller \
-                           _left_swd_config_file:="/path/to/swd_left.ini" \
-                           _right_swd_config_file:="/path/to/swd_right.ini" \
-                           _baseline:=0.485
-```
-
-- For `swd_motor_controller`:
-
-```shell
-rosrun swd_ros_controllers swd_drive_controller \
-                           swd_config_file:="/path/to/swd_config_file.ini"
+ros2 run swd_ros2_controllers swd_diff_drive_controller
 ```
 
 ## The `diff_drive_controller` node
@@ -105,15 +88,15 @@ This controller drives two ez-Wheel SWD® wheels as a differential-drive robot.
 - `right_swd_config_file` of type **`string`**: Path to the `.ini` configuration file of the right motor (mandatory parameter).
 - `baseline_m` of type **`double`**: The distance (in meters) between the 2 wheels (mandatory parameter).
 - `pub_freq_hz` of type **`int`**: Frequency (in Hz) of published odometry and TFs (default `20`).
-- `control_timeout_ms` of type **`int`**: The delay (in milliseconds) before stopping the wheels if no command is received (default `1000`).
+- `command_timeout_ms` of type **`int`**: The delay (in milliseconds) before stopping the wheels if no command is received (default `500`).
 - `base_frame` of type **`string`**: Frame ID for the moving platform, used in odometry and TFs (default `'base_link'`) (see [REP-150](https://www.ros.org/reps/rep-0105.html) for more info).
 - `odom_frame` of type **`string`**: Frame ID for the `odom` fixed frame used in odometry and TFs (default `'odom'`) (see [REP-150](https://www.ros.org/reps/rep-0105.html) for more info).
 - `publish_odom` of type **`bool`**: Publish odometry messages (default `true`).
 - `publish_tf` of type **`bool`**: Publish TF messages (default `true`).
-- `publish_safety_functions` of type **`bool`**: Publish **`swd_ros_controllers::SafetyFunctions`** message (default `true`).
-- `wheel_max_speed_rpm` of type **`double`**: Maximum allowed wheel speed (in RPM), if a target speed of one of the wheels is above this limit, the controller will limit the speed of the two wheels without changing the robot's trajectory (default `95.0`).
-- `wheel_safety_limited_speed_rpm` of type **`double`**: Wheel safety limited speed (SLS) (in RPM), if an SLS signal is detected (from a security LiDAR for example), the wheel will be limited internally to the configured SLS limit, the ROS2 controller uses this value to limit the target speed sent to the motor in the SLS case (default `40.0`).
-- `have_backward_sls` of type **`bool`**: Specifies if the robot have a backward SLS signal, coming for example from a back-facing security LiDAR. If an SLS signal is available for backward movements, set this to `true` to take it into account. Otherwise, set the parameter to `false`, this will limit all backward movements to the selected `wheel_safety_limited_speed_rpm` (default `false`).
+- `publish_safety_functions` of type **`bool`**: Publish **`swd_ros2_controllers::msg::SafetyFunctions`** message (default `true`).
+- `max_speed_rpm` of type **`int`**: Maximum allowed wheel speed (in RPM), if a target speed of one of the wheels is above this limit, the controller will limit the speed of the two wheels without changing the robot's trajectory (default `1050`).
+- `safety_limited_speed_rpm` of type **`int`**: Wheel safety limited speed (SLS) (in RPM), if an SLS signal is detected (from a security LiDAR for example), the wheel will be limited internally to the configured SLS limit, the ROS2 controller uses this value to limit the target speed sent to the motor in the SLS case (default `490`).
+- `have_backward_sls` of type **`bool`**: Specifies if the robot have a backward SLS signal, coming for example from a back-facing security LiDAR. If an SLS signal is available for backward movements, set this to `true` to take it into account. Otherwise, set the parameter to `false`, this will limit all backward movements to the selected `safety_limited_speed_rpm` (default `false`).
 - `positive_polarity_wheel` of type **`string`**: Internal parameter, used to select which wheels is set to a positive polarity (default `'Right'`).
 - `control_mode` of type **`string`**: This parameter selects the control mode of the robot, if `'Twist'` is selected, the node will subscribe to the `~cmd_vel` topic, if `'LeftRightSpeeds'` is selected, the node subscribe to `~set_speed` (default `'Twist'`).
 - `left_encoder_relative_error` of type **`double`**: Relative error for left wheel encoder, used to calculate variances and propagate them to calculate the uncertainties in the odometry message. Each encoder acquisition **`DIFF_LEFT_ENCODER`** is modeled as: **`DIFF_LEFT_ENCODER +/- abs(left_encoder_relative_error * DIFF_LEFT_ENCODER)`** (default `0.2` corresponding to 20% of error).
@@ -121,46 +104,18 @@ This controller drives two ez-Wheel SWD® wheels as a differential-drive robot.
 
 ### Subscribed Topics
 
-- `~cmd_vel` of type **`geometry_msgs::Twist`**: Target linear and angular velocities (when `control_mode:='Twist'`, this is the default).
-- `~set_speed` of type **`geometry_msgs::Point`**: Target speeds in rad/s for left (`Point.x`) and right (`Point.y`) wheels (when `control_mode:='LeftRightSpeeds'`).
-- `~soft_brake` of type **`std_msgs::Bool`**: Activate or release the soft brake, send `false` to release the brake, or `true` to activate it.
+- `~cmd_vel` of type **`geometry_msgs::msg::Twist`**: Target linear and angular velocities (when `control_mode:='Twist'`, this is the default).
+- `~set_speed` of type **`geometry_msgs::msg::Point`**: Target speeds in rad/s for left (`Point.x`) and right (`Point.y`) wheels (when `control_mode:='LeftRightSpeeds'`).
+- `~soft_brake` of type **`std_msgs::msg::Bool`**: Activate or release the soft brake, send `false` to release the brake, or `true` to activate it.
 
 ### Published Topics
 
-- `~odom` of type **`nav_msgs::Odometry`**: Odometry message based on wheels encoders, containing the pose and velocity of the robot with their's associated uncertainties. Unless disabled by the `publish_tf` parameter, TFs with the same information are also published.
-- `~safety` of type **`swd_ros_controllers::SafetyFunctions`**: Safety messages communicated by the wheels via CANOpen, the message includes information about Safe Torque Off (STO), Safety Limited Speed (SLS), Safe Direction Indication (forward/backward) (SDI+/-), and Safe Brake Control (SBC).
-
-## The `swd_drive_controller` node
-
-This controller controlles a single SWD® based wheel.
-
-### Parameters
-
-- `swd_config_file` of type **`string`**: Path to the `.ini` configuration file of the motor (mandatory parameter).
-- `pub_freq_hz` of type **`int`**: Frequency (in Hz) of published joint state (default `50`).
-- `command_timeout_ms` of type **`int`**: The delay (in milliseconds) before stopping the wheels if no command is received (default `500`).
-- `ref_frame` of type **`string`**: The reference frame, a fixed frame used in used in the joint state message (default `'wheel'`).
-- `publish_joint_state` of type **`bool`**: Publish **`sensor_msgs::JointState`** messages (default `true`).
-- `publish_safety_functions` of type **`bool`**: Publish **`swd_ros_controllers::SafetyFunctions`** message (default `true`).
-- `wheel_max_speed_rpm` of type **`double`**: Maximum allowed wheel speed (in RPM), if a target speed of the wheels is above this limit, the controller will limit the speed to this maximum limit (default `75.0`).
-- `wheel_safety_limited_speed_rpm` of type **`double`**: Wheel safety limited speed (SLS) (in RPM), if an SLS signal is detected (from a security LiDAR for example), the wheel will be limited internally to the configured SLS limit, the ROS2 controller uses this value to limit the target speed sent to the motor in the SLS case (default `30.0`).
-- `have_backward_sls` of type **`bool`**: Specifies if the wheel have a backward SLS signal, coming for example from a back-facing security LiDAR. If an SLS signal is available for backward movements, set this to `true` to take it into account. Otherwise, set the parameter to `false`, this will limit all backward movements to the selected `wheel_safety_limited_speed_rpm` (default `false`).
-- `control_mode` of type **`string`**: This parameter selects the control mode of the wheel, if `'Twist'` is selected, the node will subscribe to the `~cmd_vel` topic, if `'Float64'` is selected, the node subscribe to `~set_speed` (default `'Twist'`).
-
-### Subscribed Topics
-
-- `~cmd_vel` of type **`geometry_msgs::Twist`**: Target linear velocity (when `control_mode:='Twist'`, this is the default).
-- `~set_speed` of type **`std_msgs::Float64`**: Target speed in rad/s for the wheel (when `control_mode:='Float64'`).
-- `~soft_brake` of type **`std_msgs::Bool`**: Activate or release the soft brake, send `false` to release the brake, or `true` to activate it.
-
-### Published Topics
-
-- `~wheel_state` of type **`sensor_msgs::JointState`**: Joint state message based on the wheel's encoder, contains the position (in meters) and velocity (in m/s).
-- `~safety` of type **`swd_ros_controllers::SafetyFunctions`**: Safety messages communicated by the wheels via CANOpen, the message includes information about Safe Torque Off (STO), Safety Limited Speed (SLS), Safe Direction Indication (forward/backward) (SDI+/-), and Safe Brake Control (SBC).
+- `~odom` of type **`nav_msgs::msg::Odometry`**: Odometry message based on wheels encoders, containing the pose and velocity of the robot with their's associated uncertainties. Unless disabled by the `publish_tf` parameter, TFs with the same information are also published.
+- `~safety` of type **`swd_ros2_controllers::msg::SafetyFunctions`**: Safety messages communicated by the wheels via CANOpen, the message includes information about Safe Torque Off (STO), Safety Limited Speed (SLS), Safe Direction Indication (forward/backward) (SDI+/-), and Safe Brake Control (SBC).
 
 ## Custom message types
 
-### The `swd_ros_controllers::SafetyFunctions` message
+### The `swd_ros2_controllers::msg::SafetyFunctions` message
 
 This message provides information about CiA 402-4 CANopen safety drive functions.
 True if the safety drive function is enabled.

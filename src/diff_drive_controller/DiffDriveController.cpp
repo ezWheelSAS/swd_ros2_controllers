@@ -288,6 +288,11 @@ namespace ezw {
             }
         }
 
+        /**
+         * @brief Callback for Soft Brake
+         * 
+         * @param msg 
+         */
         void DiffDriveController::cbSoftBrake(const std_msgs::msg::Bool &msg)
         {
             // true => Enable brake
@@ -309,6 +314,10 @@ namespace ezw {
             }
         }
 
+        /**
+         * @brief Callback for Odom
+         * 
+         */
         void DiffDriveController::cbTimerOdom()
         {
             nav_msgs::msg::Odometry msg_odom;
@@ -336,23 +345,23 @@ namespace ezw {
             }
 
             // Encoder difference between t and t-1
-            double d_dist_left = static_cast<double>(left_dist_now_mm - m_dist_left_prev_mm) / 1000.0;
-            double d_dist_right = static_cast<double>(right_dist_now_mm - m_dist_right_prev_mm) / 1000.0;
+            double d_dist_left_m = static_cast<double>(left_dist_now_mm - m_dist_left_prev_mm) / 1000.0;
+            double d_dist_right_m = static_cast<double>(right_dist_now_mm - m_dist_right_prev_mm) / 1000.0;
 
             // Error calculation (standard deviation)
-            double d_dist_left_err = m_left_encoder_relative_error * std::abs(d_dist_left);
-            double d_dist_right_err = m_right_encoder_relative_error * std::abs(d_dist_right);
+            double d_dist_left_err_m = m_left_encoder_relative_error * std::abs(d_dist_left_m);
+            double d_dist_right_err_m = m_right_encoder_relative_error * std::abs(d_dist_right_m);
 
             //std::chrono::system_clock timestamp;
             rclcpp::Time timestamp = rclcpp::Node::now();
 
             // Kinematic model
-            double d_dist_center = (d_dist_left + d_dist_right) / 2.0;
-            double d_theta = (d_dist_right - d_dist_left) / m_params->getBaseline();
+            double d_dist_center = (d_dist_left_m + d_dist_right_m) / 2.0;
+            double d_theta = (d_dist_right_m - d_dist_left_m) / m_params->getBaseline();
 
             // Error propagation (See https://en.wikipedia.org/wiki/Propagation_of_uncertainty#Non-linear_combinations)
-            double d_dist_center_err = std::sqrt(std::pow(d_dist_left_err / 2.0, 2) + std::pow(d_dist_right_err / 2.0, 2));
-            double d_theta_err = std::sqrt(std::pow(d_dist_left_err / m_params->getBaseline(), 2) + std::pow(d_dist_right_err / m_params->getBaseline(), 2));
+            double d_dist_center_err = std::sqrt(std::pow(d_dist_left_err_m / 2.0, 2) + std::pow(d_dist_right_err_m / 2.0, 2));
+            double d_theta_err = std::sqrt(std::pow(d_dist_left_err_m / m_params->getBaseline(), 2) + std::pow(d_dist_right_err_m / m_params->getBaseline(), 2));
 
             // Odometry model, integration of the diff drive kinematic model
             double x_now = m_x_prev + d_dist_center * std::cos(m_theta_prev);
@@ -444,9 +453,11 @@ namespace ezw {
             setSpeeds(left, right);
         }
 
-        //
-        /// \brief Change robot velocity (linear [m/s], angular [rad/s])
-        ///
+        /**
+         * @brief Change robot velocity (linear [m/s], angular [rad/s])
+         * 
+         * @param p_cmd_vel 
+         */
         void DiffDriveController::cbCmdVel(const geometry_msgs::msg::Twist::SharedPtr p_cmd_vel)
         {
             m_timer_watchdog->reset();
@@ -471,9 +482,12 @@ namespace ezw {
             setSpeeds(left, right);
         }
 
-        ///
-        /// \brief Change robot velocity (left in rpm, right in rpm)
-        ///
+        /**
+         * @brief Change robot velocity (left in rpm, right in rpm)
+         * 
+         * @param left_speed 
+         * @param right_speed 
+         */
         void DiffDriveController::setSpeeds(int32_t left_speed, int32_t right_speed)
         {
             // Get the outer wheel speed
@@ -569,6 +583,10 @@ namespace ezw {
 #endif
         }
 
+        /**
+         * @brief Callback for Safety Functions
+         * 
+         */
         void DiffDriveController::cbTimerSafety()
         {
             swd_ros2_controllers::msg::SafetyFunctions msg;
@@ -727,10 +745,11 @@ namespace ezw {
 #endif
         }
 
-        ///
-        /// \brief A safety callback which gets activated if no control message
-        /// have been received since `control_timeout_ms`str.empty()
-        ///
+        /**
+         * @brief A safety callback which gets activated if no control message
+         * have been received since `control_timeout_ms`str.empty()
+         * 
+         */
         void DiffDriveController::cbWatchdog()
         {
             setSpeeds(0, 0);

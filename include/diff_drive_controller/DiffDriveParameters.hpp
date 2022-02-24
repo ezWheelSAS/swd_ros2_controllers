@@ -50,7 +50,7 @@ namespace ezw {
                 declare_parameter<std::string>("left_config_file", DEFAULT_LEFT_CONFIG_FILE);
                 declare_parameter<std::string>("right_config_file", DEFAULT_RIGHT_CONFIG_FILE);
                 declare_parameter<int>("pub_freq_hz", DEFAULT_PUB_FREQ_HZ);
-                declare_parameter<int>("control_timeout_ms", DEFAULT_WATCHDOG_MS);
+                declare_parameter<int>("command_timeout_ms", DEFAULT_WATCHDOG_MS);
                 declare_parameter<std::string>("base_frame", DEFAULT_BASE_FRAME);
                 declare_parameter<std::string>("odom_frame", DEFAULT_ODOM_FRAME);
                 declare_parameter<bool>("publish_odom", DEFAULT_PUBLISH_ODOM);
@@ -108,7 +108,7 @@ namespace ezw {
 
                 // Watchdog receive (ms)
                 auto l_watchdog_receive_ms = m_watchdog_receive_ms;
-                get_parameter("control_timeout_ms", m_watchdog_receive_ms);
+                get_parameter("command_timeout_ms", m_watchdog_receive_ms);
                 if (m_watchdog_receive_ms != l_watchdog_receive_ms) {
                     RCLCPP_INFO(get_logger(), "Watchdog receive (ms): %d", m_watchdog_receive_ms);
                 }
