@@ -11,21 +11,22 @@
 
 #include "rclcpp/rclcpp.hpp"
 
-constexpr auto DEFAULT_PUB_FREQ_HZ = 50;
-constexpr auto DEFAULT_MAX_SPEED_RPM = 1050;
-constexpr auto DEFAULT_MAX_SLS_RPM = 490;
-constexpr auto DEFAULT_WATCHDOG_MS = 1000;
-constexpr auto DEFAULT_ODOM_FRAME = "odom";
+constexpr auto DEFAULT_BASELINE_M = 0.0;
+constexpr auto DEFAULT_LEFT_CONFIG_FILE = "/opt/ezw/usr/etc/ezw-smc-core/swd_left_config.ini";
+constexpr auto DEFAULT_RIGHT_CONFIG_FILE = "/opt/ezw/usr/etc/ezw-smc-core/swd_right_config.ini";
+constexpr auto DEFAULT_PUB_FREQ_HZ = 20;
+constexpr auto DEFAULT_WATCHDOG_RECEIVE_MS = 500;
 constexpr auto DEFAULT_BASE_FRAME = "base_link";
-constexpr auto DEFAULT_POSITIVE_POLARITY_WHEEL = "Right";
+constexpr auto DEFAULT_ODOM_FRAME = "odom";
 constexpr auto DEFAULT_PUBLISH_ODOM = true;
 constexpr auto DEFAULT_PUBLISH_TF = true;
 constexpr auto DEFAULT_PUBLISH_SAFETY_FCNS = true;
-constexpr auto DEFAULT_BACKWARD_SLS = false;
-constexpr auto DEFAULT_LEFT_RELATIVE_ERROR = 0.05;  // 5% of error
-constexpr auto DEFAULT_RIGHT_RELATIVE_ERROR = 0.05;
-constexpr auto DEFAULT_LEFT_CONFIG_FILE = "/opt/ezw/usr/etc/ezw-smc-core/swd_left_config.ini";
-constexpr auto DEFAULT_RIGHT_CONFIG_FILE = "/opt/ezw/usr/etc/ezw-smc-core/swd_right_config.ini";
+constexpr auto DEFAULT_MAX_SPEED_RPM = 1050;
+constexpr auto DEFAULT_MAX_SLS_RPM = 490;
+constexpr auto DEFAULT_HAVE_BACKWARD_SLS = false;
+constexpr auto DEFAULT_POSITIVE_POLARITY_WHEEL = "Right";
+constexpr auto DEFAULT_LEFT_RELATIVE_ERROR = 0.2;   // 20% of error
+constexpr auto DEFAULT_RIGHT_RELATIVE_ERROR = 0.2;  // 20% of error
 
 namespace ezw {
     namespace swd {
@@ -46,22 +47,22 @@ namespace ezw {
                 RCLCPP_INFO(get_logger(), "DiffDriveParameters() is called.");
 
                 // Declare all parameters
-                declare_parameter<double>("baseline_m", 0.0);
+                declare_parameter<double>("baseline_m", DEFAULT_BASELINE_M);
                 declare_parameter<std::string>("left_config_file", DEFAULT_LEFT_CONFIG_FILE);
                 declare_parameter<std::string>("right_config_file", DEFAULT_RIGHT_CONFIG_FILE);
                 declare_parameter<int>("pub_freq_hz", DEFAULT_PUB_FREQ_HZ);
-                declare_parameter<int>("command_timeout_ms", DEFAULT_WATCHDOG_MS);
+                declare_parameter<int>("watchdog_receive_ms", DEFAULT_WATCHDOG_RECEIVE_MS);
                 declare_parameter<std::string>("base_frame", DEFAULT_BASE_FRAME);
                 declare_parameter<std::string>("odom_frame", DEFAULT_ODOM_FRAME);
                 declare_parameter<bool>("publish_odom", DEFAULT_PUBLISH_ODOM);
                 declare_parameter<bool>("publish_tf", DEFAULT_PUBLISH_TF);
                 declare_parameter<bool>("publish_safety_functions", DEFAULT_PUBLISH_SAFETY_FCNS);
-                declare_parameter<bool>("have_backward_sls", DEFAULT_BACKWARD_SLS);
-                declare_parameter<float>("left_encoder_relative_error", DEFAULT_LEFT_RELATIVE_ERROR);
-                declare_parameter<float>("right_encoder_relative_error", DEFAULT_RIGHT_RELATIVE_ERROR);
                 declare_parameter<int>("max_speed_rpm", DEFAULT_MAX_SPEED_RPM);
                 declare_parameter<int>("safety_limited_speed_rpm", DEFAULT_MAX_SLS_RPM);
+                declare_parameter<bool>("have_backward_sls", DEFAULT_HAVE_BACKWARD_SLS);
                 declare_parameter<std::string>("positive_polarity_wheel", DEFAULT_POSITIVE_POLARITY_WHEEL);
+                declare_parameter<float>("left_encoder_relative_error", DEFAULT_LEFT_RELATIVE_ERROR);
+                declare_parameter<float>("right_encoder_relative_error", DEFAULT_RIGHT_RELATIVE_ERROR);
 
                 // Read all parameters
                 update();
@@ -83,6 +84,11 @@ namespace ezw {
                 get_parameter("baseline_m", m_baseline_m);
                 if (m_baseline_m != l_baseline_m) {
                     RCLCPP_INFO(get_logger(), "Baseline : %f", m_baseline_m);
+                }
+
+                if (m_baseline_m <= 0.) {
+                    RCLCPP_WARN(get_logger(), "Invalid value %f for parameter 'baseline_m', it should be a positive value different of zero. ", m_baseline_m);
+                    throw std::runtime_error("Invalid parameter");
                 }
 
                 // Left config file
@@ -108,7 +114,7 @@ namespace ezw {
 
                 // Watchdog receive (ms)
                 auto l_watchdog_receive_ms = m_watchdog_receive_ms;
-                get_parameter("command_timeout_ms", m_watchdog_receive_ms);
+                get_parameter("watchdog_receive_ms", m_watchdog_receive_ms);
                 if (m_watchdog_receive_ms != l_watchdog_receive_ms) {
                     RCLCPP_INFO(get_logger(), "Watchdog receive (ms): %d", m_watchdog_receive_ms);
                 }

@@ -17,23 +17,24 @@ def generate_launch_description():
         package='swd_ros2_controllers',
         executable='swd_diff_drive_controller',
         name='swd_diff_drive_controller',
-        parameters=[{"baseline_m": 0.485},
-                    {"pub_freq_hz": 20},
+        parameters=[
+                    {"baseline_m": 0.485},
                     {"left_swd_config_file": "/opt/ezw/usr/etc/ezw-smc-core/swd_left_config.ini"},
                     {"right_swd_config_file": "/opt/ezw/usr/etc/ezw-smc-core/swd_right_config.ini"},
-                    {"command_timeout_ms": 500},
-                    {"control_mode": "Twist"},
+                    {"pub_freq_hz": 20},
+                    {"watchdog_receive_ms": 500},                    
                     {"base_frame": "base_link"},
                     {"odom_frame": "odom"},
-                    {"positive_polarity_wheel": "Right"},
+                    {"publish_odom": True},
+                    {"publish_tf": True},
+                    {"publish_safety_functions": True},
                     {"max_speed_rpm": 1050},
                     {"safety_limited_speed_rpm": 490},
                     {"have_backward_sls": False},
+                    {"positive_polarity_wheel": "Right"},
                     {"left_encoder_relative_error": 0.2},
                     {"right_encoder_relative_error": 0.2},
-                    {"publish_odom": True},
-                    {"publish_tf": True},
-                    {"publish_safety_functions": True}]
+                    ]
     )
 
     ld.add_action(swd_diff_drive_controller_node)
