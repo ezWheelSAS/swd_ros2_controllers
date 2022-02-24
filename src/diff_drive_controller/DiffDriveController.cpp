@@ -493,14 +493,13 @@ namespace ezw {
             // Get the outer wheel speed
             int32_t faster_wheel_speed = M_MAX(std::abs(left_speed), std::abs(right_speed));
             int32_t speed_limit = -1;
+            bool max_limited = false;
+            bool sls_limited = false;
 
             // Limit to the maximum allowed speed
             if (faster_wheel_speed > m_params->getMaxSpeedRpm()) {
                 speed_limit = m_params->getMaxSpeedRpm();
-                RCLCPP_WARN(get_logger(),
-                            "The target speed exceeds the maximum speed limit (%d rpm). "
-                            "Speed (left, right) (%d, %d) rpm",
-                            speed_limit, left_speed, right_speed);
+                max_limited = true;
             }
 
             // Impose the safety limited speed (SLS) in backward movement when the robot doesn't have backward SLS signal.
@@ -518,10 +517,7 @@ namespace ezw {
             // If SLS detected, impose the safety limited speed (SLS)
             if (sls_signal && (faster_wheel_speed > m_params->getMaxSlsSpeedRpm())) {
                 speed_limit = m_params->getMaxSlsSpeedRpm();
-                RCLCPP_WARN(get_logger(),
-                            "The target speed exceeds the SLS maximum speed limit (%d rpm). "
-                            "Speed (left, right) (%d, %d) rpm",
-                            speed_limit, left_speed, right_speed);
+                sls_limited = true;
             }
 
             // The left and right wheels may have different speeds.
@@ -548,9 +544,24 @@ namespace ezw {
                     right_speed = M_SIGN(right_speed) * speed_limit;
                 }
 
-                RCLCPP_WARN(get_logger(),
-                            "Speed set to (left, right) (%d, %d) rpm",
-                            left_speed, right_speed);
+                if (max_limited && sls_limited) {
+                    RCLCPP_WARN(get_logger(),
+                                "The target speed exceeds the MAX/SLS maximum speed limit (%d rpm). "
+                                "Set speed to (left, right) (%d, %d) rpm",
+                                speed_limit, left_speed, right_speed);
+                }
+                else if (sls_limited) {
+                    RCLCPP_WARN(get_logger(),
+                                "The target speed exceeds the SLS maximum speed limit (%d rpm). "
+                                "Set speed to (left, right) (%d, %d) rpm",
+                                speed_limit, left_speed, right_speed);
+                }
+                else if (max_limited) {
+                    RCLCPP_WARN(get_logger(),
+                                "The target speed exceeds the maximum speed limit (%d rpm). "
+                                "Set speed to (left, right) (%d, %d) rpm",
+                                speed_limit, left_speed, right_speed);
+                }
             }
 
             // If the PDS state is not OPERATION_ENABLED for both wheels, we send a nil speed.
