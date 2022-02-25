@@ -7,6 +7,10 @@
 
 #include "diff_drive_controller/DiffDriveController.hpp"
 
+#include <iomanip>
+#include <sstream>
+#include <string>
+
 #include "ezw-smc-core/Config.hpp"
 #include "tf2/LinearMath/Quaternion.h"
 
@@ -17,6 +21,19 @@ using namespace std::chrono_literals;
 using std::placeholders::_1;
 
 namespace ezw::swd {
+
+    /// Convert integer value `val` to text in hexadecimal format.
+    /// The minimum width is padded with leading zeros; if not
+    /// specified, this `width` is derived from the type of the
+    /// argument. Function suitable from char to long long.
+    template <typename T>
+    inline std::string int_to_hex(T val, size_t width = sizeof(T) * 2)
+    {
+        std::stringstream ss;
+        ss << std::setfill('0') << std::setw(width) << std::hex << (val | 0);
+        return ss.str();
+    }
+
     DiffDriveController::DiffDriveController(const std::string &p_node_name, const std::shared_ptr<const DiffDriveParameters> p_params) : Node(p_node_name),
                                                                                                                                           m_params(p_params)
     {
@@ -170,6 +187,8 @@ namespace ezw::swd {
 
     void DiffDriveController::cbTimerStateMachine()
     {
+        static bool m_first_entry = true;
+
         // NMT state machine
         smccore::INMTService::NMTState nmt_state_l, nmt_state_r;
         smccore::IPDSService::PDSState pds_state_l, pds_state_r;
@@ -194,32 +213,48 @@ namespace ezw::swd {
                          (int)err_r);
         }
 
-        if (smccore::INMTService::NMTState::OPER != nmt_state_l) {
-            err_l = m_left_controller.setNMTState(smccore::INMTService::NMTCommand::OPER);
-        }
-
-        if (smccore::INMTService::NMTState::OPER != nmt_state_r) {
-            err_r = m_right_controller.setNMTState(smccore::INMTService::NMTCommand::OPER);
-        }
-
-        if (ERROR_NONE != err_l && smccore::INMTService::NMTState::OPER != nmt_state_l) {
-            RCLCPP_ERROR(get_logger(),
-                         "Failed to set NMT state for left motor, EZW_ERR: SMCService : "
-                         "Controller::setNMTState() return error code : %d",
-                         (int)err_l);
-        }
-
-        if (ERROR_NONE != err_r && smccore::INMTService::NMTState::OPER != nmt_state_r) {
-            RCLCPP_ERROR(get_logger(),
-                         "Failed to set NMT state for right motor, EZW_ERR: SMCService : "
-                         "Controller::setNMTState() return error code : %d",
-                         (int)err_r);
-        }
-
         bool nmt_ok = (smccore::INMTService::NMTState::OPER == nmt_state_l) && (smccore::INMTService::NMTState::OPER == nmt_state_r);
-        if (m_nmt_ok != nmt_ok) {
+
+        if (m_first_entry || m_nmt_ok != nmt_ok) {
             RCLCPP_WARN(get_logger(), "NMT state machine is %s.", nmt_ok ? "OK" : "not OK");
             m_nmt_ok = nmt_ok;
+        }
+
+        if (!m_nmt_ok) {
+            uint8_t node_id_l, node_id_r;
+            std::string can_device_l, can_device_r;
+
+            err_l = m_left_controller.getConnectedNodeId(node_id_l);
+            if (ERROR_NONE == err_l) {
+                err_l = m_left_controller.getCanDevice(can_device_l);
+            }
+
+            err_r = m_right_controller.getConnectedNodeId(node_id_r);
+            if (ERROR_NONE == err_r) {
+                err_r = m_right_controller.getCanDevice(can_device_r);
+            }
+
+            if (ERROR_NONE != err_l && smccore::INMTService::NMTState::OPER != nmt_state_l) {
+                RCLCPP_ERROR(get_logger(),
+                             "Failed to set NMT state for left motor, EZW_ERR: SMCService : "
+                             "Controller::getConnectedNodeId() return error code : %d",
+                             (int)err_l);
+            }
+            else {
+                std::string cmd = "cansend " + can_device_l + " 000#01" + int_to_hex(node_id_l, 2);
+                system(cmd.c_str());
+            }
+
+            if (ERROR_NONE != err_r && smccore::INMTService::NMTState::OPER != nmt_state_r) {
+                RCLCPP_ERROR(get_logger(),
+                             "Failed to set NMT state for right motor, EZW_ERR: SMCService : "
+                             "Controller::getConnectedNodeId() return error code : %d",
+                             (int)err_r);
+            }
+            else {
+                std::string cmd = "cansend " + can_device_r + " 000#01" + int_to_hex(node_id_r, 2);
+                system(cmd.c_str());
+            }
         }
 
         // If NMT is operational, check the PDS state
@@ -241,10 +276,7 @@ namespace ezw::swd {
                              "Controller::getPDSState() return error code : %d",
                              (int)err_r);
             }
-        }
 
-        // If NMT is operational, check the PDS state
-        if (m_nmt_ok) {
             if (smccore::IPDSService::PDSState::OPERATION_ENABLED != pds_state_l) {
                 err_l = m_left_controller.enterInOperationEnabledState();
             }
@@ -269,10 +301,12 @@ namespace ezw::swd {
         }
 
         bool pds_ok = (smccore::IPDSService::PDSState::OPERATION_ENABLED == pds_state_l) && (smccore::IPDSService::PDSState::OPERATION_ENABLED == pds_state_r);
-        if (m_pds_ok != pds_ok) {
+        if (m_first_entry || m_pds_ok != pds_ok) {
             RCLCPP_WARN(get_logger(), "PDS state machine is %s.", pds_ok ? "OK" : "not OK");
             m_pds_ok = pds_ok;
         }
+
+        m_first_entry = false;
     }
 
     void DiffDriveController::cbSoftBrake(const std_msgs::msg::Bool &msg)
@@ -559,6 +593,8 @@ namespace ezw::swd {
 
     void DiffDriveController::cbTimerSafety()
     {
+        static bool m_first_entry = true;
+
         swd_ros2_controllers::msg::SafetyFunctions msg;
         ezw_error_t err;
         bool res_l, res_r;
@@ -588,7 +624,7 @@ namespace ezw::swd {
         }
 
         msg.safe_brake_control = !(res_l || res_r);
-        if (msg.safe_brake_control != m_safety_msg.safe_brake_control) {
+        if (m_first_entry || msg.safe_brake_control != m_safety_msg.safe_brake_control) {
             RCLCPP_WARN(get_logger(), msg.safe_brake_control ? "SBC enabled." : "SBC disabled.");
         }
 
@@ -614,7 +650,7 @@ namespace ezw::swd {
         }
 
         msg.safe_torque_off = !(res_l || res_r);
-        if (msg.safe_torque_off != m_safety_msg.safe_torque_off) {
+        if (m_first_entry || msg.safe_torque_off != m_safety_msg.safe_torque_off) {
             RCLCPP_WARN(get_logger(), msg.safe_torque_off ? "STO enabled." : "STO disabled.");
         }
 
@@ -669,11 +705,11 @@ namespace ezw::swd {
         msg.safe_direction_indication_forward = sdi_p;
         msg.safe_direction_indication_backward = sdi_n;
 
-        if (msg.safe_direction_indication_forward != m_safety_msg.safe_direction_indication_forward) {
+        if (m_first_entry || msg.safe_direction_indication_forward != m_safety_msg.safe_direction_indication_forward) {
             RCLCPP_WARN(get_logger(), msg.safe_direction_indication_forward ? "SDIp enabled." : "SDIp disabled.");
         }
 
-        if (msg.safe_direction_indication_backward != m_safety_msg.safe_direction_indication_backward) {
+        if (m_first_entry || msg.safe_direction_indication_backward != m_safety_msg.safe_direction_indication_backward) {
             RCLCPP_WARN(get_logger(), msg.safe_direction_indication_backward ? "SDIn enabled." : "SDIn disabled.");
         }
 
@@ -695,7 +731,7 @@ namespace ezw::swd {
         }
 
         msg.safety_limited_speed = !(res_l || res_r);
-        if (msg.safety_limited_speed != m_safety_msg.safety_limited_speed) {
+        if (m_first_entry || msg.safety_limited_speed != m_safety_msg.safety_limited_speed) {
             RCLCPP_WARN(get_logger(), msg.safety_limited_speed ? "SLS enabled." : "SLS disabled.");
         }
 
@@ -710,6 +746,8 @@ namespace ezw::swd {
         if (m_params->getPublishSafety()) {
             m_pub_safety->publish(msg);
         }
+
+        m_first_entry = false;
     }
 
     void DiffDriveController::cbTimerWatchdogReceive()
