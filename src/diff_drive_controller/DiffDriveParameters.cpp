@@ -9,7 +9,7 @@
 
 namespace ezw::swd {
     DiffDriveParameters::DiffDriveParameters(const std::string &p_node_name)
-        : Node(p_node_name)
+        : Node(p_node_name, "/parameters")  // Set namespace to "/parameters" to avoid warning "Publisher already registered for provided node name"
     {
         // Declare all parameters
         {
