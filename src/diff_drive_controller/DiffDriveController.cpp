@@ -37,8 +37,6 @@ namespace ezw::swd {
     DiffDriveController::DiffDriveController(const std::string &p_node_name, const std::shared_ptr<const DiffDriveParameters> p_params) : Node(p_node_name),
                                                                                                                                           m_params(p_params)
     {
-        RCLCPP_INFO(get_logger(), "DiffDriveController() is called.");
-
         m_tf2_br = std::make_shared<tf2_ros::TransformBroadcaster>(this);
 
         // Publishers
@@ -56,8 +54,6 @@ namespace ezw::swd {
         m_sub_command_cmd_vel = create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 5, std::bind(&DiffDriveController::cbCmdVel, this, _1));
 
         // Initialize motors
-        RCLCPP_INFO(get_logger(), "Motors config files, right : %s, left : %s", m_params->getRightConfigFile().c_str(), m_params->getLeftConfigFile().c_str());
-
         ezw_error_t err;
 
         if (m_params->getRightConfigFile().empty()) {
@@ -182,7 +178,7 @@ namespace ezw::swd {
 
         m_timer_safety = create_wall_timer(std::chrono::milliseconds(TIMER_SAFETY_MS), std::bind(&DiffDriveController::cbTimerSafety, this));
 
-        RCLCPP_INFO(get_logger(), "ez-Wheel's swd_diff_drive_controller initialized successfully!");
+        RCLCPP_INFO(get_logger(), "swd_diff_drive_controller initialized successfully!");
     }
 
     void DiffDriveController::cbTimerStateMachine()
@@ -216,7 +212,7 @@ namespace ezw::swd {
         bool nmt_ok = (smccore::INMTService::NMTState::OPER == nmt_state_l) && (smccore::INMTService::NMTState::OPER == nmt_state_r);
 
         if (m_first_entry || m_nmt_ok != nmt_ok) {
-            RCLCPP_WARN(get_logger(), "NMT state machine is %s.", nmt_ok ? "OK" : "not OK");
+            RCLCPP_INFO(get_logger(), "NMT state machine is %s.", nmt_ok ? "OK" : "not OK");
             m_nmt_ok = nmt_ok;
         }
 
@@ -225,37 +221,53 @@ namespace ezw::swd {
             std::string can_device_l, can_device_r;
 
             err_l = m_left_controller.getConnectedNodeId(node_id_l);
-            if (ERROR_NONE == err_l) {
-                err_l = m_left_controller.getCanDevice(can_device_l);
-            }
 
-            err_r = m_right_controller.getConnectedNodeId(node_id_r);
-            if (ERROR_NONE == err_r) {
-                err_r = m_right_controller.getCanDevice(can_device_r);
-            }
-
-            if (ERROR_NONE != err_l && smccore::INMTService::NMTState::OPER != nmt_state_l) {
+            if (ERROR_NONE != err_l) {
                 RCLCPP_ERROR(get_logger(),
                              "Failed to set NMT state for left motor, EZW_ERR: SMCService : "
                              "Controller::getConnectedNodeId() return error code : %d",
                              (int)err_l);
             }
             else {
-                std::string cmd = "cansend " + can_device_l + " 000#01" + int_to_hex(node_id_l, 2);
-                system(cmd.c_str());
+                err_l = m_left_controller.getCanDevice(can_device_l);
+
+                if (ERROR_NONE != err_l) {
+                    RCLCPP_ERROR(get_logger(),
+                                 "Failed to set NMT state for left motor, EZW_ERR: SMCService : "
+                                 "Controller::getCanDevice() return error code : %d",
+                                 (int)err_l);
+                }
+                else {
+                    std::string cmd = "cansend " + can_device_l + " 000#01" + int_to_hex(node_id_l, 2);
+                    system(cmd.c_str());
+                }
             }
 
-            if (ERROR_NONE != err_r && smccore::INMTService::NMTState::OPER != nmt_state_r) {
+            err_r = m_right_controller.getConnectedNodeId(node_id_r);
+
+            if (ERROR_NONE != err_r) {
                 RCLCPP_ERROR(get_logger(),
                              "Failed to set NMT state for right motor, EZW_ERR: SMCService : "
                              "Controller::getConnectedNodeId() return error code : %d",
                              (int)err_r);
             }
             else {
-                std::string cmd = "cansend " + can_device_r + " 000#01" + int_to_hex(node_id_r, 2);
-                system(cmd.c_str());
+                err_r = m_right_controller.getCanDevice(can_device_r);
+
+                if (ERROR_NONE != err_r) {
+                    RCLCPP_ERROR(get_logger(),
+                                 "Failed to set NMT state for right motor, EZW_ERR: SMCService : "
+                                 "Controller::getCanDevice() return error code : %d",
+                                 (int)err_r);
+                }
+                else {
+                    std::string cmd = "cansend " + can_device_r + " 000#01" + int_to_hex(node_id_r, 2);
+                    system(cmd.c_str());
+                }
             }
         }
+
+        bool pds_ok = false;
 
         // If NMT is operational, check the PDS state
         if (m_nmt_ok) {
@@ -277,6 +289,8 @@ namespace ezw::swd {
                              (int)err_r);
             }
 
+            pds_ok = (smccore::IPDSService::PDSState::OPERATION_ENABLED == pds_state_l) && (smccore::IPDSService::PDSState::OPERATION_ENABLED == pds_state_r);
+
             if (smccore::IPDSService::PDSState::OPERATION_ENABLED != pds_state_l) {
                 err_l = m_left_controller.enterInOperationEnabledState();
             }
@@ -284,25 +298,10 @@ namespace ezw::swd {
             if (smccore::IPDSService::PDSState::OPERATION_ENABLED != pds_state_r) {
                 err_r = m_right_controller.enterInOperationEnabledState();
             }
-
-            if (ERROR_NONE != err_l && smccore::IPDSService::PDSState::OPERATION_ENABLED != pds_state_l) {
-                RCLCPP_ERROR(get_logger(),
-                             "Failed to set PDS state for left motor, EZW_ERR: SMCService : "
-                             "Controller::enterInOperationEnabledState() return error code : %d",
-                             (int)err_l);
-            }
-
-            if (ERROR_NONE != err_r && smccore::IPDSService::PDSState::OPERATION_ENABLED != pds_state_r) {
-                RCLCPP_ERROR(get_logger(),
-                             "Failed to set PDS state for right motor, EZW_ERR: SMCService : "
-                             "Controller::enterInOperationEnabledState() return error code : %d",
-                             (int)err_r);
-            }
         }
 
-        bool pds_ok = (smccore::IPDSService::PDSState::OPERATION_ENABLED == pds_state_l) && (smccore::IPDSService::PDSState::OPERATION_ENABLED == pds_state_r);
         if (m_first_entry || m_pds_ok != pds_ok) {
-            RCLCPP_WARN(get_logger(), "PDS state machine is %s.", pds_ok ? "OK" : "not OK");
+            RCLCPP_INFO(get_logger(), "PDS state machine is %s.", pds_ok ? "OK" : "not OK");
             m_pds_ok = pds_ok;
         }
 
@@ -361,8 +360,8 @@ namespace ezw::swd {
         double d_dist_right_m = static_cast<double>(right_dist_now_mm - m_dist_right_prev_mm) / 1000.0;
 
         // Error calculation (standard deviation)
-        double d_dist_left_err_m = m_left_encoder_relative_error * std::abs(d_dist_left_m);
-        double d_dist_right_err_m = m_right_encoder_relative_error * std::abs(d_dist_right_m);
+        double d_dist_left_err_m = m_params->getLeftEncoderRelativeError() * std::abs(d_dist_left_m);
+        double d_dist_right_err_m = m_params->getRightEncoderRelativeError() * std::abs(d_dist_right_m);
 
         rclcpp::Time timestamp = rclcpp::Node::now();
 
@@ -542,19 +541,19 @@ namespace ezw::swd {
             }
 
             if (max_limited && sls_limited) {
-                RCLCPP_WARN(get_logger(),
+                RCLCPP_INFO(get_logger(),
                             "The target speed exceeds the MAX/SLS maximum speed limit (%d rpm). "
                             "Set speed to (left, right) (%d, %d) rpm",
                             speed_limit, left_speed, right_speed);
             }
             else if (sls_limited) {
-                RCLCPP_WARN(get_logger(),
+                RCLCPP_INFO(get_logger(),
                             "The target speed exceeds the SLS maximum speed limit (%d rpm). "
                             "Set speed to (left, right) (%d, %d) rpm",
                             speed_limit, left_speed, right_speed);
             }
             else if (max_limited) {
-                RCLCPP_WARN(get_logger(),
+                RCLCPP_INFO(get_logger(),
                             "The target speed exceeds the maximum speed limit (%d rpm). "
                             "Set speed to (left, right) (%d, %d) rpm",
                             speed_limit, left_speed, right_speed);
@@ -625,7 +624,7 @@ namespace ezw::swd {
 
         msg.safe_brake_control = !(res_l || res_r);
         if (m_first_entry || msg.safe_brake_control != m_safety_msg.safe_brake_control) {
-            RCLCPP_WARN(get_logger(), msg.safe_brake_control ? "SBC enabled." : "SBC disabled.");
+            RCLCPP_INFO(get_logger(), msg.safe_brake_control ? "SBC enabled." : "SBC disabled.");
         }
 
         if (res_l != res_r) {
@@ -651,7 +650,7 @@ namespace ezw::swd {
 
         msg.safe_torque_off = !(res_l || res_r);
         if (m_first_entry || msg.safe_torque_off != m_safety_msg.safe_torque_off) {
-            RCLCPP_WARN(get_logger(), msg.safe_torque_off ? "STO enabled." : "STO disabled.");
+            RCLCPP_INFO(get_logger(), msg.safe_torque_off ? "STO enabled." : "STO disabled.");
         }
 
         if (res_l != res_r) {
@@ -693,7 +692,7 @@ namespace ezw::swd {
                          (int)err);
         }
 
-        if (m_left_wheel_polarity == 1) {
+        if (m_params->getPositivePolarityWheel() == "Left") {
             sdi_p = !(sdi_l_p || sdi_r_n);
             sdi_n = !(sdi_l_n || sdi_r_p);
         }
@@ -706,11 +705,11 @@ namespace ezw::swd {
         msg.safe_direction_indication_backward = sdi_n;
 
         if (m_first_entry || msg.safe_direction_indication_forward != m_safety_msg.safe_direction_indication_forward) {
-            RCLCPP_WARN(get_logger(), msg.safe_direction_indication_forward ? "SDIp enabled." : "SDIp disabled.");
+            RCLCPP_INFO(get_logger(), msg.safe_direction_indication_forward ? "SDIp enabled." : "SDIp disabled.");
         }
 
         if (m_first_entry || msg.safe_direction_indication_backward != m_safety_msg.safe_direction_indication_backward) {
-            RCLCPP_WARN(get_logger(), msg.safe_direction_indication_backward ? "SDIn enabled." : "SDIn disabled.");
+            RCLCPP_INFO(get_logger(), msg.safe_direction_indication_backward ? "SDIn enabled." : "SDIn disabled.");
         }
 
         // Reading SLS
@@ -732,7 +731,7 @@ namespace ezw::swd {
 
         msg.safety_limited_speed = !(res_l || res_r);
         if (m_first_entry || msg.safety_limited_speed != m_safety_msg.safety_limited_speed) {
-            RCLCPP_WARN(get_logger(), msg.safety_limited_speed ? "SLS enabled." : "SLS disabled.");
+            RCLCPP_INFO(get_logger(), msg.safety_limited_speed ? "SLS enabled." : "SLS disabled.");
         }
 
 #if VERBOSE_OUTPUT

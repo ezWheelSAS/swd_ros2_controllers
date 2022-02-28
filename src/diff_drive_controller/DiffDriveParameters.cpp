@@ -11,14 +11,15 @@ namespace ezw::swd {
     DiffDriveParameters::DiffDriveParameters(const std::string &p_node_name)
         : Node(p_node_name)
     {
-        RCLCPP_INFO(get_logger(), "DiffDriveParameters() is called.");
+        rcl_interfaces::msg::ParameterDescriptor ro_descriptor;
+        ro_descriptor.read_only = true;
 
         // Declare all parameters
         declare_parameter<double>("baseline_m", DEFAULT_BASELINE_M);
-        declare_parameter<std::string>("left_config_file", DEFAULT_LEFT_CONFIG_FILE);
-        declare_parameter<std::string>("right_config_file", DEFAULT_RIGHT_CONFIG_FILE);
+        declare_parameter<std::string>("left_config_file", DEFAULT_LEFT_CONFIG_FILE, ro_descriptor);
+        declare_parameter<std::string>("right_config_file", DEFAULT_RIGHT_CONFIG_FILE, ro_descriptor);
         declare_parameter<int>("pub_freq_hz", DEFAULT_PUB_FREQ_HZ);
-        declare_parameter<int>("watchdog_receive_ms", DEFAULT_WATCHDOG_RECEIVE_MS);
+        declare_parameter<int>("watchdog_receive_ms", DEFAULT_WATCHDOG_RECEIVE_MS, ro_descriptor);
         declare_parameter<std::string>("base_frame", DEFAULT_BASE_FRAME);
         declare_parameter<std::string>("odom_frame", DEFAULT_ODOM_FRAME);
         declare_parameter<bool>("publish_odom", DEFAULT_PUBLISH_ODOM);

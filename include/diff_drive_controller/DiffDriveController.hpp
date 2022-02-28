@@ -134,8 +134,7 @@ namespace ezw::swd {
         double m_x_prev = 0.0, m_y_prev = 0.0, m_theta_prev = 0.0;
         double m_x_prev_err = 0.0, m_y_prev_err = 0.0, m_theta_prev_err = 0.0;
         int32_t m_dist_left_prev_mm = 0, m_dist_right_prev_mm = 0;
-        double m_left_wheel_diameter_m, m_right_wheel_diameter_m, m_l_motor_reduction, m_r_motor_reduction, m_left_encoder_relative_error, m_right_encoder_relative_error;
-        int m_left_wheel_polarity, m_max_motor_speed_rpm, m_motor_sls_rpm;
+        double m_left_wheel_diameter_m, m_right_wheel_diameter_m, m_l_motor_reduction, m_r_motor_reduction;
         bool m_nmt_ok, m_pds_ok;
         ezw::smcservice::DBusClient m_left_controller, m_right_controller;
     };

@@ -168,6 +168,12 @@ namespace ezw::swd {
         auto getPositivePolarityWheel() const -> std::string;
 
        private:
+        /**
+         * @brief Parameters modification callback
+         * 
+         */
+        void cbParameters(const rclcpp::Parameter &p_params);
+
         double m_baseline_m;
         std::string m_left_config_file, m_right_config_file;
         int m_pub_freq_hz, m_watchdog_receive_ms;
@@ -179,5 +185,8 @@ namespace ezw::swd {
 
         rclcpp::TimerBase::SharedPtr m_timer;
         mutable std::mutex m_mutex;
+
+        std::shared_ptr<rclcpp::ParameterEventHandler> param_subscriber_;
+        std::shared_ptr<rclcpp::ParameterCallbackHandle> cb_handle_;
     };
 }  // namespace ezw::swd
