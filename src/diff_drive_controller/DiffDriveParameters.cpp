@@ -11,26 +11,87 @@ namespace ezw::swd {
     DiffDriveParameters::DiffDriveParameters(const std::string &p_node_name)
         : Node(p_node_name)
     {
-        rcl_interfaces::msg::ParameterDescriptor ro_descriptor;
-        ro_descriptor.read_only = true;
-
         // Declare all parameters
-        declare_parameter<double>("baseline_m", DEFAULT_BASELINE_M);
-        declare_parameter<std::string>("left_config_file", DEFAULT_LEFT_CONFIG_FILE, ro_descriptor);
-        declare_parameter<std::string>("right_config_file", DEFAULT_RIGHT_CONFIG_FILE, ro_descriptor);
-        declare_parameter<int>("pub_freq_hz", DEFAULT_PUB_FREQ_HZ);
-        declare_parameter<int>("watchdog_receive_ms", DEFAULT_WATCHDOG_RECEIVE_MS, ro_descriptor);
+        {
+            rcl_interfaces::msg::ParameterDescriptor descriptor;
+            rcl_interfaces::msg::FloatingPointRange fpr;
+            descriptor.description = "Positive value (0.0-999.0)";
+            descriptor.type = 3;  // PARAMETER_DOUBLE=3
+            descriptor.floating_point_range.resize(1);
+            auto &range = descriptor.floating_point_range.at(0);
+            range.from_value = 0.001;  // min value
+            range.to_value = 999.0;    // max value
+            range.step = 0.001;        // precision value
+
+            declare_parameter<double>("baseline_m", DEFAULT_BASELINE_M, descriptor);
+        }
+        {
+            rcl_interfaces::msg::ParameterDescriptor descriptor;
+            descriptor.read_only = true;
+            declare_parameter<std::string>("left_config_file", DEFAULT_LEFT_CONFIG_FILE, descriptor);
+            declare_parameter<std::string>("right_config_file", DEFAULT_RIGHT_CONFIG_FILE, descriptor);
+        }
+        {
+            rcl_interfaces::msg::ParameterDescriptor descriptor;
+            rcl_interfaces::msg::IntegerRange fpr;
+            descriptor.description = "Positive value (0-999)";
+            descriptor.type = 2;  // PARAMETER_INTEGER=2
+            descriptor.integer_range.resize(1);
+            auto &range = descriptor.integer_range.at(0);
+            range.from_value = 1;  // min value
+            range.to_value = 999;  // max value
+            range.step = 1;        // precision value
+
+            declare_parameter<int>("pub_freq_hz", DEFAULT_PUB_FREQ_HZ, descriptor);
+        }
+        {
+            rcl_interfaces::msg::ParameterDescriptor descriptor;
+            rcl_interfaces::msg::IntegerRange fpr;
+            descriptor.description = "Positive value (0-9999)";
+            descriptor.type = 2;  // PARAMETER_INTEGER=2
+            descriptor.integer_range.resize(1);
+            auto &range = descriptor.integer_range.at(0);
+            range.from_value = 1;   // min value
+            range.to_value = 9999;  // max value
+            range.step = 1;         // precision value
+            descriptor.read_only = true;
+            declare_parameter<int>("watchdog_receive_ms", DEFAULT_WATCHDOG_RECEIVE_MS, descriptor);
+        }
         declare_parameter<std::string>("base_frame", DEFAULT_BASE_FRAME);
         declare_parameter<std::string>("odom_frame", DEFAULT_ODOM_FRAME);
         declare_parameter<bool>("publish_odom", DEFAULT_PUBLISH_ODOM);
         declare_parameter<bool>("publish_tf", DEFAULT_PUBLISH_TF);
         declare_parameter<bool>("publish_safety_functions", DEFAULT_PUBLISH_SAFETY_FCNS);
-        declare_parameter<int>("max_speed_rpm", DEFAULT_MAX_SPEED_RPM);
-        declare_parameter<int>("safety_limited_speed_rpm", DEFAULT_MAX_SLS_RPM);
+        {
+            rcl_interfaces::msg::ParameterDescriptor descriptor;
+            rcl_interfaces::msg::IntegerRange fpr;
+            descriptor.description = "Positive value (50-2000)";
+            descriptor.type = 2;  // PARAMETER_INTEGER=2
+            descriptor.integer_range.resize(1);
+            auto &range = descriptor.integer_range.at(0);
+            range.from_value = 50;  // min value
+            range.to_value = 2000;  // max value
+            range.step = 1;         // precision value
+
+            declare_parameter<int>("max_speed_rpm", DEFAULT_MAX_SPEED_RPM, descriptor);
+            declare_parameter<int>("safety_limited_speed_rpm", DEFAULT_MAX_SLS_RPM, descriptor);
+        }
         declare_parameter<bool>("have_backward_sls", DEFAULT_HAVE_BACKWARD_SLS);
         declare_parameter<std::string>("positive_polarity_wheel", DEFAULT_POSITIVE_POLARITY_WHEEL);
-        declare_parameter<float>("left_encoder_relative_error", DEFAULT_LEFT_RELATIVE_ERROR);
-        declare_parameter<float>("right_encoder_relative_error", DEFAULT_RIGHT_RELATIVE_ERROR);
+        {
+            rcl_interfaces::msg::ParameterDescriptor descriptor;
+            rcl_interfaces::msg::FloatingPointRange fpr;
+            descriptor.description = "Percent value (0.0-1.0)";
+            descriptor.type = 3;  // PARAMETER_DOUBLE=3
+            descriptor.floating_point_range.resize(1);
+            auto &range = descriptor.floating_point_range.at(0);
+            range.from_value = 0.01;  // min value
+            range.to_value = 1.0;     // max value
+            range.step = 0.01;        // precision value
+
+            declare_parameter<float>("left_encoder_relative_error", DEFAULT_LEFT_RELATIVE_ERROR, descriptor);
+            declare_parameter<float>("right_encoder_relative_error", DEFAULT_RIGHT_RELATIVE_ERROR, descriptor);
+        }
 
         // Read all parameters
         update();
@@ -48,11 +109,6 @@ namespace ezw::swd {
         get_parameter("baseline_m", m_baseline_m);
         if (m_baseline_m != l_baseline_m) {
             RCLCPP_INFO(get_logger(), "Baseline : %f", m_baseline_m);
-        }
-
-        if (m_baseline_m <= 0.) {
-            RCLCPP_WARN(get_logger(), "Invalid value %f for parameter 'baseline_m', it should be a positive value different of zero. ", m_baseline_m);
-            throw std::runtime_error("Invalid parameter");
         }
 
         // Left config file
@@ -146,27 +202,11 @@ namespace ezw::swd {
             RCLCPP_INFO(get_logger(), "Max speed RPM: %d", max_speed_rpm);
         }
 
-        if (max_speed_rpm < 0.) {
-            max_speed_rpm = DEFAULT_MAX_SPEED_RPM;
-            RCLCPP_WARN(get_logger(),
-                        "Invalid value %d for parameter 'max_speed_rpm', it should be a positive value. "
-                        "Falling back to default (%d)",
-                        max_speed_rpm, DEFAULT_MAX_SPEED_RPM);
-        }
-
         // Max speed rpm when SLS enabled
         auto l_max_sls_speed_rpm = max_sls_speed_rpm;
         get_parameter("safety_limited_speed_rpm", max_sls_speed_rpm);
         if (max_sls_speed_rpm != l_max_sls_speed_rpm) {
             RCLCPP_INFO(get_logger(), "Max SLS speed RPM: %d", max_sls_speed_rpm);
-        }
-
-        if (max_sls_speed_rpm < 0.) {
-            max_sls_speed_rpm = DEFAULT_MAX_SLS_RPM;
-            RCLCPP_WARN(get_logger(),
-                        "Invalid value %d for parameter 'safety_limited_speed_rpm', it should be a positive value. "
-                        "Falling back to default (%d)",
-                        max_sls_speed_rpm, DEFAULT_MAX_SLS_RPM);
         }
 
         // Positive polarity wheel
