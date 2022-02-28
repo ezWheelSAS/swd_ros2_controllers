@@ -22,20 +22,20 @@ using std::placeholders::_1;
 
 namespace ezw::swd {
 
-    /// Convert integer value `val` to text in hexadecimal format.
+    /// Convert integer value `p_val` to text in hexadecimal format.
     /// The minimum width is padded with leading zeros; if not
     /// specified, this `width` is derived from the type of the
-    /// argument. Function suitable from char to long long.
+    /// argument. Function suitable from char to long long.p_
     template <typename T>
-    inline std::string int_to_hex(T val, size_t width = sizeof(T) * 2)
+    inline auto int_to_hex(T p_val, int p_width = sizeof(T) * 2) -> std::string
     {
         std::stringstream ss;
-        ss << std::setfill('0') << std::setw(width) << std::hex << (val | 0);
+        ss << std::setfill('0') << std::setw(p_width) << std::hex << (p_val | 0);
         return ss.str();
     }
 
-    DiffDriveController::DiffDriveController(const std::string &p_node_name, const std::shared_ptr<const DiffDriveParameters> p_params) : Node(p_node_name),
-                                                                                                                                          m_params(p_params)
+    DiffDriveController::DiffDriveController(const std::string &p_node_name, const std::shared_ptr<DiffDriveParameters> &p_params) : Node(p_node_name),
+                                                                                                                                     m_params(p_params)
     {
         m_tf2_br = std::make_shared<tf2_ros::TransformBroadcaster>(this);
 

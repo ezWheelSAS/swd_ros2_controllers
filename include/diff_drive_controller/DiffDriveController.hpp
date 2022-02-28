@@ -52,7 +52,7 @@ namespace ezw::swd {
          * @param p_node_name Node name
          * @param p_params Node parameters
          */
-        explicit DiffDriveController(const std::string &p_node_name, const std::shared_ptr<const DiffDriveParameters> p_params);
+        explicit DiffDriveController(const std::string &p_node_name, const std::shared_ptr<DiffDriveParameters> &p_params);
 
        private:
         /**
