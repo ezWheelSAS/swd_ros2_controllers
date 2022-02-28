@@ -692,7 +692,7 @@ namespace ezw::swd {
                          (int)err);
         }
 
-        if (m_params->getPositivePolarityWheel() == "Left") {
+        if (m_params->getIsLeftPositivePolarityWheel()) {
             sdi_p = !(sdi_l_p || sdi_r_n);
             sdi_n = !(sdi_l_n || sdi_r_p);
         }

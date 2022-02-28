@@ -24,7 +24,7 @@ constexpr auto DEFAULT_PUBLISH_SAFETY_FCNS = true;
 constexpr auto DEFAULT_MAX_SPEED_RPM = 1050;
 constexpr auto DEFAULT_MAX_SLS_RPM = 490;
 constexpr auto DEFAULT_HAVE_BACKWARD_SLS = false;
-constexpr auto DEFAULT_POSITIVE_POLARITY_WHEEL = "Right";
+constexpr auto DEFAULT_IS_LEFT_POSITIVE_POLARITY_WHEEL = true;
 constexpr auto DEFAULT_LEFT_RELATIVE_ERROR = 0.2;   // 20% of error
 constexpr auto DEFAULT_RIGHT_RELATIVE_ERROR = 0.2;  // 20% of error
 
@@ -161,11 +161,11 @@ namespace ezw::swd {
         auto getMaxSlsSpeedRpm() const -> int;
 
         /**
-         * @brief Get the Positive Polarity Wheel
+         * @brief Get the Is Left Positive Polarity Wheel
          * 
-         * @return std::string 
+         * @return bool 
          */
-        auto getPositivePolarityWheel() const -> std::string;
+        auto getIsLeftPositivePolarityWheel() const -> bool;
 
        private:
         /**
@@ -178,10 +178,9 @@ namespace ezw::swd {
         std::string m_left_config_file, m_right_config_file;
         int m_pub_freq_hz, m_watchdog_receive_ms;
         std::string m_base_frame, m_odom_frame;
-        bool m_publish_odom, m_publish_tf, m_publish_safety, m_have_backward_sls;
+        bool m_publish_odom, m_publish_tf, m_publish_safety, m_have_backward_sls, m_is_left_positive_polarity_wheel;
         float m_left_encoder_relative_error, m_right_encoder_relative_error;
-        int max_speed_rpm, max_sls_speed_rpm;
-        std::string positive_polarity_wheel;
+        int m_max_speed_rpm, m_max_sls_speed_rpm;
 
         rclcpp::TimerBase::SharedPtr m_timer;
         mutable std::mutex m_mutex;
