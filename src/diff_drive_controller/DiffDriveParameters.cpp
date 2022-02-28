@@ -108,112 +108,112 @@ namespace ezw::swd {
         auto l_baseline_m = m_baseline_m;
         get_parameter("baseline_m", m_baseline_m);
         if (m_baseline_m != l_baseline_m) {
-            RCLCPP_INFO(get_logger(), "Baseline : %f", m_baseline_m);
+            RCLCPP_INFO(get_logger(), "baseline_m : %f", m_baseline_m);
         }
 
         // Left config file
         auto l_left_config_file = m_left_config_file;
         get_parameter("left_config_file", m_left_config_file);
         if (m_left_config_file != l_left_config_file) {
-            RCLCPP_INFO(get_logger(), "Left config : %s", m_left_config_file.c_str());
+            RCLCPP_INFO(get_logger(), "left_config_file : %s", m_left_config_file.c_str());
         }
 
         // Right config file
         auto l_right_config_file = m_right_config_file;
         get_parameter("right_config_file", m_right_config_file);
         if (m_right_config_file != l_right_config_file) {
-            RCLCPP_INFO(get_logger(), "Right config : %s", m_right_config_file.c_str());
+            RCLCPP_INFO(get_logger(), "right_config_file : %s", m_right_config_file.c_str());
         }
 
         // Pub freq (Hz)
         auto l_pub_freq_hz = m_pub_freq_hz;
         get_parameter("pub_freq_hz", m_pub_freq_hz);
         if (m_pub_freq_hz != l_pub_freq_hz) {
-            RCLCPP_INFO(get_logger(), "Freq (Hz) : %d", m_pub_freq_hz);
+            RCLCPP_INFO(get_logger(), "pub_freq_hz : %d", m_pub_freq_hz);
         }
 
         // Watchdog receive (ms)
         auto l_watchdog_receive_ms = m_watchdog_receive_ms;
         get_parameter("watchdog_receive_ms", m_watchdog_receive_ms);
         if (m_watchdog_receive_ms != l_watchdog_receive_ms) {
-            RCLCPP_INFO(get_logger(), "Watchdog receive (ms): %d", m_watchdog_receive_ms);
+            RCLCPP_INFO(get_logger(), "watchdog_receive_ms : %d", m_watchdog_receive_ms);
         }
 
         // Base frame
         auto l_base_frame = m_base_frame;
         get_parameter("base_frame", m_base_frame);
         if (m_base_frame != l_base_frame) {
-            RCLCPP_INFO(get_logger(), "Base frame : %s", m_base_frame.c_str());
+            RCLCPP_INFO(get_logger(), "base_frame : %s", m_base_frame.c_str());
         }
 
         // Odom frame
         auto l_odom_frame = m_odom_frame;
         get_parameter("odom_frame", m_odom_frame);
         if (m_odom_frame != l_odom_frame) {
-            RCLCPP_INFO(get_logger(), "Odom frame : %s", m_odom_frame.c_str());
+            RCLCPP_INFO(get_logger(), "odom_frame : %s", m_odom_frame.c_str());
         }
 
         // Publish odom
         auto l_publish_odom = m_publish_odom;
         get_parameter("publish_odom", m_publish_odom);
         if (m_publish_odom != l_publish_odom) {
-            RCLCPP_INFO(get_logger(), "Publish odom : %d", m_publish_odom);
+            RCLCPP_INFO(get_logger(), "publish_odom : %d", m_publish_odom);
         }
 
         // Publish tf
         auto l_publish_tf = m_publish_tf;
         get_parameter("publish_tf", m_publish_tf);
         if (m_publish_tf != l_publish_tf) {
-            RCLCPP_INFO(get_logger(), "Publish tf : %d", m_publish_tf);
+            RCLCPP_INFO(get_logger(), "publish_tf : %d", m_publish_tf);
         }
 
         // Publish safety
         auto l_publish_safety = m_publish_safety;
         get_parameter("publish_safety_functions", m_publish_safety);
         if (m_publish_safety != l_publish_safety) {
-            RCLCPP_INFO(get_logger(), "Publish safety : %d", m_publish_safety);
+            RCLCPP_INFO(get_logger(), "publish_safety_functions : %d", m_publish_safety);
         }
 
         // Have backward SLS
         auto l_have_backward_sls = m_have_backward_sls;
         get_parameter("have_backward_sls", m_have_backward_sls);
         if (m_have_backward_sls != l_have_backward_sls) {
-            RCLCPP_INFO(get_logger(), "Publish backward SLS : %d", m_have_backward_sls);
+            RCLCPP_INFO(get_logger(), "have_backward_sls : %d", m_have_backward_sls);
         }
 
         // Left encoder relative error
         auto l_left_encoder_relative_error = m_left_encoder_relative_error;
         get_parameter("left_encoder_relative_error", m_left_encoder_relative_error);
         if (m_left_encoder_relative_error != l_left_encoder_relative_error) {
-            RCLCPP_INFO(get_logger(), "Left encoder relative error : %f", m_left_encoder_relative_error);
+            RCLCPP_INFO(get_logger(), "left_encoder_relative_error : %f", m_left_encoder_relative_error);
         }
 
         // Right encoder relative error
         auto l_right_encoder_relative_error = m_right_encoder_relative_error;
         get_parameter("right_encoder_relative_error", m_right_encoder_relative_error);
         if (m_right_encoder_relative_error != l_right_encoder_relative_error) {
-            RCLCPP_INFO(get_logger(), "Right encoder relative error : %f", m_right_encoder_relative_error);
+            RCLCPP_INFO(get_logger(), "right_encoder_relative_error : %f", m_right_encoder_relative_error);
         }
 
         // Max speed rpm
         auto l_max_speed_rpm = m_max_speed_rpm;
         get_parameter("max_speed_rpm", m_max_speed_rpm);
         if (m_max_speed_rpm != l_max_speed_rpm) {
-            RCLCPP_INFO(get_logger(), "Max speed RPM: %d", m_max_speed_rpm);
+            RCLCPP_INFO(get_logger(), "max_speed_rpm : %d", m_max_speed_rpm);
         }
 
         // Max speed rpm when SLS enabled
         auto l_max_sls_speed_rpm = m_max_sls_speed_rpm;
         get_parameter("safety_limited_speed_rpm", m_max_sls_speed_rpm);
         if (m_max_sls_speed_rpm != l_max_sls_speed_rpm) {
-            RCLCPP_INFO(get_logger(), "Max SLS speed RPM: %d", m_max_sls_speed_rpm);
+            RCLCPP_INFO(get_logger(), "safety_limited_speed_rpm : %d", m_max_sls_speed_rpm);
         }
 
         // Is Left Positive polarity wheel
         auto l_is_left_positive_polarity_wheel = m_is_left_positive_polarity_wheel;
         get_parameter("is_left_positive_polarity_wheel", m_is_left_positive_polarity_wheel);
         if (m_is_left_positive_polarity_wheel != l_is_left_positive_polarity_wheel) {
-            RCLCPP_INFO(get_logger(), "Is left positive polarity wheel: %d", m_is_left_positive_polarity_wheel);
+            RCLCPP_INFO(get_logger(), "is_left_positive_polarity_wheel : %d", m_is_left_positive_polarity_wheel);
         }
     }
 
