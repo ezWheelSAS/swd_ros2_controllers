@@ -31,7 +31,7 @@ def generate_launch_description():
                     {"max_speed_rpm": 1050},
                     {"safety_limited_speed_rpm": 490},
                     {"have_backward_sls": False},
-                    {"positive_polarity_wheel": "Right"},
+                    {"is_left_positive_polarity_wheel": True},
                     {"left_encoder_relative_error": 0.2},
                     {"right_encoder_relative_error": 0.2},
                     ]
