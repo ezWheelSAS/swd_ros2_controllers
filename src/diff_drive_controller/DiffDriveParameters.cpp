@@ -73,7 +73,6 @@ namespace ezw::swd {
             declare_parameter<int>("motor_max_safety_limited_speed_rpm", DEFAULT_MOTOR_MAX_SLS_RPM, descriptor);
         }
         declare_parameter<bool>("have_backward_sls", DEFAULT_HAVE_BACKWARD_SLS);
-        declare_parameter<bool>("is_left_positive_polarity_motor", DEFAULT_IS_LEFT_POSITIVE_POLARITY_MOTOR);
         {
             rcl_interfaces::msg::ParameterDescriptor descriptor;
             descriptor.additional_constraints = "Percent value (0.0-1.0)";
@@ -203,13 +202,6 @@ namespace ezw::swd {
         if (m_motor_max_sls_speed_rpm != l_motor_max_sls_speed_rpm) {
             RCLCPP_INFO(get_logger(), "motor_max_safety_limited_speed_rpm : %d", m_motor_max_sls_speed_rpm);
         }
-
-        // Is Left Positive polarity motor
-        auto l_is_left_positive_polarity_motor = m_is_left_positive_polarity_motor;
-        get_parameter("is_left_positive_polarity_motor", m_is_left_positive_polarity_motor);
-        if (m_is_left_positive_polarity_motor != l_is_left_positive_polarity_motor) {
-            RCLCPP_INFO(get_logger(), "is_left_positive_polarity_motor : %d", m_is_left_positive_polarity_motor);
-        }
     }
 
     auto DiffDriveParameters::getBaseline() const -> double
@@ -300,11 +292,5 @@ namespace ezw::swd {
     {
         lg_t lock(m_mutex);
         return m_motor_max_sls_speed_rpm;
-    }
-
-    auto DiffDriveParameters::getIsLeftPositivePolarityMotor() const -> bool
-    {
-        lg_t lock(m_mutex);
-        return m_is_left_positive_polarity_motor;
     }
 }  // namespace ezw::swd

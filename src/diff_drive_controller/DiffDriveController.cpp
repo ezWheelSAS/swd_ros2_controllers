@@ -170,6 +170,17 @@ namespace ezw::swd {
             throw std::runtime_error("Initial reading from right motor failed");
         }
 
+        ezw::smccore::IPDSService::PolarityParameters polarity_parameters;
+        err = m_left_controller.getPolarityParameters(polarity_parameters);
+        if (ERROR_NONE != err) {
+            RCLCPP_ERROR(get_logger(),
+                         "Failed reading the motor polarity, EZW_ERR: SMCService : "
+                         "Controller::getPolarityParameters() return error code : %d",
+                         (int)err);
+            throw std::runtime_error("Failed reading the left motor polarity");
+        }
+        m_left_motor_polarity = polarity_parameters.velocity_polarity;
+
         // Start the timers
         m_timer_watchdog = create_wall_timer(std::chrono::milliseconds(m_params->getWatchdogReceiveMs()), std::bind(&DiffDriveController::cbTimerWatchdogReceive, this));
         m_timer_pds = create_wall_timer(std::chrono::milliseconds(TIMER_STATE_MACHINE_MS), std::bind(&DiffDriveController::cbTimerStateMachine, this));
@@ -694,7 +705,7 @@ namespace ezw::swd {
                          (int)err);
         }
 
-        if (m_params->getIsLeftPositivePolarityMotor()) {
+        if (m_left_motor_polarity) {
             sdi_p = !(sdi_l_p || sdi_r_n);
             sdi_n = !(sdi_l_n || sdi_r_p);
         }
