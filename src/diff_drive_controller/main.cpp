@@ -9,9 +9,6 @@
 
 auto main(int argc, char** argv) -> int
 {
-    (void)argc;
-    (void)argv;
-
     // force flush of the stdout buffer.
     // this ensures a correct sync of all prints
     // even when executed simultaneously within the launch file.

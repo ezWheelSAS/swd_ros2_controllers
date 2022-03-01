@@ -9,14 +9,13 @@
 
 namespace ezw::swd {
     DiffDriveParameters::DiffDriveParameters(const std::string &p_node_name)
-        : Node(p_node_name, "/parameters")  // Set namespace to "/parameters" to avoid warning "Publisher already registered for provided node name"
+        : Node(p_node_name, "/parameters")
     {
         // Declare all parameters
         {
             rcl_interfaces::msg::ParameterDescriptor descriptor;
-            rcl_interfaces::msg::FloatingPointRange fpr;
             descriptor.additional_constraints = "Positive value (0.0-999.0)";
-            descriptor.type = 3;  // PARAMETER_DOUBLE=3
+            descriptor.type = rclcpp::ParameterType::PARAMETER_DOUBLE;
             descriptor.floating_point_range.resize(1);
             auto &range = descriptor.floating_point_range.at(0);
             range.from_value = 0.001;  // min value
@@ -33,9 +32,8 @@ namespace ezw::swd {
         }
         {
             rcl_interfaces::msg::ParameterDescriptor descriptor;
-            rcl_interfaces::msg::IntegerRange fpr;
             descriptor.additional_constraints = "Positive value (0-999)";
-            descriptor.type = 2;  // PARAMETER_INTEGER=2
+            descriptor.type = rclcpp::ParameterType::PARAMETER_INTEGER;
             descriptor.integer_range.resize(1);
             auto &range = descriptor.integer_range.at(0);
             range.from_value = 1;  // min value
@@ -46,9 +44,8 @@ namespace ezw::swd {
         }
         {
             rcl_interfaces::msg::ParameterDescriptor descriptor;
-            rcl_interfaces::msg::IntegerRange fpr;
             descriptor.additional_constraints = "Positive value (0-9999)";
-            descriptor.type = 2;  // PARAMETER_INTEGER=2
+            descriptor.type = rclcpp::ParameterType::PARAMETER_INTEGER;
             descriptor.integer_range.resize(1);
             auto &range = descriptor.integer_range.at(0);
             range.from_value = 1;   // min value
@@ -64,33 +61,31 @@ namespace ezw::swd {
         declare_parameter<bool>("publish_safety_functions", DEFAULT_PUBLISH_SAFETY_FCNS);
         {
             rcl_interfaces::msg::ParameterDescriptor descriptor;
-            rcl_interfaces::msg::IntegerRange fpr;
             descriptor.additional_constraints = "Positive value (50-2000)";
-            descriptor.type = 2;  // PARAMETER_INTEGER=2
+            descriptor.type = rclcpp::ParameterType::PARAMETER_INTEGER;
             descriptor.integer_range.resize(1);
             auto &range = descriptor.integer_range.at(0);
             range.from_value = 50;  // min value
             range.to_value = 2000;  // max value
             range.step = 1;         // precision value
 
-            declare_parameter<int>("max_speed_rpm", DEFAULT_MAX_SPEED_RPM, descriptor);
-            declare_parameter<int>("safety_limited_speed_rpm", DEFAULT_MAX_SLS_RPM, descriptor);
+            declare_parameter<int>("motor_max_speed_rpm", DEFAULT_MOTOR_MAX_SPEED_RPM, descriptor);
+            declare_parameter<int>("motor_max_safety_limited_speed_rpm", DEFAULT_MOTOR_MAX_SLS_RPM, descriptor);
         }
         declare_parameter<bool>("have_backward_sls", DEFAULT_HAVE_BACKWARD_SLS);
-        declare_parameter<bool>("is_left_positive_polarity_wheel", DEFAULT_IS_LEFT_POSITIVE_POLARITY_WHEEL);
+        declare_parameter<bool>("is_left_positive_polarity_motor", DEFAULT_IS_LEFT_POSITIVE_POLARITY_MOTOR);
         {
             rcl_interfaces::msg::ParameterDescriptor descriptor;
-            rcl_interfaces::msg::FloatingPointRange fpr;
             descriptor.additional_constraints = "Percent value (0.0-1.0)";
-            descriptor.type = 3;  // PARAMETER_DOUBLE=3
+            descriptor.type = rclcpp::ParameterType::PARAMETER_DOUBLE;
             descriptor.floating_point_range.resize(1);
             auto &range = descriptor.floating_point_range.at(0);
             range.from_value = 0.01;  // min value
             range.to_value = 1.0;     // max value
             range.step = 0.01;        // precision value
 
-            declare_parameter<float>("left_encoder_relative_error", DEFAULT_LEFT_RELATIVE_ERROR, descriptor);
-            declare_parameter<float>("right_encoder_relative_error", DEFAULT_RIGHT_RELATIVE_ERROR, descriptor);
+            declare_parameter<double>("left_encoder_relative_error", DEFAULT_LEFT_RELATIVE_ERROR, descriptor);
+            declare_parameter<double>("right_encoder_relative_error", DEFAULT_RIGHT_RELATIVE_ERROR, descriptor);
         }
 
         // Read all parameters
@@ -195,25 +190,25 @@ namespace ezw::swd {
             RCLCPP_INFO(get_logger(), "right_encoder_relative_error : %f", m_right_encoder_relative_error);
         }
 
-        // Max speed rpm
-        auto l_max_speed_rpm = m_max_speed_rpm;
-        get_parameter("max_speed_rpm", m_max_speed_rpm);
-        if (m_max_speed_rpm != l_max_speed_rpm) {
-            RCLCPP_INFO(get_logger(), "max_speed_rpm : %d", m_max_speed_rpm);
+        // Motor max speed rpm
+        auto l_motor_max_speed_rpm = m_motor_max_speed_rpm;
+        get_parameter("motor_max_speed_rpm", m_motor_max_speed_rpm);
+        if (m_motor_max_speed_rpm != l_motor_max_speed_rpm) {
+            RCLCPP_INFO(get_logger(), "motor_max_speed_rpm : %d", m_motor_max_speed_rpm);
         }
 
-        // Max speed rpm when SLS enabled
-        auto l_max_sls_speed_rpm = m_max_sls_speed_rpm;
-        get_parameter("safety_limited_speed_rpm", m_max_sls_speed_rpm);
-        if (m_max_sls_speed_rpm != l_max_sls_speed_rpm) {
-            RCLCPP_INFO(get_logger(), "safety_limited_speed_rpm : %d", m_max_sls_speed_rpm);
+        // Motor max speed rpm when SLS enabled
+        auto l_motor_max_sls_speed_rpm = m_motor_max_sls_speed_rpm;
+        get_parameter("motor_max_safety_limited_speed_rpm", m_motor_max_sls_speed_rpm);
+        if (m_motor_max_sls_speed_rpm != l_motor_max_sls_speed_rpm) {
+            RCLCPP_INFO(get_logger(), "motor_max_safety_limited_speed_rpm : %d", m_motor_max_sls_speed_rpm);
         }
 
-        // Is Left Positive polarity wheel
-        auto l_is_left_positive_polarity_wheel = m_is_left_positive_polarity_wheel;
-        get_parameter("is_left_positive_polarity_wheel", m_is_left_positive_polarity_wheel);
-        if (m_is_left_positive_polarity_wheel != l_is_left_positive_polarity_wheel) {
-            RCLCPP_INFO(get_logger(), "is_left_positive_polarity_wheel : %d", m_is_left_positive_polarity_wheel);
+        // Is Left Positive polarity motor
+        auto l_is_left_positive_polarity_motor = m_is_left_positive_polarity_motor;
+        get_parameter("is_left_positive_polarity_motor", m_is_left_positive_polarity_motor);
+        if (m_is_left_positive_polarity_motor != l_is_left_positive_polarity_motor) {
+            RCLCPP_INFO(get_logger(), "is_left_positive_polarity_motor : %d", m_is_left_positive_polarity_motor);
         }
     }
 
@@ -295,21 +290,21 @@ namespace ezw::swd {
         return m_right_encoder_relative_error;
     }
 
-    auto DiffDriveParameters::getMaxSpeedRpm() const -> int
+    auto DiffDriveParameters::getMotorMaxSpeedRpm() const -> int
     {
         lg_t lock(m_mutex);
-        return m_max_speed_rpm;
+        return m_motor_max_speed_rpm;
     }
 
-    auto DiffDriveParameters::getMaxSlsSpeedRpm() const -> int
+    auto DiffDriveParameters::getMotorMaxSlsSpeedRpm() const -> int
     {
         lg_t lock(m_mutex);
-        return m_max_sls_speed_rpm;
+        return m_motor_max_sls_speed_rpm;
     }
 
-    auto DiffDriveParameters::getIsLeftPositivePolarityWheel() const -> bool
+    auto DiffDriveParameters::getIsLeftPositivePolarityMotor() const -> bool
     {
         lg_t lock(m_mutex);
-        return m_is_left_positive_polarity_wheel;
+        return m_is_left_positive_polarity_motor;
     }
 }  // namespace ezw::swd

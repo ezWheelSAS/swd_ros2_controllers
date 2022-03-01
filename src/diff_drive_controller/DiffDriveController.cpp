@@ -314,7 +314,7 @@ namespace ezw::swd {
         // false => Release brake
         ezw_error_t err = m_left_controller.setHalt(msg.data);
         if (ERROR_NONE != err) {
-            RCLCPP_ERROR(get_logger(), "SoftBrake: Failed %s left wheel, EZW_ERR: %d", msg.data ? "braking" : "releasing", (int)err);
+            RCLCPP_ERROR(get_logger(), "SoftBrake: Failed %s left motor, EZW_ERR: %d", msg.data ? "braking" : "releasing", (int)err);
         }
         else {
             RCLCPP_INFO(get_logger(), "SoftBrake: Left motor's soft brake %s", msg.data ? "activated" : "disabled");
@@ -322,7 +322,7 @@ namespace ezw::swd {
 
         err = m_right_controller.setHalt(msg.data);
         if (ERROR_NONE != err) {
-            RCLCPP_ERROR(get_logger(), "SoftBrake: Failed %s right wheel, EZW_ERR: %d", msg.data ? "braking" : "releasing", (int)err);
+            RCLCPP_ERROR(get_logger(), "SoftBrake: Failed %s right motor, EZW_ERR: %d", msg.data ? "braking" : "releasing", (int)err);
         }
         else {
             RCLCPP_INFO(get_logger(), "SoftBrake: Right motor's soft brake %s", msg.data ? "activated" : "disabled");
@@ -486,15 +486,15 @@ namespace ezw::swd {
 
     void DiffDriveController::setSpeeds(int32_t left_speed, int32_t right_speed)
     {
-        // Get the outer wheel speed
-        int32_t faster_wheel_speed = M_MAX(std::abs(left_speed), std::abs(right_speed));
+        // Get the outer motor speed
+        int32_t faster_motor_speed = M_MAX(std::abs(left_speed), std::abs(right_speed));
         int32_t speed_limit = -1;
         bool max_limited = false;
         bool sls_limited = false;
 
         // Limit to the maximum allowed speed
-        if (faster_wheel_speed > m_params->getMaxSpeedRpm()) {
-            speed_limit = m_params->getMaxSpeedRpm();
+        if (faster_motor_speed > m_params->getMotorMaxSpeedRpm()) {
+            speed_limit = m_params->getMotorMaxSpeedRpm();
             max_limited = true;
         }
 
@@ -502,8 +502,8 @@ namespace ezw::swd {
         // For example, if it has only one forward-facing safety LiDAR, when the robot move backwards, there's no
         // safety guarantees, hence speed is limited to SLS, otherwise, the safety limit will be decided by the
         // presence of the SLS signal.
-        if (!m_params->getHaveBackwardSls() && (left_speed < 0) && (right_speed < 0) && (faster_wheel_speed > m_params->getMaxSlsSpeedRpm())) {
-            speed_limit = m_params->getMaxSlsSpeedRpm();
+        if (!m_params->getHaveBackwardSls() && (left_speed < 0) && (right_speed < 0) && (faster_motor_speed > m_params->getMotorMaxSlsSpeedRpm())) {
+            speed_limit = m_params->getMotorMaxSlsSpeedRpm();
         }
 
         m_safety_msg_mtx.lock();
@@ -511,20 +511,20 @@ namespace ezw::swd {
         m_safety_msg_mtx.unlock();
 
         // If SLS detected, impose the safety limited speed (SLS)
-        if (sls_signal && (faster_wheel_speed > m_params->getMaxSlsSpeedRpm())) {
-            speed_limit = m_params->getMaxSlsSpeedRpm();
+        if (sls_signal && (faster_motor_speed > m_params->getMotorMaxSlsSpeedRpm())) {
+            speed_limit = m_params->getMotorMaxSlsSpeedRpm();
             sls_limited = true;
         }
 
-        // The left and right wheels may have different speeds.
-        // If we need to limit one of them, we need to scale the second wheel speed.
+        // The left and right motors may have different speeds.
+        // If we need to limit one of them, we need to scale the second motor speed.
         // This ensures a speed limitation without distorting the target path.
         if (-1 != speed_limit) {
-            // If we enter here, we are sure that (faster_wheel_speed > speed_limit).
-            // Get the ratio between the outer (faster) wheel, and the speed limit.
-            double speed_ratio = static_cast<double>(speed_limit) / static_cast<double>(faster_wheel_speed);
+            // If we enter here, we are sure that (faster_motor_speed > speed_limit).
+            // Get the ratio between the outer (faster) motor, and the speed limit.
+            double speed_ratio = static_cast<double>(speed_limit) / static_cast<double>(faster_motor_speed);
 
-            // Get the faster wheel
+            // Get the faster motor
             if (std::abs(left_speed) > std::abs(right_speed)) {
                 // Scale right_speed
                 right_speed = static_cast<int32_t>(static_cast<double>(right_speed) * speed_ratio);
@@ -560,7 +560,7 @@ namespace ezw::swd {
             }
         }
 
-        // If the PDS state is not OPERATION_ENABLED for both wheels, we send a nil speed.
+        // If the PDS state is not OPERATION_ENABLED, we send a nil speed.
         if (!m_pds_ok) {
             left_speed = right_speed = 0;
         }
@@ -692,7 +692,7 @@ namespace ezw::swd {
                          (int)err);
         }
 
-        if (m_params->getIsLeftPositivePolarityWheel()) {
+        if (m_params->getIsLeftPositivePolarityMotor()) {
             sdi_p = !(sdi_l_p || sdi_r_n);
             sdi_n = !(sdi_l_n || sdi_r_p);
         }
