@@ -78,10 +78,12 @@ namespace ezw::swd {
         m_r_motor_reduction = lConfig->getReduction();
 
         /* Init DBus client */
-        std::string lHWEntry = lConfig->getHWConfigurationEntry();
-        std::transform(lHWEntry.begin(), lHWEntry.end(), lHWEntry.begin(), ::tolower);
+        RCLCPP_INFO(get_logger(), "Initializing dbus service !");
 
-        std::string lServiceInstanceName = "commonapi.ezw.smcservice." + lHWEntry;
+        std::string lDbusNamespace = lConfig->getDbusNamespace();
+        std::transform(lDbusNamespace.begin(), lDbusNamespace.end(), lDbusNamespace.begin(), ::tolower);
+
+        std::string lServiceInstanceName = "commonapi.ezw.smcservice." + lDbusNamespace;
 
         /* Init the motor */
         err = m_right_controller.init(lConfig->getContextId(), "local", lServiceInstanceName);
@@ -124,10 +126,10 @@ namespace ezw::swd {
         m_l_motor_reduction = lConfig->getReduction();
 
         /* Init DBus client */
-        lHWEntry = lConfig->getHWConfigurationEntry();
-        std::transform(lHWEntry.begin(), lHWEntry.end(), lHWEntry.begin(), ::tolower);
+        lDbusNamespace = lConfig->getDbusNamespace();
+        std::transform(lDbusNamespace.begin(), lDbusNamespace.end(), lDbusNamespace.begin(), ::tolower);
 
-        lServiceInstanceName = "commonapi.ezw.smcservice." + lHWEntry;
+        lServiceInstanceName = "commonapi.ezw.smcservice." + lDbusNamespace;
 
         /* Init the motor */
         err = m_left_controller.init(lConfig->getContextId(), "local", lServiceInstanceName);
