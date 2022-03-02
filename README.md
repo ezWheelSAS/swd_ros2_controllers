@@ -33,10 +33,10 @@ Then download and add the GPG key using following command:
 wget -qO - http://packages.ez-wheel.com:8081/archive.key | sudo apt-key add -
 ```
 
-Now, you should be able to install the `ros-galactic-swd-ros-controllers` package using `apt`:
+Now, you should be able to install the `ros-galactic-swd-ros2-controllers` package using `apt`:
 
 ```shell
-sudo apt update && sudo apt install ros-galactic-swd-ros-controllers
+sudo apt update && sudo apt install ros-galactic-swd-ros2-controllers
 ```
 
 ### Compiling from source
@@ -71,11 +71,15 @@ ros2 launch swd_ros2_controllers swd_diff_drive_controller_launch.py
 
 You can always use the nodes with the `ros2 run` command, the minimum required parameters are:
 
-- For `swd_ros2_controllers`:
+- `swd_ros2_controllers`:
 
 ```shell
-ros2 run swd_ros2_controllers swd_diff_drive_controller
+ros2 run swd_ros2_controllers swd_diff_drive_controller --ros-args -p baseline_m:=0.485
 ```
+The corresponding D-Bus services have to be started in order to use the nodes.
+Example for the [SWD® Starter Kit](https://www.ez-wheel.com/en/development-kit-for-agv-and-amr) differential drive robot:
+* ezw-swd-left.service (/opt/ezw/usr/bin/ezw-smc-service /opt/ezw/usr/etc/ezw-smc-core/swd_left_config.ini)
+* ezw-swd-right.service (/opt/ezw/usr/bin/ezw-smc-service /opt/ezw/usr/etc/ezw-smc-core/swd_left_config.ini)
 
 ## The `swd_diff_drive_controller` node
 
