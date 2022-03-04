@@ -1,7 +1,7 @@
 ################################################
 ## Copyright (C) 2022 ez-Wheel S.A.S.         ##
 ##                                            ##
-## @file swd_diff_drive_controller_launch.py  ##
+## @file swd_diff_drive_controller.launch.py  ##
 ################################################
 
 
