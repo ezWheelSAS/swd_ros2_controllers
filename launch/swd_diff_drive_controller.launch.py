@@ -9,6 +9,8 @@ import os.path
 
 from launch import LaunchDescription
 from launch_ros.actions import Node
+from launch.substitutions import LaunchConfiguration
+from launch.actions import DeclareLaunchArgument
 
 def generate_launch_description():
 
@@ -21,14 +23,23 @@ def generate_launch_description():
             lines = f.readlines()
         env = dict(line.strip().split("=", 1) for line in lines)
         os.environ.update(env)
-    
+
+    # Create the launch configuration variables
+    baseline_m = LaunchConfiguration('baseline_m')
+
+    # Declare the launch arguments
+    declare_baseline_m_cmd = DeclareLaunchArgument(
+        'baseline_m',
+        default_value='0.485',
+    )
+
     return LaunchDescription([
         Node(
             package='swd_ros2_controllers',
             executable='swd_diff_drive_controller',
             name='swd_diff_drive_controller',
             parameters=[
-                        {"baseline_m": 0.485},
+                        {"baseline_m": baseline_m},
                         {"left_swd_config_file": "/opt/ezw/usr/etc/ezw-smc-core/swd_left_config.ini"},
                         {"right_swd_config_file": "/opt/ezw/usr/etc/ezw-smc-core/swd_right_config.ini"},
                         {"pub_freq_hz": 20},
