@@ -87,8 +87,7 @@ include_directories(
 # Add library dirs. The case not configured will be empty
 link_directories(
   ${EZW_LOG_LIBRARY_DIRS}
-  ${EZW_TOOLS_LIBRARY_DIRS}
-  ${EZW_SMC_SERVICE_CLIENT_INCLUDE_DIRS}
+  ${EZW_SMC_SERVICE_CLIENT_LIBRARY_DIRS}
 )
 
 # Add required definitions from pkgconfig
