@@ -78,14 +78,13 @@ namespace ezw::swd {
         m_r_motor_reduction = lConfig->getReduction();
 
         /* Init DBus client */
-        RCLCPP_INFO(get_logger(), "Initializing dbus service !");
+        RCLCPP_INFO(get_logger(), "Initializing right dbus client !");
 
         std::string lDbusNamespace = lConfig->getDbusNamespace();
         std::transform(lDbusNamespace.begin(), lDbusNamespace.end(), lDbusNamespace.begin(), ::tolower);
 
         std::string lServiceInstanceName = "commonapi.ezw.smcservice." + lDbusNamespace;
 
-        /* Init the motor */
         err = m_right_controller.init(lConfig->getContextId(), "local", lServiceInstanceName);
         if (err != ERROR_NONE) {
             RCLCPP_ERROR(get_logger(),
@@ -95,22 +94,10 @@ namespace ezw::swd {
             throw std::runtime_error("Failed initializing right motor");
         }
 
-        /* Connect to the motor */
-        err = m_right_controller.connect(lConfig->getNodeId());
-        if (err != ERROR_NONE) {
-            RCLCPP_ERROR(get_logger(),
-                         "Failed initializing right motor, EZW_ERR: SMCService : "
-                         "Controller::connect() return error code : %d",
-                         (int)err);
-            throw std::runtime_error("Failed initializing right motor");
-        }
-
         if (m_params->getLeftConfigFile().empty()) {
             RCLCPP_ERROR(get_logger(), "Please specify the 'left_swd_config_file' parameter");
             throw std::runtime_error("Please specify the 'left_swd_config_file' parameter");
         }
-
-        // Connect to the left motor
 
         /* Load motor config file */
         err = lConfig->load(m_params->getLeftConfigFile());
@@ -126,12 +113,13 @@ namespace ezw::swd {
         m_l_motor_reduction = lConfig->getReduction();
 
         /* Init DBus client */
+        RCLCPP_INFO(get_logger(), "Initializing left dbus client !");
+
         lDbusNamespace = lConfig->getDbusNamespace();
         std::transform(lDbusNamespace.begin(), lDbusNamespace.end(), lDbusNamespace.begin(), ::tolower);
 
         lServiceInstanceName = "commonapi.ezw.smcservice." + lDbusNamespace;
 
-        /* Init the motor */
         err = m_left_controller.init(lConfig->getContextId(), "local", lServiceInstanceName);
         if (err != ERROR_NONE) {
             RCLCPP_ERROR(get_logger(),
@@ -141,17 +129,7 @@ namespace ezw::swd {
             throw std::runtime_error("Failed initializing left motor");
         }
 
-        /* Connect to the motor */
-        err = m_left_controller.connect(lConfig->getNodeId());
-        if (err != ERROR_NONE) {
-            RCLCPP_ERROR(get_logger(),
-                         "Failed initializing left motor, EZW_ERR: SMCService : "
-                         "Controller::connect() return error code : %d",
-                         (int)err);
-            throw std::runtime_error("Failed initializing left motor");
-        }
-
-        // Read initial encoders values
+        /* Read initial encoders values */
         err = m_left_controller.getOdometryValue(m_dist_left_prev_mm);
         if (ERROR_NONE != err) {
             RCLCPP_ERROR(get_logger(),
@@ -768,3 +746,4 @@ namespace ezw::swd {
     }
 
 }  // namespace ezw::swd
+
