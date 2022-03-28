@@ -15,7 +15,7 @@
 #include "tf2/LinearMath/Quaternion.h"
 
 #define TIMER_STATE_MACHINE_MS 1000
-#define TIMER_SAFETY_MS 200
+#define TIMER_SAFETY_MS 400
 
 using namespace std::chrono_literals;
 using std::placeholders::_1;
@@ -577,7 +577,7 @@ namespace ezw::swd {
         }
 
 #if VERBOSE_OUTPUT
-        ROS_INFO("Speed sent to motors (left, right) = (%d, %d) rpm", left_speed, right_speed);
+        RCLCPP_INFO(get_logger(), "Speed sent to motors (left, right) = (%d, %d) rpm", left_speed, right_speed);
 #endif
     }
 
@@ -726,7 +726,7 @@ namespace ezw::swd {
         }
 
 #if VERBOSE_OUTPUT
-        ROS_INFO("STO: %d, SDI+: %d, SDI-: %d, SLS: %d", msg.safe_torque_off, msg.safe_direction_indication_forward, msg.safe_direction_indication_backward, msg.safety_limited_speed);
+        RCLCPP_INFO(get_logger(), "STO: %d, SDI+: %d, SDI-: %d, SLS: %d", msg.safe_torque_off, msg.safe_direction_indication_forward, msg.safe_direction_indication_backward, msg.safety_limited_speed);
 #endif
 
         m_safety_msg_mtx.lock();
@@ -746,4 +746,3 @@ namespace ezw::swd {
     }
 
 }  // namespace ezw::swd
-
