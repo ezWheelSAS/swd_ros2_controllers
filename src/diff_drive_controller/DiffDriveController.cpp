@@ -14,8 +14,9 @@
 #include "ezw-smc-core/Config.hpp"
 #include "tf2/LinearMath/Quaternion.h"
 
-#define TIMER_STATE_MACHINE_MS 1000
-#define TIMER_SAFETY_MS 400
+#define TIMER_STATE_MACHINE_MS 1000ms
+#define TIMER_SAFETY_MS 400ms
+#define TIMER_PARAMS_MS 1000ms
 
 using namespace std::chrono_literals;
 using std::placeholders::_1;
@@ -34,9 +35,12 @@ namespace ezw::swd {
         return ss.str();
     }
 
-    DiffDriveController::DiffDriveController(const std::string &p_node_name, const std::shared_ptr<DiffDriveParameters> &p_params) : Node(p_node_name),
-                                                                                                                                     m_params(p_params)
+    DiffDriveController::DiffDriveController(const std::string &p_node_name) : Node(p_node_name)
     {
+        // Create parameters
+        m_params = std::make_shared<ezw::swd::DiffDriveParameters>(this);
+
+        // Create a TransformBroadcaster object that we'll use later to send transformations
         m_tf2_br = std::make_shared<tf2_ros::TransformBroadcaster>(this);
 
         // Publishers
@@ -161,13 +165,13 @@ namespace ezw::swd {
 
         // Start the timers
         m_timer_watchdog = create_wall_timer(std::chrono::milliseconds(m_params->getWatchdogReceiveMs()), std::bind(&DiffDriveController::cbTimerWatchdogReceive, this));
-        m_timer_pds = create_wall_timer(std::chrono::milliseconds(TIMER_STATE_MACHINE_MS), std::bind(&DiffDriveController::cbTimerStateMachine, this));
+        m_timer_pds = create_wall_timer(TIMER_STATE_MACHINE_MS, std::bind(&DiffDriveController::cbTimerStateMachine, this));
 
         if (m_params->getPublishOdom() || m_params->getPublishTf()) {
             m_timer_odom = create_wall_timer(std::chrono::milliseconds(1000 / m_params->getPubFreqHz()), std::bind(&DiffDriveController::cbTimerOdom, this));
         }
 
-        m_timer_safety = create_wall_timer(std::chrono::milliseconds(TIMER_SAFETY_MS), std::bind(&DiffDriveController::cbTimerSafety, this));
+        m_timer_safety = create_wall_timer(TIMER_SAFETY_MS, std::bind(&DiffDriveController::cbTimerSafety, this));
 
         RCLCPP_INFO(get_logger(), "swd_diff_drive_controller initialized successfully!");
     }

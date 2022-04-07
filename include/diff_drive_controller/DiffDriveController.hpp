@@ -50,9 +50,8 @@ namespace ezw::swd {
          * @brief Construct a new Diff Drive Controller object
          * 
          * @param p_node_name Node name
-         * @param p_params Node parameters
          */
-        explicit DiffDriveController(const std::string &p_node_name, const std::shared_ptr<DiffDriveParameters> &p_params);
+        explicit DiffDriveController(const std::string &p_node_name);
 
        private:
         /**
@@ -119,6 +118,9 @@ namespace ezw::swd {
         // TF broadcaster
         std::shared_ptr<tf2_ros::TransformBroadcaster> m_tf2_br;
 
+        // Node Parameters
+        std::shared_ptr<DiffDriveParameters> m_params;
+
         // Timers
         rclcpp::TimerBase::SharedPtr m_timer_odom, m_timer_watchdog, m_timer_pds, m_timer_safety;
 
@@ -128,15 +130,13 @@ namespace ezw::swd {
         // SafetyFunctions message
         swd_ros2_controllers::msg::SafetyFunctions m_safety_msg;
 
-        // Node parameters
-        const std::shared_ptr<const DiffDriveParameters> m_params;
-
         double m_x_prev = 0.0, m_y_prev = 0.0, m_theta_prev = 0.0;
         double m_x_prev_err = 0.0, m_y_prev_err = 0.0, m_theta_prev_err = 0.0;
         int32_t m_dist_left_prev_mm = 0, m_dist_right_prev_mm = 0;
         double m_left_wheel_diameter_m, m_right_wheel_diameter_m, m_l_motor_reduction, m_r_motor_reduction = 0.0;
         bool m_left_motor_polarity = false;
         bool m_nmt_ok, m_pds_ok = false;
+
         ezw::smcservice::DBusClient m_left_controller, m_right_controller;
     };
 }  // namespace ezw::swd

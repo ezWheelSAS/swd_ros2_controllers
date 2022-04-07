@@ -29,75 +29,68 @@ constexpr auto DEFAULT_RIGHT_RELATIVE_ERROR = 0.2;  // 20% of error
 
 namespace ezw::swd {
     using namespace std::chrono_literals;
-    using lg_t = std::lock_guard<std::mutex>;
 
     /**
      * @brief This class provides the parameters of the swd_diff_drive_controller node.
      * 
      */
-    class DiffDriveParameters : public rclcpp::Node {
+    class DiffDriveParameters {
        public:
         /**
          * @brief Construct a new Diff Drive Parameters object
          * 
-         * @param p_node_name Node name
+         * @param p_node Diff drive node
          */
-        explicit DiffDriveParameters(const std::string &p_node_name);
-
-        /**
-         * @brief Read and update all parameters
-         * 
-         */
-        void update();
+        explicit DiffDriveParameters(rclcpp::Node* p_node);
 
         /**
          * @brief Get the Baseline (m)
          * 
          * @return double 
          */
-        auto getBaseline() const -> double;
+        auto getBaseline() -> double;
 
         /**
          * @brief Get the Left Config File
          * 
          * @return std::string 
          */
-        auto getLeftConfigFile() const -> std::string;
+        auto getLeftConfigFile() -> std::string;
 
         /**
          * @brief Get the Right Config File
          * 
          * @return std::string 
          */
-        auto getRightConfigFile() const -> std::string;
+        auto getRightConfigFile() -> std::string;
 
         /**
          * @brief Get the Pub Freq (Hz)
          * 
          * @return int 
          */
-        auto getPubFreqHz() const -> int;
+        auto getPubFreqHz() -> int;
 
         /**
          * @brief Get the Watchdog Receive (ms)
          * 
          * @return int 
          */
-        auto getWatchdogReceiveMs() const -> int;
+        auto getWatchdogReceiveMs() -> int;
 
         /**
          * @brief Get the Base Frame
          * 
          * @return std::string 
          */
-        auto getBaseFrame() const -> std::string;
+        auto getBaseFrame() -> std::string;
 
         /**
          * @brief Get the Odom Frame
          * 
          * @return std::string 
          */
-        auto getOdomFrame() const -> std::string;
+        auto getOdomFrame() -> std::string;
 
         /**
          * @brief Get the Publish Odom
@@ -105,7 +98,7 @@ namespace ezw::swd {
          * @return true if publish enabled
          * @return false 
          */
-        auto getPublishOdom() const -> bool;
+        auto getPublishOdom() -> bool;
 
         /**
          * @brief Get the Publish Tf
@@ -113,7 +106,7 @@ namespace ezw::swd {
          * @return true if publish enabled
          * @return false 
          */
-        auto getPublishTf() const -> bool;
+        auto getPublishTf() -> bool;
 
         /**
          * @brief Get the Publish Safety
@@ -121,7 +114,7 @@ namespace ezw::swd {
          * @return true if publish enabled
          * @return false 
          */
-        auto getPublishSafety() const -> bool;
+        auto getPublishSafety() -> bool;
 
         /**
          * @brief Get the Have Backward SLS
@@ -129,42 +122,38 @@ namespace ezw::swd {
          * @return true if a backward SLS is handled by a LIDAR sensor
          * @return false 
          */
-        auto getHaveBackwardSls() const -> bool;
+        auto getHaveBackwardSls() -> bool;
 
         /**
          * @brief Get the Left Encoder Relative Error
          * 
          * @return float 
          */
-        auto getLeftEncoderRelativeError() const -> float;
+        auto getLeftEncoderRelativeError() -> float;
 
         /**
          * @brief Get the Right Encoder Relative Error
          * 
          * @return float 
          */
-        auto getRightEncoderRelativeError() const -> float;
+        auto getRightEncoderRelativeError() -> float;
 
         /**
          * @brief Get the Motor Max Speed Rpm
          * 
          * @return int 
          */
-        auto getMotorMaxSpeedRpm() const -> int;
+        auto getMotorMaxSpeedRpm() -> int;
 
         /**
          * @brief Get the Motor Max SLS Speed Rpm
          * 
          * @return int 
          */
-        auto getMotorMaxSlsSpeedRpm() const -> int;
+        auto getMotorMaxSlsSpeedRpm() -> int;
 
        private:
-        /**
-         * @brief Parameters modification callback
-         * 
-         */
-        void cbParameters(const rclcpp::Parameter &p_params);
+        rclcpp::Node* m_node;
 
         double m_baseline_m;
         std::string m_left_config_file, m_right_config_file;
@@ -173,11 +162,5 @@ namespace ezw::swd {
         bool m_publish_odom, m_publish_tf, m_publish_safety, m_have_backward_sls;
         double m_left_encoder_relative_error, m_right_encoder_relative_error;
         int m_motor_max_speed_rpm, m_motor_max_sls_speed_rpm;
-
-        rclcpp::TimerBase::SharedPtr m_timer;
-        mutable std::mutex m_mutex;
-
-        std::shared_ptr<rclcpp::ParameterEventHandler> param_subscriber_;
-        std::shared_ptr<rclcpp::ParameterCallbackHandle> cb_handle_;
     };
 }  // namespace ezw::swd

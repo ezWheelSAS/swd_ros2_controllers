@@ -14,18 +14,16 @@ auto main(int argc, char** argv) -> int
     // even when executed simultaneously within the launch file.
     setvbuf(stdout, nullptr, _IONBF, BUFSIZ);
 
+    // Initialize ROS 2
     rclcpp::init(argc, argv);
 
-    rclcpp::executors::MultiThreadedExecutor exe;
+    // Create node
+    auto node = std::make_shared<ezw::swd::DiffDriveController>("diff_drive_controller");
 
-    auto params_node = std::make_shared<ezw::swd::DiffDriveParameters>("diff_drive_parameters");
-    exe.add_node(params_node);
+    // Start processing data from the node as well as the callbacks and the timer
+    rclcpp::spin(node);
 
-    auto lc_node = std::make_shared<ezw::swd::DiffDriveController>("diff_drive_controller", params_node);
-    exe.add_node(lc_node);
-
-    exe.spin();
-
+    // Shutdown the node when finished
     rclcpp::shutdown();
 
     return 0;
