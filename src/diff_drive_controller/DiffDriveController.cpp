@@ -15,7 +15,7 @@
 #include "tf2/LinearMath/Quaternion.h"
 
 #define TIMER_STATE_MACHINE_MS 1000ms
-#define TIMER_SAFETY_MS 200ms
+#define TIMER_SAFETY_MS 333ms  // Lower value (<200ms) may perturbated navigation
 #define TIMER_PARAMS_MS 1000ms
 
 using namespace std::chrono_literals;
