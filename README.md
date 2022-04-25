@@ -9,15 +9,16 @@ This package has been tested on ROS2 Galactic. It contains ROS2 nodes to control
 
 ## Installation
 
-This package has been tested on **x64_86** and **arm64** machines.
-Pre-built packages are available for ROS2 Galactic on Ubuntu 20.04 (for **x64_86** and **arm64**).
+This package has been tested on **x64_86** and ~~**arm64**~~ machines.
+Pre-built packages are available for ROS2 Galactic on Ubuntu 20.04 (for **x64_86** and ~~**arm64**~~).
 
 ### Prerequisites
 
 - A SWD® based wheel
+- `SWD firmware` (**`>= 1.0.0`**)
 - Ubuntu 20.04
 - ROS2 Galactic
-- `swd-services (>= 0.2.0)`
+- `swd-services` (**`>= 0.2.0`**)
 
 ### Ubuntu
 
@@ -66,7 +67,7 @@ The package comes with preconfigured `.launch` files which can be started using 
 - `swd_diff_drive_controller_launch.py`: sample configuration for the [SWD® Starter Kit](https://www.ez-wheel.com/en/development-kit-for-agv-and-amr) differential drive robot. To use it, run the following command:
 
 ```shell
-ros2 launch swd_ros2_controllers swd_diff_drive_controller_launch.py
+ros2 launch swd_ros2_controllers swd_diff_drive_controller.launch.py
 ```
 
 You can always use the nodes with the `ros2 run` command, the minimum required parameters are:
@@ -78,9 +79,59 @@ ros2 run swd_ros2_controllers swd_diff_drive_controller --ros-args -p baseline_m
 ```
 The corresponding D-Bus services have to be started in order to use the nodes.
 Example for the [SWD® Starter Kit](https://www.ez-wheel.com/en/development-kit-for-agv-and-amr) differential drive robot:
-* ezw-swd-left.service (/opt/ezw/usr/bin/ezw-smc-service /opt/ezw/usr/etc/ezw-smc-core/swd_left_config.ini)
-* ezw-swd-right.service (/opt/ezw/usr/bin/ezw-smc-service /opt/ezw/usr/etc/ezw-smc-core/swd_left_config.ini)
+* ezw-dbus-user-session.service (dbus-launch > /tmp/SYSTEMCTL_dbus.id) [**OPTIONAL**]
+> export $(cat /tmp/SYSTEMCTL_dbus.id) [**OPTIONAL**]
 
+> export LD_LIBRARY_PATH=/opt/ezw/usr/lib
+* ezw-swd-left.service (/opt/ezw/usr/bin/ezw-smc-service /opt/ezw/usr/etc/ezw-smc-core/swd_left_config.ini)
+* ezw-swd-right.service (/opt/ezw/usr/bin/ezw-smc-service /opt/ezw/usr/etc/ezw-smc-core/swd_right_config.ini)
+
+Example of configuration files for [SWD® Starter Kit](https://www.ez-wheel.com/en/development-kit-for-agv-and-amr) differential drive robot:
+
+swd_left_config.ini
+```
+# SMC Drive service config file
+contextId = 12
+nodeId = 4
+coreNodeId = 6
+coreNodeIsMaster = true ; Slave:false Master:true
+canDevice = can0
+dbusNamespace = swd_left
+
+HWConfigurationEntry = SWD_CORE
+HWConfigurationFile = /opt/ezw/data/configuration.json
+
+CANOpenEDSFile = /opt/ezw/usr/etc/ezw-canopen-dico/swd_core.eds
+```
+
+swd_right_config.ini
+```
+# SMC Drive service config file
+contextId = 12
+nodeId = 5
+coreNodeId = 7
+coreNodeIsMaster = true # Slave:false Master:true
+canDevice = can0
+dbusNamespace = swd_right
+
+HWConfigurationEntry = SWD_CORE
+HWConfigurationFile = /opt/ezw/data/configuration.json
+
+CANOpenEDSFile = /opt/ezw/usr/etc/ezw-canopen-dico/swd_core.eds
+```
+
+configuration.json
+```
+[
+   {
+      "name": "SWD_CORE",
+      "nbStepRevolutionElec": 6,
+      "nbPolePair": 5,
+      "reduction": 14.0,
+      "diameter": 125.0
+   }
+]
+```
 ## The `swd_diff_drive_controller` node
 
 This controller drives two ez-Wheel SWD® wheels as a differential-drive robot.
