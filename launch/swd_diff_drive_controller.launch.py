@@ -32,7 +32,8 @@ def generate_launch_description():
             description='Use simulation (Gazebo) clock if true'),
 
         DeclareLaunchArgument(
-            'baseline_m'),
+            'baseline_m',
+            default_value='0.485'),
             
         Node(
             package='swd_ros2_controllers',

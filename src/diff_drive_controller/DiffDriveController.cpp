@@ -358,7 +358,7 @@ namespace ezw::swd {
         double d_dist_left_err_m = m_params->getLeftEncoderRelativeError() * std::abs(d_dist_left_m);
         double d_dist_right_err_m = m_params->getRightEncoderRelativeError() * std::abs(d_dist_right_m);
 
-        rclcpp::Time timestamp = rclcpp::Node::now();
+        rclcpp::Time timestamp = get_clock()->now();
 
         // Kinematic model
         double d_dist_center = (d_dist_left_m + d_dist_right_m) / 2.0;
@@ -597,7 +597,7 @@ namespace ezw::swd {
             return;
         }
 
-        msg.header.stamp = rclcpp::Node::now();
+        msg.header.stamp = get_clock()->now();
         msg.header.frame_id = m_params->getBaseFrame();
 
         // Reading SBC
