@@ -19,9 +19,9 @@
 #define TIMER_PARAMS_MS 1000ms
 
 using namespace std::chrono_literals;
-using std::placeholders::_1;
 
 namespace ezw::swd {
+    using std::placeholders::_1;
 
     /// Convert integer value `p_val` to text in hexadecimal format.
     /// The minimum width is padded with leading zeros; if not
