@@ -15,7 +15,7 @@
 #include "tf2/LinearMath/Quaternion.h"
 
 #define TIMER_STATE_MACHINE_MS 1000ms
-#define TIMER_SAFETY_MS 300ms  // Lower value (<300ms) may perturbated navigation and joy teleoperation
+#define TIMER_SAFETY_MS 400ms  // Lower value (<300ms) may perturbated navigation and joy teleoperation
 #define TIMER_PARAMS_MS 1000ms
 
 using namespace std::chrono_literals;
@@ -553,6 +553,45 @@ namespace ezw::swd {
                             "Set speed to (left, right) (%d, %d) rpm",
                             speed_limit, left_speed, right_speed);
             }
+        }
+
+        int32_t lower_motor_speed = M_MIN(std::abs(left_speed), std::abs(right_speed));
+        speed_limit = -1;
+
+        // If minimum speed detected, impose the minimum speed
+        if (lower_motor_speed > 1.0 && lower_motor_speed <= 40.0) {
+            RCLCPP_INFO(get_logger(), "The target speed falls behind the minimum speed limit (%d rpm). ", lower_motor_speed);
+            speed_limit = 40.0;
+        }
+
+        // The left and right motors may have different speeds.
+        // If we need to limit one of them, we need to scale the second motor speed.
+        // This ensures a speed limitation without distorting the target path.
+        if (-1 != speed_limit) {
+            // If we enter here, we are sure that (lower_motor_speed < speed_limit).
+            // Get the ratio between the outer (lower) motor, and the speed limit.
+            double speed_ratio = static_cast<double>(speed_limit) / static_cast<double>(lower_motor_speed);
+
+            // Get the lower motor
+            if (std::abs(left_speed) < std::abs(right_speed)) {
+                // Scale right_speed
+                right_speed = static_cast<int32_t>(static_cast<double>(right_speed) * speed_ratio);
+
+                // Limit the left_speed
+                left_speed = M_SIGN(left_speed) * speed_limit;
+            }
+            else {
+                // Scale left_speed
+                left_speed = static_cast<int32_t>(static_cast<double>(left_speed) * speed_ratio);
+
+                // Limit the right_speed
+                right_speed = M_SIGN(right_speed) * speed_limit;
+            }
+
+            RCLCPP_INFO(get_logger(),
+                        "The target speed falls behind the minimum speed limit (%d rpm). "
+                        "Set speed to (left, right) (%d, %d) rpm",
+                        speed_limit, left_speed, right_speed);
         }
 
         // If the PDS state is not OPERATION_ENABLED, we send a nil speed.
