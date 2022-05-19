@@ -15,7 +15,7 @@
 #include "tf2/LinearMath/Quaternion.h"
 
 #define TIMER_STATE_MACHINE_MS 1000ms
-#define TIMER_SAFETY_MS 400ms  // Lower value (<300ms) may perturbated navigation and joy teleoperation
+#define TIMER_SAFETY_MS 500ms  // Lower value (<300ms) may perturbated navigation and joy teleoperation
 #define TIMER_PARAMS_MS 1000ms
 
 using namespace std::chrono_literals;
@@ -481,6 +481,8 @@ namespace ezw::swd {
 
     void DiffDriveController::setSpeeds(int32_t left_speed, int32_t right_speed)
     {
+        ezw_error_t err;
+
         // Get the outer motor speed
         int32_t faster_motor_speed = M_MAX(std::abs(left_speed), std::abs(right_speed));
         int32_t speed_limit = -1;
@@ -501,9 +503,25 @@ namespace ezw::swd {
             speed_limit = m_params->getMotorMaxSlsSpeedRpm();
         }
 
-        m_safety_msg_mtx.lock();
-        bool sls_signal = m_safety_msg.safety_limited_speed;
-        m_safety_msg_mtx.unlock();
+        // Reading SLS
+        bool res_l, res_r;
+        err = m_left_controller.getSafetyFunctionCommand(ezw::smccore::ISafeMotionService::SafetyFunctionId::SLS_1, res_l);
+        if (ERROR_NONE != err) {
+            RCLCPP_ERROR(get_logger(),
+                         "Error reading SLS from left motor, EZW_ERR: SMCService : "
+                         "Controller::getSafetyFunctionCommand() return error code : %d",
+                         (int)err);
+        }
+
+        err = m_right_controller.getSafetyFunctionCommand(ezw::smccore::ISafeMotionService::SafetyFunctionId::SLS_1, res_r);
+        if (ERROR_NONE != err) {
+            RCLCPP_ERROR(get_logger(),
+                         "Error reading SLS from right motor, EZW_ERR: SMCService : "
+                         "Controller::getSafetyFunctionCommand() return error code : %d",
+                         (int)err);
+        }
+
+        bool sls_signal = !(res_l || res_r);
 
         // If SLS detected, impose the safety limited speed (SLS)
         if (sls_signal && (faster_motor_speed > m_params->getMotorMaxSlsSpeedRpm())) {
@@ -600,7 +618,7 @@ namespace ezw::swd {
         }
 
         // Send the actual speed (in RPM) to left motor
-        ezw_error_t err = m_left_controller.setTargetVelocity(left_speed);
+        err = m_left_controller.setTargetVelocity(left_speed);
         if (ERROR_NONE != err) {
             RCLCPP_ERROR(get_logger(),
                          "Failed setting velocity of right motor, EZW_ERR: SMCService : "
