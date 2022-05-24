@@ -658,19 +658,19 @@ namespace ezw::swd {
         msg.header.frame_id = m_params->getBaseFrame();
 
         // Reading SBC
-        err = m_left_controller.getSafetyFunctionCommand(ezw::smccore::ISafeMotionService::SafetyFunctionId::SBC_1, res_l);
+        err = m_left_controller.getSafetyFunctionStatus(ezw::smccore::ISafeMotionService::SafetyFunctionId::SBC_1, res_l);
         if (ERROR_NONE != err) {
             RCLCPP_ERROR(get_logger(),
                          "Error reading SBC from left motor, EZW_ERR: SMCService : "
-                         "Controller::getSafetyFunctionCommand() return error code : %d",
+                         "Controller::getSafetyFunctionStatus() return error code : %d",
                          (int)err);
         }
 
-        err = m_right_controller.getSafetyFunctionCommand(ezw::smccore::ISafeMotionService::SafetyFunctionId::SBC_1, res_r);
+        err = m_right_controller.getSafetyFunctionStatus(ezw::smccore::ISafeMotionService::SafetyFunctionId::SBC_1, res_r);
         if (ERROR_NONE != err) {
             RCLCPP_ERROR(get_logger(),
                          "Error reading SBC from right motor, EZW_ERR: SMCService : "
-                         "Controller::getSafetyFunctionCommand() return error code : %d",
+                         "Controller::getSafetyFunctionStatus() return error code : %d",
                          (int)err);
         }
 
@@ -684,23 +684,23 @@ namespace ezw::swd {
         }
 
         // Reading STO
-        err = m_left_controller.getSafetyFunctionCommand(ezw::smccore::ISafeMotionService::SafetyFunctionId::STO, res_l);
+        err = m_left_controller.getSafetyFunctionStatus(ezw::smccore::ISafeMotionService::SafetyFunctionId::STO, res_l);
         if (ERROR_NONE != err) {
             RCLCPP_ERROR(get_logger(),
                          "Error reading STO from left motor, EZW_ERR: SMCService : "
-                         "Controller::getSafetyFunctionCommand() return error code : %d",
+                         "Controller::getSafetyFunctionStatus() return error code : %d",
                          (int)err);
         }
 
-        err = m_right_controller.getSafetyFunctionCommand(ezw::smccore::ISafeMotionService::SafetyFunctionId::STO, res_r);
+        err = m_right_controller.getSafetyFunctionStatus(ezw::smccore::ISafeMotionService::SafetyFunctionId::STO, res_r);
         if (ERROR_NONE != err) {
             RCLCPP_ERROR(get_logger(),
                          "Error reading STO from right motor, EZW_ERR: SMCService : "
-                         "Controller::getSafetyFunctionCommand() return error code : %d",
+                         "Controller::getSafetyFunctionStatus() return error code : %d",
                          (int)err);
         }
 
-        msg.safe_torque_off = !(res_l || res_r);
+        msg.safe_torque_off = (res_l || res_r);
         if (m_first_entry || msg.safe_torque_off != m_safety_msg.safe_torque_off) {
             RCLCPP_INFO(get_logger(), msg.safe_torque_off ? "STO enabled." : "STO disabled.");
         }
