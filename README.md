@@ -15,10 +15,10 @@ Pre-built packages are available for ROS2 Galactic on Ubuntu 20.04 (for **x64_86
 ### Prerequisites
 
 - A SWD® based wheel
-- `SWD firmware` (**`>= 1.0.0`**)
+- `SWD firmware` (**`> 1.0.1`**)
 - Ubuntu 20.04
 - ROS2 Galactic
-- `swd-services` (**`>= 0.2.0`**)
+- `swd-services` (**`>= 0.2.4`**)
 
 ### Ubuntu
 
@@ -153,6 +153,7 @@ This controller drives two ez-Wheel SWD® wheels as a differential-drive robot.
 - `have_backward_sls` of type **`bool`**: Specifies if the robot have a backward SLS signal, coming for example from a back-facing security LiDAR. If an SLS signal is available for backward movements, set this to `true` to take it into account. Otherwise, set the parameter to `false`, this will limit all backward movements to the selected `safety_limited_speed_rpm` (default `false`).
 - `left_encoder_relative_error` of type **`double`**: Relative error for left wheel encoder, used to calculate variances and propagate them to calculate the uncertainties in the odometry message. Each encoder acquisition **`DIFF_LEFT_ENCODER`** is modeled as: **`DIFF_LEFT_ENCODER +/- abs(left_encoder_relative_error * DIFF_LEFT_ENCODER)`** (default `0.2` corresponding to 20% of error).
 - `right_encoder_relative_error` of type **`double`**: Relative error for right wheel encoder, used to calculate variances and propagate them to calculate the uncertainties in the odometry message. Each encoder acquisition **`DIFF_RIGHT_ENCODER`** is modeled as: **`DIFF_RIGHT_ENCODER +/- abs(right_encoder_relative_error * DIFF_RIGHT_ENCODER)`** (default `0.2` corresponding to 20% of error).
+- `fine_odometry` of type **`bool`**: Use fine odometry (default `false`).
 
 ### Subscribed Topics
 

@@ -89,6 +89,7 @@ namespace ezw::swd {
             m_node->declare_parameter<double>("left_encoder_relative_error", DEFAULT_LEFT_RELATIVE_ERROR, descriptor);
             m_node->declare_parameter<double>("right_encoder_relative_error", DEFAULT_RIGHT_RELATIVE_ERROR, descriptor);
         }
+        m_node->declare_parameter<bool>("fine_odometry", DEFAULT_FINE_ODOMETRY);
     }
 
     auto DiffDriveParameters::getBaseline() -> double
@@ -255,4 +256,16 @@ namespace ezw::swd {
         }
         return m_motor_max_sls_speed_rpm;
     }
+
+    auto DiffDriveParameters::getFineOdometry() -> bool
+    {
+        // Fine odometry enabled
+        auto l_fine_odometry = m_fine_odometry;
+        m_node->get_parameter("fine_odometry", m_fine_odometry);
+        if (m_fine_odometry != l_fine_odometry) {
+            RCLCPP_INFO(m_node->get_logger(), "fine_odometry : %d", m_fine_odometry);
+        }
+        return m_fine_odometry;
+    }
+
 }  // namespace ezw::swd

@@ -134,20 +134,20 @@ namespace ezw::swd {
         }
 
         /* Read initial encoders values */
-        err = m_left_controller.getFineOdometryValue(m_dist_left_prev_mm);
+        err = m_params->getFineOdometry() ? m_left_controller.getFineOdometryValue(m_dist_left_prev_mm) : m_left_controller.getOdometryValue(m_dist_left_prev_mm);
         if (ERROR_NONE != err) {
             RCLCPP_ERROR(get_logger(),
                          "Failed initial reading from left motor, EZW_ERR: SMCService : "
-                         "Controller::getFineOdometryValue() return error code : %d",
+                         "Controller::getOdometryValue() return error code : %d",
                          (int)err);
             throw std::runtime_error("Initial reading from left motor failed");
         }
 
-        err = m_right_controller.getFineOdometryValue(m_dist_right_prev_mm);
+        err = m_params->getFineOdometry() ? m_right_controller.getFineOdometryValue(m_dist_right_prev_mm) : m_right_controller.getOdometryValue(m_dist_right_prev_mm);
         if (ERROR_NONE != err) {
             RCLCPP_ERROR(get_logger(),
                          "Failed initial reading from right motor, EZW_ERR: SMCService : "
-                         "Controller::getFineOdometryValue() return error code : %d",
+                         "Controller::getOdometryValue() return error code : %d",
                          (int)err);
             throw std::runtime_error("Initial reading from right motor failed");
         }
@@ -331,13 +331,13 @@ namespace ezw::swd {
         int32_t left_dist_now_mm = 0, right_dist_now_mm = 0;
 
         ezw_error_t err_l, err_r;
-        err_l = m_left_controller.getFineOdometryValue(left_dist_now_mm);    // In mm
-        err_r = m_right_controller.getFineOdometryValue(right_dist_now_mm);  // In mm
+        err_l = m_params->getFineOdometry() ? m_left_controller.getFineOdometryValue(left_dist_now_mm) : m_left_controller.getOdometryValue(left_dist_now_mm);      // In mm
+        err_r = m_params->getFineOdometry() ? m_right_controller.getFineOdometryValue(right_dist_now_mm) : m_right_controller.getOdometryValue(right_dist_now_mm);  // In mm
 
         if (ERROR_NONE != err_l) {
             RCLCPP_ERROR(get_logger(),
                          "Failed reading from left motor, EZW_ERR: SMCService : "
-                         "Controller::getFineOdometryValue() return error code : %d",
+                         "Controller::getOdometryValue() return error code : %d",
                          (int)err_l);
             return;
         }
@@ -345,7 +345,7 @@ namespace ezw::swd {
         if (ERROR_NONE != err_r) {
             RCLCPP_ERROR(get_logger(),
                          "Failed reading from right motor, EZW_ERR: SMCService : "
-                         "Controller::getFineOdometryValue() return error code : %d",
+                         "Controller::getOdometryValue() return error code : %d",
                          (int)err_r);
             return;
         }

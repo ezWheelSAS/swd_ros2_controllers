@@ -26,6 +26,7 @@ constexpr auto DEFAULT_MOTOR_MAX_SLS_RPM = 490;
 constexpr auto DEFAULT_HAVE_BACKWARD_SLS = false;
 constexpr auto DEFAULT_LEFT_RELATIVE_ERROR = 0.2;   // 20% of error
 constexpr auto DEFAULT_RIGHT_RELATIVE_ERROR = 0.2;  // 20% of error
+constexpr auto DEFAULT_FINE_ODOMETRY = false;
 
 namespace ezw::swd {
     using namespace std::chrono_literals;
@@ -93,7 +94,7 @@ namespace ezw::swd {
         auto getOdomFrame() -> std::string;
 
         /**
-         * @brief Get the Publish Odom
+         * @brief Get the Publish Odom flag
          * 
          * @return true if publish enabled
          * @return false 
@@ -109,7 +110,7 @@ namespace ezw::swd {
         auto getPublishTf() -> bool;
 
         /**
-         * @brief Get the Publish Safety
+         * @brief Get the Publish Safety flag
          * 
          * @return true if publish enabled
          * @return false 
@@ -117,7 +118,7 @@ namespace ezw::swd {
         auto getPublishSafety() -> bool;
 
         /**
-         * @brief Get the Have Backward SLS
+         * @brief Get the Have Backward SLS flag
          * 
          * @return true if a backward SLS is handled by a LIDAR sensor
          * @return false 
@@ -152,6 +153,14 @@ namespace ezw::swd {
          */
         auto getMotorMaxSlsSpeedRpm() -> int;
 
+        /**
+         * @brief Get the Fine Odometry flag
+         * 
+         * @return true 
+         * @return false 
+         */
+        auto getFineOdometry() -> bool;
+
        private:
         rclcpp::Node* m_node;
 
@@ -159,7 +168,7 @@ namespace ezw::swd {
         std::string m_left_config_file, m_right_config_file;
         int m_pub_freq_hz, m_watchdog_receive_ms;
         std::string m_base_frame, m_odom_frame;
-        bool m_publish_odom, m_publish_tf, m_publish_safety, m_have_backward_sls;
+        bool m_publish_odom, m_publish_tf, m_publish_safety, m_have_backward_sls, m_fine_odometry;
         double m_left_encoder_relative_error, m_right_encoder_relative_error;
         int m_motor_max_speed_rpm, m_motor_max_sls_speed_rpm;
     };
