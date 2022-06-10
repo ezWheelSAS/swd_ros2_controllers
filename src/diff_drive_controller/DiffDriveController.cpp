@@ -188,8 +188,6 @@ namespace ezw::swd {
         pds_state_l = pds_state_r = smccore::IPDSService::PDSState::SWITCH_ON_DISABLED;
 
         err_l = m_left_controller.getNMTState(nmt_state_l);
-        err_r = m_right_controller.getNMTState(nmt_state_r);
-
         if (ERROR_NONE != err_l) {
             RCLCPP_ERROR(get_logger(),
                          "Failed to get the NMT state for left motor, EZW_ERR: SMCService : "
@@ -197,6 +195,7 @@ namespace ezw::swd {
                          (int)err_l);
         }
 
+        err_r = m_right_controller.getNMTState(nmt_state_r);
         if (ERROR_NONE != err_r) {
             RCLCPP_ERROR(get_logger(),
                          "Failed to get the NMT state for right motor, EZW_ERR: SMCService : "
@@ -212,52 +211,23 @@ namespace ezw::swd {
         }
 
         if (!m_nmt_ok) {
-            uint8_t node_id_l, node_id_r;
-            std::string can_device_l, can_device_r;
-
-            err_l = m_left_controller.getConnectedNodeId(node_id_l);
-
-            if (ERROR_NONE != err_l) {
+            // Broadcast NMT command PREOP to all canopen nodes
+            int err = m_left_controller.broadcastNMTState(smccore::INMTService::NMTCommand::PREOP);
+            if (ERROR_NONE != err) {
                 RCLCPP_ERROR(get_logger(),
-                             "Failed to set NMT state for left motor, EZW_ERR: SMCService : "
-                             "Controller::getConnectedNodeId() return error code : %d",
-                             (int)err_l);
+                             "Failed to broadcast NMT command PREOP"
+                             "Controller::broadcastNMTState() return error code : %d",
+                             (int)err);
             }
             else {
-                err_l = m_left_controller.getCanDevice(can_device_l);
-
-                if (ERROR_NONE != err_l) {
+                usleep((10) * 1000);
+                // Broadcast NMT command OPER to all canopen nodes
+                err = m_left_controller.broadcastNMTState(smccore::INMTService::NMTCommand::OPER);
+                if (ERROR_NONE != err) {
                     RCLCPP_ERROR(get_logger(),
-                                 "Failed to set NMT state for left motor, EZW_ERR: SMCService : "
-                                 "Controller::getCanDevice() return error code : %d",
-                                 (int)err_l);
-                }
-                else {
-                    std::string cmd = "cansend " + can_device_l + " 000#01" + int_to_hex(node_id_l, 2);
-                    system(cmd.c_str());
-                }
-            }
-
-            err_r = m_right_controller.getConnectedNodeId(node_id_r);
-
-            if (ERROR_NONE != err_r) {
-                RCLCPP_ERROR(get_logger(),
-                             "Failed to set NMT state for right motor, EZW_ERR: SMCService : "
-                             "Controller::getConnectedNodeId() return error code : %d",
-                             (int)err_r);
-            }
-            else {
-                err_r = m_right_controller.getCanDevice(can_device_r);
-
-                if (ERROR_NONE != err_r) {
-                    RCLCPP_ERROR(get_logger(),
-                                 "Failed to set NMT state for right motor, EZW_ERR: SMCService : "
-                                 "Controller::getCanDevice() return error code : %d",
-                                 (int)err_r);
-                }
-                else {
-                    std::string cmd = "cansend " + can_device_r + " 000#01" + int_to_hex(node_id_r, 2);
-                    system(cmd.c_str());
+                                 "Failed to broadcast NMT state OPER"
+                                 "Controller::broadcastNMTState() return error code : %d",
+                                 (int)err);
                 }
             }
         }
