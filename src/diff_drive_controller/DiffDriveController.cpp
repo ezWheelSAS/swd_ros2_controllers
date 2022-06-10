@@ -449,6 +449,9 @@ namespace ezw::swd {
         setSpeeds(left, right);
     }
 
+#define CONF_MAX_DELTA_SPEED_SLS 140  // in rpm motor
+#define CONF_MAX_DELTA_SPEED 1000     // in rpm motor
+
     void DiffDriveController::setSpeeds(int32_t left_speed, int32_t right_speed)
     {
         ezw_error_t err;
@@ -507,21 +510,11 @@ namespace ezw::swd {
             // Get the ratio between the outer (faster) motor, and the speed limit.
             double speed_ratio = static_cast<double>(speed_limit) / static_cast<double>(faster_motor_speed);
 
-            // Get the faster motor
-            if (std::abs(left_speed) > std::abs(right_speed)) {
-                // Scale right_speed
-                right_speed = static_cast<int32_t>(static_cast<double>(right_speed) * speed_ratio);
+            // Scale right_speed
+            right_speed = static_cast<int32_t>(static_cast<double>(right_speed) * speed_ratio);
 
-                // Limit the left_speed
-                left_speed = M_SIGN(left_speed) * speed_limit;
-            }
-            else {
-                // Scale left_speed
-                left_speed = static_cast<int32_t>(static_cast<double>(left_speed) * speed_ratio);
-
-                // Limit the right_speed
-                right_speed = M_SIGN(right_speed) * speed_limit;
-            }
+            // Scale left_speed
+            left_speed = static_cast<int32_t>(static_cast<double>(left_speed) * speed_ratio);
 
             if (max_limited && sls_limited) {
                 RCLCPP_INFO(get_logger(),
@@ -560,26 +553,49 @@ namespace ezw::swd {
             // Get the ratio between the outer (lower) motor, and the speed limit.
             double speed_ratio = static_cast<double>(speed_limit) / static_cast<double>(lower_motor_speed);
 
-            // Get the lower motor
-            if (std::abs(left_speed) < std::abs(right_speed)) {
-                // Scale right_speed
-                right_speed = static_cast<int32_t>(static_cast<double>(right_speed) * speed_ratio);
+            // Scale right_speed
+            right_speed = static_cast<int32_t>(static_cast<double>(right_speed) * speed_ratio);
 
-                // Limit the left_speed
-                left_speed = M_SIGN(left_speed) * speed_limit;
-            }
-            else {
-                // Scale left_speed
-                left_speed = static_cast<int32_t>(static_cast<double>(left_speed) * speed_ratio);
-
-                // Limit the right_speed
-                right_speed = M_SIGN(right_speed) * speed_limit;
-            }
+            // Scale left_speed
+            left_speed = static_cast<int32_t>(static_cast<double>(left_speed) * speed_ratio);
 
             RCLCPP_INFO(get_logger(),
                         "The target speed falls behind the minimum speed limit (%d rpm). "
                         "Set speed to (left, right) (%d, %d) rpm",
                         speed_limit, left_speed, right_speed);
+        }
+
+        // Get the delta wheel speed
+        int32_t delta_wheel_speed = std::abs(left_speed - right_speed);
+        int32_t delta_speed_limit = -1;
+
+        // Limit to the maximum allowed delta speed
+        if (delta_wheel_speed > CONF_MAX_DELTA_SPEED) {
+            delta_speed_limit = CONF_MAX_DELTA_SPEED;
+        }
+
+        // If SLS detected, limit to the maximum allowed delta safety limited speed (SLS)
+        if (sls_signal && (delta_wheel_speed > CONF_MAX_DELTA_SPEED_SLS)) {
+            delta_speed_limit = CONF_MAX_DELTA_SPEED_SLS;
+        }
+
+        // The left and right wheels may have different speeds.
+        // If we need to limit one of them, we need to scale the second wheel speed.
+        // This ensures a delta speed limitation without distorting the target path.
+        if (-1 != delta_speed_limit) {
+            // Get the ratio between the max allowed delta speed limit, and the current delta speed limit.
+            double delta_speed_ratio = static_cast<double>(delta_speed_limit) / static_cast<double>(delta_wheel_speed);
+
+            // Scale right_speed
+            right_speed = static_cast<int32_t>(static_cast<double>(right_speed) * delta_speed_ratio);
+
+            // Scale left_speed
+            left_speed = static_cast<int32_t>(static_cast<double>(left_speed) * delta_speed_ratio);
+
+            RCLCPP_INFO(get_logger(),
+                        "The target speed exceeds the maximum delta speed limit (%d rpm). "
+                        "Speed set to (left, right) (%d, %d) rpm",
+                        delta_speed_limit, left_speed, right_speed);
         }
 
         // If the PDS state is not OPERATION_ENABLED, we send a nil speed.
@@ -591,13 +607,13 @@ namespace ezw::swd {
         err = m_left_controller.setTargetVelocity(left_speed);
         if (ERROR_NONE != err) {
             RCLCPP_ERROR(get_logger(),
-                         "Failed setting velocity of right motor, EZW_ERR: SMCService : "
+                         "Failed setting velocity of left motor, EZW_ERR: SMCService : "
                          "Controller::setTargetVelocity() return error code : %d",
                          (int)err);
             return;
         }
 
-        // Send the actual speed (in RPM) to left motor
+        // Send the actual speed (in RPM) to right motor
         err = m_right_controller.setTargetVelocity(right_speed);
         if (ERROR_NONE != err) {
             RCLCPP_ERROR(get_logger(),
