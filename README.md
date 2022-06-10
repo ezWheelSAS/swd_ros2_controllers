@@ -14,7 +14,7 @@ Pre-built packages are available for ROS2 Galactic on Ubuntu 20.04 (for **x64_86
 
 ### Prerequisites
 
-- A SWD® based wheel
+- Two SWD® based wheels
 - `SWD firmware` (**`> 1.0.1`**)
 - Ubuntu 20.04
 - ROS2 Galactic
@@ -63,10 +63,11 @@ source ~/ros2_ws/install/setup.bash
 
 ## Usage
 
-The package comes with preconfigured `.launch` files which can be started using the `ros2 launch` command:
+The package comes with a preconfigured `.launch` files which can be started using the `ros2 launch` command:
 - `swd_diff_drive_controller_launch.py`: sample configuration for the [SWD® Starter Kit](https://www.ez-wheel.com/en/development-kit-for-agv-and-amr) differential drive robot. To use it, run the following command:
 
 ```shell
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/ezw/usr/lib
 ros2 launch swd_ros2_controllers swd_diff_drive_controller.launch.py
 ```
 
@@ -75,6 +76,7 @@ You can always use the nodes with the `ros2 run` command, the minimum required p
 - `swd_ros2_controllers`:
 
 ```shell
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/ezw/usr/lib
 ros2 run swd_ros2_controllers swd_diff_drive_controller --ros-args -p baseline_m:=0.485
 ```
 The corresponding D-Bus services have to be started in order to use the nodes.
@@ -82,7 +84,7 @@ Example for the [SWD® Starter Kit](https://www.ez-wheel.com/en/development-kit-
 * ezw-dbus-user-session.service (dbus-launch > /tmp/SYSTEMCTL_dbus.id) [**OPTIONAL**]
 > export $(cat /tmp/SYSTEMCTL_dbus.id) [**OPTIONAL**]
 
-> export LD_LIBRARY_PATH=/opt/ezw/usr/lib
+> export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/ezw/usr/lib
 * ezw-swd-left.service (/opt/ezw/usr/bin/ezw-smc-service /opt/ezw/usr/etc/ezw-smc-core/swd_left_config.ini)
 * ezw-swd-right.service (/opt/ezw/usr/bin/ezw-smc-service /opt/ezw/usr/etc/ezw-smc-core/swd_right_config.ini)
 
@@ -94,7 +96,7 @@ swd_left_config.ini
 contextId = 12
 nodeId = 4
 coreNodeId = 6
-coreNodeIsMaster = true ; Slave:false Master:true
+coreNodeIsMaster = true # Slave:false Master:true
 canDevice = can0
 dbusNamespace = swd_left
 
@@ -153,7 +155,7 @@ This controller drives two ez-Wheel SWD® wheels as a differential-drive robot.
 - `have_backward_sls` of type **`bool`**: Specifies if the robot have a backward SLS signal, coming for example from a back-facing security LiDAR. If an SLS signal is available for backward movements, set this to `true` to take it into account. Otherwise, set the parameter to `false`, this will limit all backward movements to the selected `safety_limited_speed_rpm` (default `false`).
 - `left_encoder_relative_error` of type **`double`**: Relative error for left wheel encoder, used to calculate variances and propagate them to calculate the uncertainties in the odometry message. Each encoder acquisition **`DIFF_LEFT_ENCODER`** is modeled as: **`DIFF_LEFT_ENCODER +/- abs(left_encoder_relative_error * DIFF_LEFT_ENCODER)`** (default `0.2` corresponding to 20% of error).
 - `right_encoder_relative_error` of type **`double`**: Relative error for right wheel encoder, used to calculate variances and propagate them to calculate the uncertainties in the odometry message. Each encoder acquisition **`DIFF_RIGHT_ENCODER`** is modeled as: **`DIFF_RIGHT_ENCODER +/- abs(right_encoder_relative_error * DIFF_RIGHT_ENCODER)`** (default `0.2` corresponding to 20% of error).
-- `fine_odometry` of type **`bool`**: Use fine odometry (default `false`).
+- `fine_odometry` of type **`bool`**: Use fine odometry (default `false`). See fine_odometry.md for procedure to follow.
 
 ### Subscribed Topics
 
