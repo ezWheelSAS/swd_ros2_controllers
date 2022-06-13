@@ -536,35 +536,6 @@ namespace ezw::swd {
             }
         }
 
-        int32_t lower_motor_speed = M_MIN(std::abs(left_speed), std::abs(right_speed));
-        speed_limit = -1;
-
-        // If minimum speed detected, impose the minimum speed
-        if (lower_motor_speed > 1.0 && lower_motor_speed <= 40.0) {
-            RCLCPP_INFO(get_logger(), "The target speed falls behind the minimum speed limit (%d rpm). ", lower_motor_speed);
-            speed_limit = 40.0;
-        }
-
-        // The left and right motors may have different speeds.
-        // If we need to limit one of them, we need to scale the second motor speed.
-        // This ensures a speed limitation without distorting the target path.
-        if (-1 != speed_limit) {
-            // If we enter here, we are sure that (lower_motor_speed < speed_limit).
-            // Get the ratio between the outer (lower) motor, and the speed limit.
-            double speed_ratio = static_cast<double>(speed_limit) / static_cast<double>(lower_motor_speed);
-
-            // Scale right_speed
-            right_speed = static_cast<int32_t>(static_cast<double>(right_speed) * speed_ratio);
-
-            // Scale left_speed
-            left_speed = static_cast<int32_t>(static_cast<double>(left_speed) * speed_ratio);
-
-            RCLCPP_INFO(get_logger(),
-                        "The target speed falls behind the minimum speed limit (%d rpm). "
-                        "Set speed to (left, right) (%d, %d) rpm",
-                        speed_limit, left_speed, right_speed);
-        }
-
         // Get the delta wheel speed
         int32_t delta_wheel_speed = std::abs(left_speed - right_speed);
         int32_t delta_speed_limit = -1;
@@ -596,6 +567,35 @@ namespace ezw::swd {
                         "The target speed exceeds the maximum delta speed limit (%d rpm). "
                         "Speed set to (left, right) (%d, %d) rpm",
                         delta_speed_limit, left_speed, right_speed);
+        }
+
+        int32_t lower_motor_speed = M_MIN(std::abs(left_speed), std::abs(right_speed));
+        speed_limit = -1;
+
+        // If not SLS detected && minimum speed detected, impose the minimum speed
+        if (!sls_signal && lower_motor_speed > 1.0 && lower_motor_speed <= 40.0) {
+            RCLCPP_INFO(get_logger(), "The target speed falls behind the minimum speed limit (%d rpm). ", lower_motor_speed);
+            speed_limit = 40.0;
+        }
+
+        // The left and right motors may have different speeds.
+        // If we need to limit one of them, we need to scale the second motor speed.
+        // This ensures a speed limitation without distorting the target path.
+        if (-1 != speed_limit) {
+            // If we enter here, we are sure that (lower_motor_speed < speed_limit).
+            // Get the ratio between the outer (lower) motor, and the speed limit.
+            double speed_ratio = static_cast<double>(speed_limit) / static_cast<double>(lower_motor_speed);
+
+            // Scale right_speed
+            right_speed = static_cast<int32_t>(static_cast<double>(right_speed) * speed_ratio);
+
+            // Scale left_speed
+            left_speed = static_cast<int32_t>(static_cast<double>(left_speed) * speed_ratio);
+
+            RCLCPP_INFO(get_logger(),
+                        "The target speed falls behind the minimum speed limit (%d rpm). "
+                        "Set speed to (left, right) (%d, %d) rpm",
+                        speed_limit, left_speed, right_speed);
         }
 
         // If the PDS state is not OPERATION_ENABLED, we send a nil speed.
