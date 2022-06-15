@@ -169,7 +169,7 @@ namespace ezw::swd {
         int m_pub_freq_hz, m_watchdog_receive_ms;
         std::string m_base_frame, m_odom_frame;
         bool m_publish_odom, m_publish_tf, m_publish_safety, m_have_backward_sls, m_fine_odometry;
-        double m_left_encoder_relative_error, m_right_encoder_relative_error;
+        float m_left_encoder_relative_error, m_right_encoder_relative_error;
         int m_motor_max_speed_rpm, m_motor_max_sls_speed_rpm;
     };
 }  // namespace ezw::swd

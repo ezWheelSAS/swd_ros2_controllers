@@ -12,6 +12,7 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -31,10 +32,9 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 
 ament_export_dependencies(rosidl_default_runtime)
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Project definition, variable and dependencies
-#------------------------------------------------------------------------------
-
+# ------------------------------------------------------------------------------
 set(CMAKE_PROJECT_NAME ${PROJECT_NAME})
 set(CMAKE_SYSTEM_NAME Linux)
 
@@ -44,25 +44,22 @@ set(PKG_CONFIG_PATH /opt/ezw/usr/lib/pkgconfig CACHE PATH "")
 set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:${PKG_CONFIG_PATH}")
 message(STATUS "Pkgconfig extra path are: $ENV{PKG_CONFIG_PATH} ")
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # pkgconfig
-#------------------------------------------------------------------------------
-
+# ------------------------------------------------------------------------------
 find_package(PkgConfig REQUIRED)
 
-#############
-## Clang ##
-#############
+# ############
+# # Clang ##
+# ############
 
 # Allow Clang-tidy
 # set(CMAKE_CXX_CLANG_TIDY clang-tidy-12 --config-file=${CMAKE_SOURCE_DIR}/.clang-tidy --use-color --header-filter=${CMAKE_SOURCE_DIR}/include/)
 # set(DCMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Project configuration
-#------------------------------------------------------------------------------
-
+# ------------------------------------------------------------------------------
 include_directories(
   ${CMAKE_SOURCE_DIR}/include
   ${CMAKE_SOURCE_DIR}/msg

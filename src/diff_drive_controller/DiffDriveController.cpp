@@ -23,18 +23,6 @@ using namespace std::chrono_literals;
 namespace ezw::swd {
     using std::placeholders::_1;
 
-    /// Convert integer value `p_val` to text in hexadecimal format.
-    /// The minimum width is padded with leading zeros; if not
-    /// specified, this `width` is derived from the type of the
-    /// argument. Function suitable from char to long long.p_
-    template <typename T>
-    inline auto int_to_hex(T p_val, int p_width = sizeof(T) * 2) -> std::string
-    {
-        std::stringstream ss;
-        ss << std::setfill('0') << std::setw(p_width) << std::hex << (p_val | 0);
-        return ss.str();
-    }
-
     DiffDriveController::DiffDriveController(const std::string &p_node_name) : Node(p_node_name)
     {
         // Create parameters
@@ -68,8 +56,8 @@ namespace ezw::swd {
         // Connect to the right motor
 
         /* Load motor config file */
-        auto lConfig = std::make_shared<ezw::smccore::Config>();
-        err = lConfig->load(m_params->getRightConfigFile());
+        auto config = std::make_shared<ezw::smccore::Config>();
+        err = config->load(m_params->getRightConfigFile());
         if (err != ERROR_NONE) {
             RCLCPP_ERROR(get_logger(),
                          "Failed loading right motor's config file <%s>, CONTEXT_ID: %d, EZW_ERR: SMCService : "
@@ -78,18 +66,18 @@ namespace ezw::swd {
             throw std::runtime_error("Failed loading right motor's config file");
         }
 
-        m_right_wheel_diameter_m = lConfig->getDiameter() * 1e-3;
-        m_r_motor_reduction = lConfig->getReduction();
+        m_right_wheel_diameter_m = config->getDiameter() * 1e-3;
+        m_r_motor_reduction = config->getReduction();
 
         /* Init DBus client */
         RCLCPP_INFO(get_logger(), "Initializing right dbus client !");
 
-        std::string lDbusNamespace = lConfig->getDbusNamespace();
-        std::transform(lDbusNamespace.begin(), lDbusNamespace.end(), lDbusNamespace.begin(), ::tolower);
+        std::string dbus_namespace = config->getDbusNamespace();
+        std::transform(dbus_namespace.begin(), dbus_namespace.end(), dbus_namespace.begin(), ::tolower);
 
-        std::string lServiceInstanceName = "commonapi.ezw.smcservice." + lDbusNamespace;
+        std::string service_instance_name = "commonapi.ezw.smcservice." + dbus_namespace;
 
-        err = m_right_controller.init(lConfig->getContextId(), "local", lServiceInstanceName);
+        err = m_right_controller.init(config->getContextId(), "local", service_instance_name);
         if (err != ERROR_NONE) {
             RCLCPP_ERROR(get_logger(),
                          "Failed initializing right motor, EZW_ERR: SMCService : "
@@ -104,7 +92,7 @@ namespace ezw::swd {
         }
 
         /* Load motor config file */
-        err = lConfig->load(m_params->getLeftConfigFile());
+        err = config->load(m_params->getLeftConfigFile());
         if (err != ERROR_NONE) {
             RCLCPP_ERROR(get_logger(),
                          "Failed loading left motor's config file <%s>, CONTEXT_ID: %d, EZW_ERR: SMCService : "
@@ -113,18 +101,18 @@ namespace ezw::swd {
             throw std::runtime_error("Failed initializing left motor");
         }
 
-        m_left_wheel_diameter_m = lConfig->getDiameter() * 1e-3;
-        m_l_motor_reduction = lConfig->getReduction();
+        m_left_wheel_diameter_m = config->getDiameter() * 1e-3;
+        m_l_motor_reduction = config->getReduction();
 
         /* Init DBus client */
         RCLCPP_INFO(get_logger(), "Initializing left dbus client !");
 
-        lDbusNamespace = lConfig->getDbusNamespace();
-        std::transform(lDbusNamespace.begin(), lDbusNamespace.end(), lDbusNamespace.begin(), ::tolower);
+        dbus_namespace = config->getDbusNamespace();
+        std::transform(dbus_namespace.begin(), dbus_namespace.end(), dbus_namespace.begin(), ::tolower);
 
-        lServiceInstanceName = "commonapi.ezw.smcservice." + lDbusNamespace;
+        service_instance_name = "commonapi.ezw.smcservice." + dbus_namespace;
 
-        err = m_left_controller.init(lConfig->getContextId(), "local", lServiceInstanceName);
+        err = m_left_controller.init(config->getContextId(), "local", service_instance_name);
         if (err != ERROR_NONE) {
             RCLCPP_ERROR(get_logger(),
                          "Failed initializing left motor, EZW_ERR: SMCService : "
@@ -212,7 +200,7 @@ namespace ezw::swd {
 
         if (!m_nmt_ok) {
             // Broadcast NMT command PREOP to all canopen nodes
-            int err = m_left_controller.broadcastNMTState(smccore::INMTService::NMTCommand::PREOP);
+            ezw_error_t err = m_left_controller.broadcastNMTState(smccore::INMTService::NMTCommand::PREOP);
             if (ERROR_NONE != err) {
                 RCLCPP_ERROR(get_logger(),
                              "Failed to broadcast NMT command PREOP"
@@ -273,24 +261,24 @@ namespace ezw::swd {
         m_first_entry = false;
     }
 
-    void DiffDriveController::cbSoftBrake(const std_msgs::msg::Bool &msg)
+    void DiffDriveController::cbSoftBrake(const std_msgs::msg::Bool &p_msg)
     {
         // true => Enable brake
         // false => Release brake
-        ezw_error_t err = m_left_controller.setHalt(msg.data);
+        ezw_error_t err = m_left_controller.setHalt(p_msg.data != 0);
         if (ERROR_NONE != err) {
-            RCLCPP_ERROR(get_logger(), "SoftBrake: Failed %s left motor, EZW_ERR: %d", msg.data ? "braking" : "releasing", (int)err);
+            RCLCPP_ERROR(get_logger(), "SoftBrake: Failed %s left motor, EZW_ERR: %d", p_msg.data ? "braking" : "releasing", (int)err);
         }
         else {
-            RCLCPP_INFO(get_logger(), "SoftBrake: Left motor's soft brake %s", msg.data ? "activated" : "disabled");
+            RCLCPP_INFO(get_logger(), "SoftBrake: Left motor's soft brake %s", p_msg.data ? "activated" : "disabled");
         }
 
-        err = m_right_controller.setHalt(msg.data);
+        err = m_right_controller.setHalt(p_msg.data != 0);
         if (ERROR_NONE != err) {
-            RCLCPP_ERROR(get_logger(), "SoftBrake: Failed %s right motor, EZW_ERR: %d", msg.data ? "braking" : "releasing", (int)err);
+            RCLCPP_ERROR(get_logger(), "SoftBrake: Failed %s right motor, EZW_ERR: %d", p_msg.data ? "braking" : "releasing", (int)err);
         }
         else {
-            RCLCPP_INFO(get_logger(), "SoftBrake: Right motor's soft brake %s", msg.data ? "activated" : "disabled");
+            RCLCPP_INFO(get_logger(), "SoftBrake: Right motor's soft brake %s", p_msg.data ? "activated" : "disabled");
         }
     }
 
@@ -328,7 +316,7 @@ namespace ezw::swd {
         double d_dist_left_err_m = m_params->getLeftEncoderRelativeError() * std::abs(d_dist_left_m);
         double d_dist_right_err_m = m_params->getRightEncoderRelativeError() * std::abs(d_dist_right_m);
 
-        rclcpp::Time timestamp = get_clock()->now();
+        auto timestamp = get_clock()->now();
 
         // Kinematic model
         double d_dist_center = (d_dist_left_m + d_dist_right_m) / 2.0;
@@ -397,6 +385,7 @@ namespace ezw::swd {
             // Send TF
             m_tf2_br->sendTransform(tf_odom_baselink);
         }
+
         m_x_prev = x_now;
         m_y_prev = y_now;
         m_theta_prev = theta_now;
@@ -407,19 +396,19 @@ namespace ezw::swd {
         m_dist_right_prev_mm = right_dist_now_mm;
     }
 
-    void DiffDriveController::cbSetSpeed(const geometry_msgs::msg::Point &speed)
+    void DiffDriveController::cbSetSpeed(const geometry_msgs::msg::Point &p_speed)
     {
         m_timer_watchdog->reset();
 
         // Convert rad/s wheel speed to rpm motor speed
-        int32_t left = static_cast<int32_t>(speed.x * m_l_motor_reduction * 60.0 / (2.0 * M_PI));
-        int32_t right = static_cast<int32_t>(speed.y * m_r_motor_reduction * 60.0 / (2.0 * M_PI));
+        auto left = static_cast<int32_t>(p_speed.x * m_l_motor_reduction * 60.0 / (2.0 * M_PI));
+        auto right = static_cast<int32_t>(p_speed.y * m_r_motor_reduction * 60.0 / (2.0 * M_PI));
 
 #if VERBOSE_OUTPUT
         RCLCPP_INFO(get_logger(),
                     "Got RightLeftSpeeds command: (left, right) = (%f, %f) rad/s. "
                     "Calculated speeds (left, right) = (%d, %d) rpm",
-                    speed->x, speed->y, left, right);
+                    speed.x, speed.y, left, right);
 #endif
 
         setSpeeds(left, right);
@@ -436,8 +425,8 @@ namespace ezw::swd {
         right_vel = (2. * p_cmd_vel->linear.x + p_cmd_vel->angular.z * m_params->getBaseline()) / m_right_wheel_diameter_m;
 
         // Convert rad/s wheel speed to rpm motor speed
-        int32_t left = static_cast<int32_t>(left_vel * m_l_motor_reduction * 60.0 / (2.0 * M_PI));
-        int32_t right = static_cast<int32_t>(right_vel * m_r_motor_reduction * 60.0 / (2.0 * M_PI));
+        auto left = static_cast<int32_t>(left_vel * m_l_motor_reduction * 60.0 / (2.0 * M_PI));
+        auto right = static_cast<int32_t>(right_vel * m_r_motor_reduction * 60.0 / (2.0 * M_PI));
 
 #if VERBOSE_OUTPUT
         RCLCPP_INFO(get_logger(),
@@ -452,12 +441,12 @@ namespace ezw::swd {
 #define CONF_MAX_DELTA_SPEED_SLS 140  // in rpm motor
 #define CONF_MAX_DELTA_SPEED 1000     // in rpm motor
 
-    void DiffDriveController::setSpeeds(int32_t left_speed, int32_t right_speed)
+    void DiffDriveController::setSpeeds(int32_t p_left_speed, int32_t p_right_speed)
     {
-        ezw_error_t err;
+        ezw_error_t err = ERROR_NONE;
 
         // Get the outer motor speed
-        int32_t faster_motor_speed = M_MAX(std::abs(left_speed), std::abs(right_speed));
+        int32_t faster_motor_speed = M_MAX(std::abs(p_left_speed), std::abs(p_right_speed));
         int32_t speed_limit = -1;
         bool max_limited = false;
         bool sls_limited = false;
@@ -472,7 +461,7 @@ namespace ezw::swd {
         // For example, if it has only one forward-facing safety LiDAR, when the robot move backwards, there's no
         // safety guarantees, hence speed is limited to SLS, otherwise, the safety limit will be decided by the
         // presence of the SLS signal.
-        if (!m_params->getHaveBackwardSls() && (left_speed < 0) && (right_speed < 0) && (faster_motor_speed > m_params->getMotorMaxSlsSpeedRpm())) {
+        if (!m_params->getHaveBackwardSls() && (p_left_speed < 0) && (p_right_speed < 0) && (faster_motor_speed > m_params->getMotorMaxSlsSpeedRpm())) {
             speed_limit = m_params->getMotorMaxSlsSpeedRpm();
         }
 
@@ -510,34 +499,34 @@ namespace ezw::swd {
             // Get the ratio between the outer (faster) motor, and the speed limit.
             double speed_ratio = static_cast<double>(speed_limit) / static_cast<double>(faster_motor_speed);
 
-            // Scale right_speed
-            right_speed = static_cast<int32_t>(static_cast<double>(right_speed) * speed_ratio);
+            // Scale right speed
+            p_right_speed = static_cast<int32_t>(static_cast<double>(p_right_speed) * speed_ratio);
 
-            // Scale left_speed
-            left_speed = static_cast<int32_t>(static_cast<double>(left_speed) * speed_ratio);
+            // Scale left speed
+            p_left_speed = static_cast<int32_t>(static_cast<double>(p_left_speed) * speed_ratio);
 
             if (max_limited && sls_limited) {
                 RCLCPP_INFO(get_logger(),
                             "The target speed exceeds the MAX/SLS maximum speed limit (%d rpm). "
                             "Set speed to (left, right) (%d, %d) rpm",
-                            speed_limit, left_speed, right_speed);
+                            speed_limit, p_left_speed, p_right_speed);
             }
             else if (sls_limited) {
                 RCLCPP_INFO(get_logger(),
                             "The target speed exceeds the SLS maximum speed limit (%d rpm). "
                             "Set speed to (left, right) (%d, %d) rpm",
-                            speed_limit, left_speed, right_speed);
+                            speed_limit, p_left_speed, p_right_speed);
             }
             else if (max_limited) {
                 RCLCPP_INFO(get_logger(),
                             "The target speed exceeds the maximum speed limit (%d rpm). "
                             "Set speed to (left, right) (%d, %d) rpm",
-                            speed_limit, left_speed, right_speed);
+                            speed_limit, p_left_speed, p_right_speed);
             }
         }
 
         // Get the delta wheel speed
-        int32_t delta_wheel_speed = std::abs(left_speed - right_speed);
+        int32_t delta_wheel_speed = std::abs(p_left_speed - p_right_speed);
         int32_t delta_speed_limit = -1;
 
         // Limit to the maximum allowed delta speed
@@ -557,19 +546,19 @@ namespace ezw::swd {
             // Get the ratio between the max allowed delta speed limit, and the current delta speed limit.
             double delta_speed_ratio = static_cast<double>(delta_speed_limit) / static_cast<double>(delta_wheel_speed);
 
-            // Scale right_speed
-            right_speed = static_cast<int32_t>(static_cast<double>(right_speed) * delta_speed_ratio);
+            // Scale right speed
+            p_right_speed = static_cast<int32_t>(static_cast<double>(p_right_speed) * delta_speed_ratio);
 
-            // Scale left_speed
-            left_speed = static_cast<int32_t>(static_cast<double>(left_speed) * delta_speed_ratio);
+            // Scale left speed
+            p_left_speed = static_cast<int32_t>(static_cast<double>(p_left_speed) * delta_speed_ratio);
 
             RCLCPP_INFO(get_logger(),
                         "The target speed exceeds the maximum delta speed limit (%d rpm). "
                         "Speed set to (left, right) (%d, %d) rpm",
-                        delta_speed_limit, left_speed, right_speed);
+                        delta_speed_limit, p_left_speed, p_right_speed);
         }
 
-        int32_t lower_motor_speed = M_MIN(std::abs(left_speed), std::abs(right_speed));
+        int32_t lower_motor_speed = M_MIN(std::abs(p_left_speed), std::abs(p_right_speed));
         speed_limit = -1;
 
         // If not SLS detected && minimum speed detected, impose the minimum speed
@@ -586,25 +575,25 @@ namespace ezw::swd {
             // Get the ratio between the outer (lower) motor, and the speed limit.
             double speed_ratio = static_cast<double>(speed_limit) / static_cast<double>(lower_motor_speed);
 
-            // Scale right_speed
-            right_speed = static_cast<int32_t>(static_cast<double>(right_speed) * speed_ratio);
+            // Scale right speed
+            p_right_speed = static_cast<int32_t>(static_cast<double>(p_right_speed) * speed_ratio);
 
-            // Scale left_speed
-            left_speed = static_cast<int32_t>(static_cast<double>(left_speed) * speed_ratio);
+            // Scale left speed
+            p_left_speed = static_cast<int32_t>(static_cast<double>(p_left_speed) * speed_ratio);
 
             RCLCPP_INFO(get_logger(),
                         "The target speed falls behind the minimum speed limit (%d rpm). "
                         "Set speed to (left, right) (%d, %d) rpm",
-                        speed_limit, left_speed, right_speed);
+                        speed_limit, p_left_speed, p_right_speed);
         }
 
         // If the PDS state is not OPERATION_ENABLED, we send a nil speed.
         if (!m_pds_ok) {
-            left_speed = right_speed = 0;
+            p_left_speed = p_right_speed = 0;
         }
 
         // Send the actual speed (in RPM) to left motor
-        err = m_left_controller.setTargetVelocity(left_speed);
+        err = m_left_controller.setTargetVelocity(static_cast<int16_t>(p_left_speed));
         if (ERROR_NONE != err) {
             RCLCPP_ERROR(get_logger(),
                          "Failed setting velocity of left motor, EZW_ERR: SMCService : "
@@ -614,7 +603,7 @@ namespace ezw::swd {
         }
 
         // Send the actual speed (in RPM) to right motor
-        err = m_right_controller.setTargetVelocity(right_speed);
+        err = m_right_controller.setTargetVelocity(static_cast<int16_t>(p_right_speed));
         if (ERROR_NONE != err) {
             RCLCPP_ERROR(get_logger(),
                          "Failed setting velocity of right motor, EZW_ERR: SMCService : "
@@ -624,7 +613,7 @@ namespace ezw::swd {
         }
 
 #if VERBOSE_OUTPUT
-        RCLCPP_INFO(get_logger(), "Speed sent to motors (left, right) = (%d, %d) rpm", left_speed, right_speed);
+        RCLCPP_INFO(get_logger(), "Speed sent to motors (left, right) = (%d, %d) rpm", p_left_speed, p_right_speed);
 #endif
     }
 
@@ -660,7 +649,7 @@ namespace ezw::swd {
                          (int)err);
         }
 
-        msg.safe_brake_control = !(res_l || res_r);
+        msg.safe_brake_control = static_cast<uint8_t>(!(res_l || res_r));
         if (m_first_entry || msg.safe_brake_control != m_safety_msg.safe_brake_control) {
             RCLCPP_INFO(get_logger(), msg.safe_brake_control ? "SBC enabled." : "SBC disabled.");
         }
@@ -686,7 +675,7 @@ namespace ezw::swd {
                          (int)err);
         }
 
-        msg.safe_torque_off = (res_l || res_r);
+        msg.safe_torque_off = static_cast<uint8_t>(res_l || res_r);
         if (m_first_entry || msg.safe_torque_off != m_safety_msg.safe_torque_off) {
             RCLCPP_INFO(get_logger(), msg.safe_torque_off ? "STO enabled." : "STO disabled.");
         }
@@ -739,8 +728,8 @@ namespace ezw::swd {
             sdi_n = !(sdi_l_p || sdi_r_n);
         }
 
-        msg.safe_direction_indication_forward = sdi_p;
-        msg.safe_direction_indication_backward = sdi_n;
+        msg.safe_direction_indication_forward = static_cast<uint8_t>(sdi_p);
+        msg.safe_direction_indication_backward = static_cast<uint8_t>(sdi_n);
 
         if (m_first_entry || msg.safe_direction_indication_forward != m_safety_msg.safe_direction_indication_forward) {
             RCLCPP_INFO(get_logger(), msg.safe_direction_indication_forward ? "SDIp enabled." : "SDIp disabled.");
@@ -767,7 +756,7 @@ namespace ezw::swd {
                          (int)err);
         }
 
-        msg.safety_limited_speed = !(res_l || res_r);
+        msg.safety_limited_speed = static_cast<uint8_t>(!(res_l || res_r));
         if (m_first_entry || msg.safety_limited_speed != m_safety_msg.safety_limited_speed) {
             RCLCPP_INFO(get_logger(), msg.safety_limited_speed ? "SLS enabled." : "SLS disabled.");
         }
