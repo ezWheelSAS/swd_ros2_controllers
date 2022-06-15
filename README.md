@@ -18,7 +18,7 @@ Pre-built packages are available for ROS2 Galactic on Ubuntu 20.04 (for **x64_86
 - `SWD firmware` (**`> 1.0.1`**)
 - Ubuntu 20.04
 - ROS2 Galactic
-- `swd-services` (**`>= 0.2.4`**)
+- `swd-services` (**`>= 0.2.5`**)
 
 ### Ubuntu
 
