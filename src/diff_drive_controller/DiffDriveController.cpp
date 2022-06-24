@@ -429,19 +429,55 @@ namespace ezw::swd {
         auto right = static_cast<int32_t>(right_vel * m_r_motor_reduction * 60.0 / (2.0 * M_PI));
 
 #if VERBOSE_OUTPUT
+        auto left_requested = left;
+        auto right_requested = right;
+
         RCLCPP_INFO(get_logger(),
                     "Got Twist command: linear = %f m/s, angular = %f rad/s. "
                     "Calculated speeds (left, right) = (%d, %d) rpm",
-                    cmd_vel->linear.x, cmd_vel->angular.z, left, right);
+                    p_cmd_vel->linear.x, p_cmd_vel->angular.z, left, right);
 #endif
 
         setSpeeds(left, right);
+
+#if VERBOSE_OUTPUT
+        int32_t p_left_speed, p_right_speed;
+
+        ezw_error_t err = m_left_controller.getVelocityActualValue(p_left_speed);
+        if (ERROR_NONE != err) {
+            RCLCPP_ERROR(get_logger(),
+                         "Failed get velocity of left motor, EZW_ERR: SMCService : "
+                         "Controller::getTargetVelocity() return error code : %d",
+                         (int)err);
+            return;
+        }
+
+        err = m_right_controller.getVelocityActualValue(p_right_speed);
+        if (ERROR_NONE != err) {
+            RCLCPP_ERROR(get_logger(),
+                         "Failed get velocity of right motor, EZW_ERR: SMCService : "
+                         "Controller::getTargetVelocity() return error code : %d",
+                         (int)err);
+            return;
+        }
+
+        double _left_vel = 1.0 * (p_left_speed / m_l_motor_reduction / 60.0 * (2.0 * M_PI));
+        double _right_vel = 1.0 * (p_right_speed / m_l_motor_reduction / 60.0 * (2.0 * M_PI));
+
+        double x = 1.0 * ((_left_vel + _right_vel) * m_left_wheel_diameter_m / (4 * m_params->getBaseline()));
+        double z = 1.0 * ((_right_vel - _left_vel) * m_left_wheel_diameter_m / (2 * m_params->getBaseline()));
+
+        RCLCPP_INFO(get_logger(),
+                    "Twist command (linear.x_requested, angular.z_requested, linear.x_real, angular.z_real); %f;%f;%f;%f;Calculated speeds (left_requested, right_requested, left_send, right_send); %d; %d; %d; %d;",
+                    p_cmd_vel->linear.x, p_cmd_vel->angular.z, x, z, left_requested, right_requested, left, right);
+
+#endif
     }
 
 #define CONF_MAX_DELTA_SPEED_SLS 140  // in rpm motor
 #define CONF_MAX_DELTA_SPEED 1000     // in rpm motor
 
-    void DiffDriveController::setSpeeds(int32_t p_left_speed, int32_t p_right_speed)
+    void DiffDriveController::setSpeeds(int32_t &p_left_speed, int32_t &p_right_speed)
     {
         ezw_error_t err = ERROR_NONE;
 
@@ -778,7 +814,9 @@ namespace ezw::swd {
 
     void DiffDriveController::cbTimerWatchdogReceive()
     {
-        setSpeeds(0, 0);
+        int32_t left = 0;
+        int32_t right = 0;
+        setSpeeds(left, right);
     }
 
 }  // namespace ezw::swd

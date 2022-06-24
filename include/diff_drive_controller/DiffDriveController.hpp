@@ -92,7 +92,7 @@ namespace ezw::swd {
          * @param left_speed 
          * @param right_speed 
          */
-        void setSpeeds(int32_t p_left_speed, int32_t p_right_speed);
+        void setSpeeds(int32_t &p_left_speed, int32_t &p_right_speed);
 
         /**
          * @brief Callback for Safety timer

@@ -95,6 +95,7 @@ add_definitions(
   ${EZW_SMC_SERVICE_CLIENT_LDFLAGS}
 )
 
+# add_definitions( -DVERBOSE_OUTPUT )
 file(GLOB_RECURSE SOURCES_DIFF_DRIVE_CRTL src/diff_drive_controller/*.cpp)
 
 add_executable(swd_diff_drive_controller ${SOURCES_DIFF_DRIVE_CRTL})
