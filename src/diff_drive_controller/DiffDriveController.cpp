@@ -151,6 +151,8 @@ namespace ezw::swd {
         }
         m_left_motor_polarity = polarity_parameters.velocity_polarity;
 
+        RCLCPP_INFO(get_logger(), "left motor polarity : %s", m_left_motor_polarity ? "True" : "False");
+
         // Start the timers
         m_timer_watchdog = create_wall_timer(std::chrono::milliseconds(m_params->getWatchdogReceiveMs()), std::bind(&DiffDriveController::cbTimerWatchdogReceive, this));
         m_timer_pds = create_wall_timer(TIMER_STATE_MACHINE_MS, std::bind(&DiffDriveController::cbTimerStateMachine, this));
@@ -754,12 +756,12 @@ namespace ezw::swd {
         }
 
         if (m_left_motor_polarity) {
-            sdi_p = !(sdi_l_p || sdi_r_n);
-            sdi_n = !(sdi_l_n || sdi_r_p);
-        }
-        else {
             sdi_p = !(sdi_l_n || sdi_r_p);
             sdi_n = !(sdi_l_p || sdi_r_n);
+        }
+        else {
+            sdi_p = !(sdi_l_p || sdi_r_n);
+            sdi_n = !(sdi_l_n || sdi_r_p);
         }
 
         msg.safe_direction_indication_forward = static_cast<uint8_t>(sdi_p);
