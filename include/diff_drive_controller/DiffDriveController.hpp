@@ -12,6 +12,7 @@
 #include "geometry_msgs/msg/twist_with_covariance.hpp"
 #include "iostream"
 #include "lifecycle_msgs/msg/transition.hpp"
+#include "map"
 #include "memory"
 #include "nav_msgs/msg/odometry.hpp"
 #include "rclcpp/publisher.hpp"
@@ -138,5 +139,7 @@ namespace ezw::swd {
         bool m_nmt_ok, m_pds_ok = false;
 
         ezw::smcservice::DBusClient m_left_controller, m_right_controller;
+
+        std::map<ezw::smccore::ISafeMotionService::SafetyFunctionId, int8_t> m_left_safety_functions, m_right_safety_functions;
     };
 }  // namespace ezw::swd
