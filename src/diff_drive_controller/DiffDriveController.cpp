@@ -482,9 +482,6 @@ namespace ezw::swd {
         auto right = static_cast<int32_t>(right_vel * m_r_motor_reduction * 60.0 / (2.0 * M_PI));
 
 #if VERBOSE_OUTPUT
-        auto left_requested = left;
-        auto right_requested = right;
-
         RCLCPP_INFO(get_logger(),
                     "Got Twist command: linear = %f m/s, angular = %f rad/s. "
                     "Calculated speeds (left, right) = (%d, %d) rpm",
@@ -494,9 +491,12 @@ namespace ezw::swd {
         setSpeeds(left, right);
 
 #if VERBOSE_OUTPUT
-        int32_t p_left_speed, p_right_speed;
+        auto left_requested = left;
+        auto right_requested = right;
 
-        ezw_error_t err = m_left_controller.getVelocityActualValue(p_left_speed);
+        int32_t left_speed, right_speed;
+
+        ezw_error_t err = m_left_controller.getVelocityActualValue(left_speed);
         if (ERROR_NONE != err) {
             RCLCPP_ERROR(get_logger(),
                          "Failed get velocity of left motor, EZW_ERR: SMCService : "
@@ -505,7 +505,7 @@ namespace ezw::swd {
             return;
         }
 
-        err = m_right_controller.getVelocityActualValue(p_right_speed);
+        err = m_right_controller.getVelocityActualValue(right_speed);
         if (ERROR_NONE != err) {
             RCLCPP_ERROR(get_logger(),
                          "Failed get velocity of right motor, EZW_ERR: SMCService : "
@@ -514,8 +514,8 @@ namespace ezw::swd {
             return;
         }
 
-        double _left_vel = 1.0 * (p_left_speed / m_l_motor_reduction / 60.0 * (2.0 * M_PI));
-        double _right_vel = 1.0 * (p_right_speed / m_l_motor_reduction / 60.0 * (2.0 * M_PI));
+        double _left_vel = 1.0 * (left_speed / m_l_motor_reduction / 60.0 * (2.0 * M_PI));
+        double _right_vel = 1.0 * (right_speed / m_l_motor_reduction / 60.0 * (2.0 * M_PI));
 
         double x = 0.5 * ((_left_vel + _right_vel) * m_left_wheel_diameter_m / (4 * m_params->getBaseline()));
         double z = 1.0 * ((_right_vel - _left_vel) * m_left_wheel_diameter_m / (2 * m_params->getBaseline()));
