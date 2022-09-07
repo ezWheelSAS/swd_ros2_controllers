@@ -153,6 +153,31 @@ namespace ezw::swd {
 
         RCLCPP_INFO(get_logger(), "left motor polarity : %s", m_left_motor_polarity ? "True" : "False");
 
+        ezw::smccore::IVelocityModeService::VelocityModeParameters velocity_mode_parameters;
+        err = m_left_controller.getVelocityModeParameters(velocity_mode_parameters);
+        if (ERROR_NONE != err) {
+            RCLCPP_ERROR(get_logger(),
+                         "Failed reading the left motor velocity mode parameters, EZW_ERR: SMCService : "
+                         "Controller::getVelocityModeParameters() return error code : %d",
+                         (int)err);
+            throw std::runtime_error("Failed reading the left motor velocity mode parameters");
+        }
+        m_left_min_speed_rpm = velocity_mode_parameters.vl_velocity_min_amount;
+
+        RCLCPP_INFO(get_logger(), "min left velocity : %d rpm", m_left_min_speed_rpm);
+
+        err = m_right_controller.getVelocityModeParameters(velocity_mode_parameters);
+        if (ERROR_NONE != err) {
+            RCLCPP_ERROR(get_logger(),
+                         "Failed reading the right motor velocity mode parameters, EZW_ERR: SMCService : "
+                         "Controller::getVelocityModeParameters() return error code : %d",
+                         (int)err);
+            throw std::runtime_error("Failed reading the right motor velocity mode parameters");
+        }
+        m_right_min_speed_rpm = velocity_mode_parameters.vl_velocity_min_amount;
+
+        RCLCPP_INFO(get_logger(), "min right velocity : %d rpm", m_right_min_speed_rpm);
+
         // SAFEIN_1 : Mapping Size = 6
         // SafetyFunctionId::STO
         // SafetyFunctionId::SBC_1
@@ -531,15 +556,19 @@ namespace ezw::swd {
         double z = 1.0 * ((_right_vel - _left_vel) * m_left_wheel_diameter_m / (2 * m_params->getBaseline()));
 
         RCLCPP_INFO(get_logger(),
-                    "Twist command (linear.x_requested, angular.z_requested, linear.x_real, angular.z_real); %f;%f;%f;%f;Calculated speeds (left_requested, right_requested, left_send, right_send); %d; %d; %d; %d;",
-                    p_cmd_vel->linear.x, p_cmd_vel->angular.z, x, z, left_requested, right_requested, left, right);
+                    "Twist command (linear.x_requested, angular.z_requested, linear.x_real, angular.z_real); %f;%f;%f;%f; \
+                    Calculated speeds (left_requested, right_requested, left_send, right_send); \
+                    % d; % d; % d; % d; \
+                    Safety indicators (STO, SDIp, SLS); % d; % d; % d; ",
+                    p_cmd_vel->linear.x,
+                    p_cmd_vel->angular.z, x, z, left_requested, right_requested, left, right,
+                    (int)m_safety_msg.safe_torque_off, (int)m_safety_msg.safe_direction_indication_forward, (int)m_safety_msg.safety_limited_speed);
 
 #endif
     }
 
 #define CONF_MAX_DELTA_SPEED_SLS (m_params->getMotorMaxSlsSpeedRpm() / 2)  // in rpm motor
 #define CONF_MAX_DELTA_SPEED (m_params->getMotorMaxSpeedRpm() / 2)         // in rpm motor
-#define CONF_MIN_SPEED 40                                                  // in rpm motor
 
     void DiffDriveController::setSpeeds(int32_t &p_left_speed, int32_t &p_right_speed)
     {
@@ -643,11 +672,11 @@ namespace ezw::swd {
                         delta_speed_limit, p_left_speed, p_right_speed);
         }
 
-        // If not SLS detected && left minimum speed detected, impose the minimum speed
-        bool left_min_limit = !sls_signal && std::abs(p_left_speed) > 1 && std::abs(p_left_speed) <= 40;
+        // If left minimum speed detected, impose the minimum speed
+        bool left_min_limit = std::abs(p_left_speed) > 1 && std::abs(p_left_speed) <= m_left_min_speed_rpm;
 
-        // If not SLS detected && right minimum speed detected, impose the minimum speed
-        bool right_min_limit = !sls_signal && std::abs(p_right_speed) > 1 && std::abs(p_right_speed) <= 40;
+        // If right minimum speed detected, impose the minimum speed
+        bool right_min_limit = std::abs(p_right_speed) > 1 && std::abs(p_right_speed) <= m_right_min_speed_rpm;
 
         if (left_min_limit || right_min_limit) {
             int32_t left_speed = p_left_speed;
@@ -655,12 +684,12 @@ namespace ezw::swd {
 
             // Update left speed
             if (left_min_limit) {
-                p_left_speed = (p_left_speed > 0) ? CONF_MIN_SPEED : -CONF_MIN_SPEED;
+                p_left_speed = (p_left_speed > 0) ? m_left_min_speed_rpm : -m_left_min_speed_rpm;
             }
 
             // Update right speed
             if (right_min_limit) {
-                p_right_speed = (p_right_speed > 0) ? CONF_MIN_SPEED : -CONF_MIN_SPEED;
+                p_right_speed = (p_right_speed > 0) ? m_right_min_speed_rpm : -m_right_min_speed_rpm;
             }
 
             RCLCPP_INFO(get_logger(),

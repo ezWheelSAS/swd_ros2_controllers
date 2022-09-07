@@ -137,6 +137,7 @@ namespace ezw::swd {
         double m_left_wheel_diameter_m, m_right_wheel_diameter_m, m_l_motor_reduction, m_r_motor_reduction = 0.0;
         bool m_left_motor_polarity = false;
         bool m_nmt_ok, m_pds_ok = false;
+        uint32_t m_left_min_speed_rpm, m_right_min_speed_rpm = 0;
 
         ezw::smcservice::DBusClient m_left_controller, m_right_controller;
 
