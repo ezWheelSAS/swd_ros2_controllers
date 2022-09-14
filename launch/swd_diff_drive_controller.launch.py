@@ -56,7 +56,6 @@ def generate_launch_description():
                         {"have_backward_sls": False},
                         {"left_encoder_relative_error": 0.2},
                         {"right_encoder_relative_error": 0.2},
-                        {"fine_odometry": False},
                         ]
         )
     ])
