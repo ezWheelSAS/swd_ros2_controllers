@@ -9,8 +9,8 @@ This package has been tested on ROS2 Galactic. It contains ROS2 nodes to control
 
 ## Installation
 
-This package has been tested on **x64_86** and ~~**arm64**~~ machines.
-Pre-built packages are available for ROS2 Galactic on Ubuntu 20.04 (for **x64_86** and ~~**arm64**~~).
+This package has been tested on **x64_86** and **arm64** machines.
+Some pre-built packages are available for ROS2 Galactic on Ubuntu 20.04 (for **x64_86** and **arm64**).
 
 ### Prerequisites
 
@@ -18,7 +18,7 @@ Pre-built packages are available for ROS2 Galactic on Ubuntu 20.04 (for **x64_86
 - `SWD firmware` (**`>= 1.0.1`**)
 - Ubuntu 20.04
 - ROS2 Galactic
-- `swd-services` (**`>= 0.2.5`**)
+- `swd-services` (**`>= 0.2.7`**)
 
 ### Ubuntu
 
@@ -186,7 +186,7 @@ The functions SDIp and SDIn enable the motor movement only in the corresponding 
 
 ## Support
 
-For any questions, please [open a GitHub issue](https://github.com/ezWheelSAS/swd_ros_controllers/issues).
+For any questions, please [open a GitHub issue](https://github.com/ezWheelSAS/swd_ros2_controllers/issues).
 
 ## About ez-Wheel®
 
