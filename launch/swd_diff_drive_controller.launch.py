@@ -51,7 +51,7 @@ def generate_launch_description():
                         {"publish_odom": True},
                         {"publish_tf": True},
                         {"publish_safety_functions": True},
-                        {"motor_max_speed_rpm": 1800},
+                        {"motor_max_speed_rpm": 1050},
                         {"motor_max_safety_limited_speed_rpm": 490},
                         {"have_backward_sls": False},
                         {"left_encoder_relative_error": 0.2},
