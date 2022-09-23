@@ -34,7 +34,11 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'baseline_m',
             default_value='0.485'),
-            
+
+        DeclareLaunchArgument(
+            'motor_max_speed_rpm',
+            default_value='1050'),
+
         Node(
             package='swd_ros2_controllers',
             executable='swd_diff_drive_controller',
@@ -51,7 +55,7 @@ def generate_launch_description():
                         {"publish_odom": True},
                         {"publish_tf": True},
                         {"publish_safety_functions": True},
-                        {"motor_max_speed_rpm": 1050},
+                        {"motor_max_speed_rpm": LaunchConfiguration('motor_max_speed_rpm')},
                         {"motor_max_safety_limited_speed_rpm": 490},
                         {"have_backward_sls": False},
                         {"left_encoder_relative_error": 0.2},
