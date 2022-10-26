@@ -349,24 +349,24 @@ namespace ezw::swd {
         m_first_entry = false;
     }
 
-    void DiffDriveController::cbSoftBrake(const std_msgs::msg::Bool &p_msg)
+    void DiffDriveController::cbSoftBrake(const std_msgs::msg::Bool::SharedPtr p_msg)
     {
         // true => Enable brake
         // false => Release brake
-        ezw_error_t err = m_left_controller.setHalt(p_msg.data != 0);
+        ezw_error_t err = m_left_controller.setHalt(p_msg->data != 0);
         if (ERROR_NONE != err) {
-            RCLCPP_ERROR(get_logger(), "SoftBrake: Failed %s left motor, EZW_ERR: %d", p_msg.data ? "braking" : "releasing", (int)err);
+            RCLCPP_ERROR(get_logger(), "SoftBrake: Failed %s left motor, EZW_ERR: %d", p_msg->data ? "braking" : "releasing", (int)err);
         }
         else {
-            RCLCPP_INFO(get_logger(), "SoftBrake: Left motor's soft brake %s", p_msg.data ? "activated" : "disabled");
+            RCLCPP_INFO(get_logger(), "SoftBrake: Left motor's soft brake %s", p_msg->data ? "activated" : "disabled");
         }
 
-        err = m_right_controller.setHalt(p_msg.data != 0);
+        err = m_right_controller.setHalt(p_msg->data != 0);
         if (ERROR_NONE != err) {
-            RCLCPP_ERROR(get_logger(), "SoftBrake: Failed %s right motor, EZW_ERR: %d", p_msg.data ? "braking" : "releasing", (int)err);
+            RCLCPP_ERROR(get_logger(), "SoftBrake: Failed %s right motor, EZW_ERR: %d", p_msg->data ? "braking" : "releasing", (int)err);
         }
         else {
-            RCLCPP_INFO(get_logger(), "SoftBrake: Right motor's soft brake %s", p_msg.data ? "activated" : "disabled");
+            RCLCPP_INFO(get_logger(), "SoftBrake: Right motor's soft brake %s", p_msg->data ? "activated" : "disabled");
         }
     }
 
@@ -484,19 +484,19 @@ namespace ezw::swd {
         m_dist_right_prev_mm = right_dist_now_mm;
     }
 
-    void DiffDriveController::cbSetSpeed(const geometry_msgs::msg::Point &p_speed)
+    void DiffDriveController::cbSetSpeed(const geometry_msgs::msg::Point::SharedPtr p_speed)
     {
         m_timer_watchdog->reset();
 
         // Convert rad/s wheel speed to rpm motor speed
-        auto left = static_cast<int32_t>(p_speed.x * m_l_motor_reduction * 60.0 / (2.0 * M_PI));
-        auto right = static_cast<int32_t>(p_speed.y * m_r_motor_reduction * 60.0 / (2.0 * M_PI));
+        auto left = static_cast<int32_t>(p_speed->x * m_l_motor_reduction * 60.0 / (2.0 * M_PI));
+        auto right = static_cast<int32_t>(p_speed->y * m_r_motor_reduction * 60.0 / (2.0 * M_PI));
 
 #if VERBOSE_OUTPUT
         RCLCPP_INFO(get_logger(),
                     "Got RightLeftSpeeds command: (left, right) = (%f, %f) rad/s. "
                     "Calculated speeds (left, right) = (%d, %d) rpm",
-                    speed.x, speed.y, left, right);
+                    p_speed->x, p_speed->y, left, right);
 #endif
 
         setSpeeds(left, right);

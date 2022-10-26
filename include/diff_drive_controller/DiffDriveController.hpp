@@ -65,7 +65,7 @@ namespace ezw::swd {
          * @brief Callback for SoftBrake
          * 
          */
-        void cbSoftBrake(const std_msgs::msg::Bool &p_msg);
+        void cbSoftBrake(const std_msgs::msg::Bool::SharedPtr p_msg);
 
         /**
          * @brief Callback for Odom timer
@@ -78,7 +78,7 @@ namespace ezw::swd {
          * 
          * @param p_speed 
          */
-        void cbSetSpeed(const geometry_msgs::msg::Point &p_speed);
+        void cbSetSpeed(const geometry_msgs::msg::Point::SharedPtr p_speed);
 
         /**
          * @brief Change robot velocity (linear [m/s], angular [rad/s])
