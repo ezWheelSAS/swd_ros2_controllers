@@ -1,7 +1,8 @@
 # ez-Wheel SWD® ROS2 Controllers
+
 ## Overview
 
-This package has been tested on ROS2 Galactic. It contains ROS2 nodes to control motors powered by the [ez-Wheel](https://www.ez-wheel.com) Safety Wheel Drive (SWD®) technology.
+This package has been tested on ROS2 Foxy and Galactic. It contains ROS2 nodes to control motors powered by the [ez-Wheel](https://www.ez-wheel.com) Safety Wheel Drive (SWD®) technology.
 
 | <img src="https://www.ez-wheel.com/storage/image-product/visuels-swd-core-2-0-0.png" width="45%"></img> | <img src="https://www.ez-wheel.com/storage/image-product/roue-electrique-swd-150-2-0-0-0.png" width="45%"></img> | <img src="https://www.ez-wheel.com/storage/image-product/starterkit-ez-wheel-web-0-0-0.png" width="45%"></img>       |
 | ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
@@ -10,14 +11,14 @@ This package has been tested on ROS2 Galactic. It contains ROS2 nodes to control
 ## Installation
 
 This package has been tested on **x64_86** and **arm64** machines.
-Some pre-built packages are available for ROS2 Galactic on Ubuntu 20.04 (for **x64_86** and **arm64**).
+Some pre-built packages are available for ROS2 Foxy and Galactic on Ubuntu 20.04 (for **x64_86** and **arm64**).
 
 ### Prerequisites
 
 - Two SWD® based wheels
 - `SWD firmware` (**`>= 1.0.1`**)
 - Ubuntu 20.04
-- ROS2 Galactic
+- ROS2 Foxy or Galactic
 - `swd-services` (**`>= 0.2.7`**)
 
 ### Ubuntu
@@ -34,7 +35,15 @@ Then download and add the GPG key using following command:
 wget -qO - http://packages.ez-wheel.com:8081/archive.key | sudo apt-key add -
 ```
 
-Now, you should be able to install the `ros-galactic-swd-ros2-controllers` package using `apt`:
+Now, you should be able to install the `swd-ros2-controllers` package using `apt`:
+
+#### Foxy
+
+```shell
+sudo apt update && sudo apt install swd-services ros-foxy-swd-ros2-controllers
+```
+
+#### Galactic
 
 ```shell
 sudo apt update && sudo apt install swd-services ros-galactic-swd-ros2-controllers
@@ -64,6 +73,7 @@ source ~/ros2_ws/install/setup.bash
 ## Usage on a SWD® Starter Kit
 
 The package comes with a preconfigured `.launch` files which can be started using the `ros2 launch` command:
+
 - `swd_diff_drive_controller_launch.py`: sample configuration for the [SWD® Starter Kit](https://www.ez-wheel.com/en/development-kit-for-agv-and-amr) differential drive robot. To use it, run the following command:
 
 ```shell
@@ -77,18 +87,22 @@ You can always use the node with the `ros2 run` command, the minimum required pa
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/ezw/usr/lib
 ros2 run swd_ros2_controllers swd_diff_drive_controller --ros-args -p baseline_m:=0.485
 ```
+
 The corresponding D-Bus services have to be started in order to use the nodes.
 Example for the [SWD® Starter Kit](https://www.ez-wheel.com/en/development-kit-for-agv-and-amr) differential drive robot:
-* ezw-dbus-user-session.service (dbus-launch > /tmp/SYSTEMCTL_dbus.id) [**OPTIONAL**]
-> export $(cat /tmp/SYSTEMCTL_dbus.id) [**OPTIONAL**]
+
+- ezw-dbus-user-session.service (dbus-launch > /tmp/SYSTEMCTL_dbus.id) [**OPTIONAL**]
+  > export $(cat /tmp/SYSTEMCTL_dbus.id) [**OPTIONAL**]
 
 > export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/ezw/usr/lib
-* ezw-swd-left.service (/opt/ezw/usr/bin/ezw-smc-service /opt/ezw/usr/etc/ezw-smc-core/swd_left_config.ini)
-* ezw-swd-right.service (/opt/ezw/usr/bin/ezw-smc-service /opt/ezw/usr/etc/ezw-smc-core/swd_right_config.ini)
+
+- ezw-swd-left.service (/opt/ezw/usr/bin/ezw-smc-service /opt/ezw/usr/etc/ezw-smc-core/swd_left_config.ini)
+- ezw-swd-right.service (/opt/ezw/usr/bin/ezw-smc-service /opt/ezw/usr/etc/ezw-smc-core/swd_right_config.ini)
 
 Example of configuration files for [SWD® Starter Kit](https://www.ez-wheel.com/en/development-kit-for-agv-and-amr) differential drive robot:
 
 swd_left_config.ini
+
 ```
 # SMC Drive service config file
 contextId = 12
@@ -105,6 +119,7 @@ CANOpenEDSFile = /opt/ezw/usr/etc/ezw-canopen-dico/swd_core.eds
 ```
 
 swd_right_config.ini
+
 ```
 # SMC Drive service config file
 contextId = 12
@@ -121,6 +136,7 @@ CANOpenEDSFile = /opt/ezw/usr/etc/ezw-canopen-dico/swd_core.eds
 ```
 
 configuration.json
+
 ```
 [
    {
@@ -135,11 +151,12 @@ configuration.json
 
 ## Usage on your own IPC
 
-As the minimal SWD® Starter Kit config files do not exist on your IPC, you can install them manually as specified above or install them via a third package. 
+As the minimal SWD® Starter Kit config files do not exist on your IPC, you can install them manually as specified above or install them via a third package.
 
 In this case, make sure you have added the ez-Wheel repository to your `/etc/apt/sources.list` as specified above.
 
 Firstly, you need to create a user `swd_sk` with sudo rights and swd_sk as default password:
+
 ```shell
 sudo addgroup swd_sk
 sudo useradd -m -s /bin/bash -g swd_sk swd_sk
@@ -160,20 +177,24 @@ sudo apt-get update && sudo apt install swd-system-config-2wheels
 ```
 
 This package will configure your system to start at boot up four new services (with user `swd_sk` account):
-* `ezw-stack.service` : initialize can0
-* `ezw-dbus-user-session` : initialize D-Bus session
-* `ezw-swd-left.service` : start left D-Bus service
-* `ezw-swd-right.service` : start right D-Bus service
+
+- `ezw-stack.service` : initialize can0
+- `ezw-dbus-user-session` : initialize D-Bus session
+- `ezw-swd-left.service` : start left D-Bus service
+- `ezw-swd-right.service` : start right D-Bus service
 
 and add the following config files as specified above :
-* `/opt/ezw/data/configuration.json`
-* `/opt/ezw/usr/etc/ezw-smc-core/swd_left_config.ini`
-* `/opt/ezw/usr/etc/ezw-smc-core/swd_right_config.ini`
+
+- `/opt/ezw/data/configuration.json`
+- `/opt/ezw/usr/etc/ezw-smc-core/swd_left_config.ini`
+- `/opt/ezw/usr/etc/ezw-smc-core/swd_right_config.ini`
 
 This packages comes also with the `commissioning scripts` used for each wheels :
-* `/opt/ezw/commissioning/SafetyHub12pts`
+
+- `/opt/ezw/commissioning/SafetyHub12pts`
 
 You can modify them and do the commissioning using:
+
 ```shell
 cd /opt/ezw/commissioning/SafetyHub12pts
 ./swd_left_4_commissioning.py
@@ -230,9 +251,10 @@ bool safety_limited_speed                   # Safety Limited Speed (SLS)
 bool safe_direction_indication_forward      # Safe Direction Indication (positive)
 bool safe_direction_indication_backward     # Safe Direction Indication (negative)
 ```
-The main safe drive function is the STO whereby the immediately torque-off on the motor may be accompanied by an SBC command to close the brakes. 
+
+The main safe drive function is the STO whereby the immediately torque-off on the motor may be accompanied by an SBC command to close the brakes.
 The SLS functions cause the drive to decelerate (if required) and monitor whether the velocity is held within the defined limits.
-The functions SDIp and SDIn enable the motor movement only in the corresponding (positive or negative) direction. 
+The functions SDIp and SDIn enable the motor movement only in the corresponding (positive or negative) direction.
 
 ## Support
 
