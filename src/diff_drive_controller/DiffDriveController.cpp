@@ -242,6 +242,14 @@ namespace ezw::swd {
         RCLCPP_INFO(get_logger(), "swd_diff_drive_controller initialized successfully!");
     }
 
+    DiffDriveController::~DiffDriveController()
+    {
+        RCLCPP_INFO(get_logger(), "Set the robot velocity to zero");
+
+        // Stop the robot
+        setSpeeds(0, 0);
+    }
+
     void DiffDriveController::cbTimerStateMachine()
     {
         static bool m_first_entry = true;
@@ -570,7 +578,7 @@ namespace ezw::swd {
 #define CONF_MAX_DELTA_SPEED_SLS (m_params->getMotorMaxSlsSpeedRpm() / 2)  // in rpm motor
 #define CONF_MAX_DELTA_SPEED (m_params->getMotorMaxSpeedRpm() / 2)         // in rpm motor
 
-    void DiffDriveController::setSpeeds(int32_t &p_left_speed, int32_t &p_right_speed)
+    void DiffDriveController::setSpeeds(int32_t p_left_speed, int32_t p_right_speed)
     {
         ezw_error_t err = ERROR_NONE;
 
@@ -849,9 +857,8 @@ namespace ezw::swd {
 
     void DiffDriveController::cbTimerWatchdogReceive()
     {
-        int32_t left = 0;
-        int32_t right = 0;
-        setSpeeds(left, right);
+        // Stop the robot
+        setSpeeds(0, 0);
     }
 
 }  // namespace ezw::swd

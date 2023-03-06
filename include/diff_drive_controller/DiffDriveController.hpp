@@ -54,6 +54,12 @@ namespace ezw::swd {
          */
         explicit DiffDriveController(const std::string &p_node_name);
 
+        /**
+         * @brief Destroy the Diff Drive Controller object
+         * 
+         */
+        virtual ~DiffDriveController();
+
        private:
         /**
          * @brief Callback for State Machine timer
@@ -93,7 +99,7 @@ namespace ezw::swd {
          * @param left_speed 
          * @param right_speed 
          */
-        void setSpeeds(int32_t &p_left_speed, int32_t &p_right_speed);
+        void setSpeeds(int32_t p_left_speed, int32_t p_right_speed);
 
         /**
          * @brief Callback for Safety timer
