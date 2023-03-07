@@ -8,6 +8,7 @@ This package has been tested on ROS2 Foxy and Galactic. It contains ROS2 nodes t
 | ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | [SWD® Core](https://www.ez-wheel.com/en/safety-gear-motor) <br />Safety gear motor                      | [SWD® 150](https://www.ez-wheel.com/en/swd-150-safety-wheel-drive) <br />Safety wheel drive                      | [SWD® StarterKit](https://www.ez-wheel.com/en/development-kit-for-agv-and-amr) <br />Development kit for AGV and AMR |
 
+Users should regularly inform themselves about updates to this driver (best subscribe under "Watch").
 ## Installation
 
 This package has been tested on **x64_86** and **arm64** machines.
