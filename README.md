@@ -87,23 +87,31 @@ You can always use the node with the `ros2 run` command, the minimum required pa
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/ezw/usr/lib
 ros2 run swd_ros2_controllers swd_diff_drive_controller --ros-args -p baseline_m:=0.485
 ```
-
 The corresponding D-Bus services have to be started in order to use the nodes.
 Example for the [SWD® Starter Kit](https://www.ez-wheel.com/en/development-kit-for-agv-and-amr) differential drive robot:
 
-- ezw-dbus-user-session.service (dbus-launch > /tmp/SYSTEMCTL_dbus.id) [**OPTIONAL**]
-  > export $(cat /tmp/SYSTEMCTL_dbus.id) [**OPTIONAL**]
-
-> export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/ezw/usr/lib
-
-- ezw-swd-left.service (/opt/ezw/usr/bin/ezw-smc-service /opt/ezw/usr/etc/ezw-smc-core/swd_left_config.ini)
-- ezw-swd-right.service (/opt/ezw/usr/bin/ezw-smc-service /opt/ezw/usr/etc/ezw-smc-core/swd_right_config.ini)
+* The service `ezw-dbus-user-session.service` is equivalent to running:
+```shell
+dbus-launch > /tmp/SYSTEMCTL_dbus.id ## [OPTIONAL]
+```
+* Prepare the environment
+```shell
+export $(cat /tmp/SYSTEMCTL_dbus.id) ## [OPTIONAL]
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/ezw/usr/lib
+```
+* The service `ezw-swd-left.service` is equivalent to running:
+```shell
+/opt/ezw/usr/bin/ezw-smc-service /opt/ezw/usr/etc/ezw-smc-core/swd_left_config.ini
+```
+* The service `ezw-swd-right.service` is equivalent to running:
+```shell
+/opt/ezw/usr/bin/ezw-smc-service /opt/ezw/usr/etc/ezw-smc-core/swd_right_config.ini
+```
 
 Example of configuration files for [SWD® Starter Kit](https://www.ez-wheel.com/en/development-kit-for-agv-and-amr) differential drive robot:
 
-swd_left_config.ini
-
-```
+### `swd_left_config.ini`
+```ini
 # SMC Drive service config file
 contextId = 12
 nodeId = 4
@@ -118,9 +126,8 @@ HWConfigurationFile = /opt/ezw/data/configuration.json
 CANOpenEDSFile = /opt/ezw/usr/etc/ezw-canopen-dico/swd_core.eds
 ```
 
-swd_right_config.ini
-
-```
+### `swd_right_config.ini`
+```ini
 # SMC Drive service config file
 contextId = 12
 nodeId = 5
@@ -135,9 +142,8 @@ HWConfigurationFile = /opt/ezw/data/configuration.json
 CANOpenEDSFile = /opt/ezw/usr/etc/ezw-canopen-dico/swd_core.eds
 ```
 
-configuration.json
-
-```
+### `configuration.json`
+```json
 [
    {
       "name": "SWD_CORE",
@@ -156,7 +162,6 @@ As the minimal SWD® Starter Kit config files do not exist on your IPC, you can 
 In this case, make sure you have added the ez-Wheel repository to your `/etc/apt/sources.list` as specified above.
 
 Firstly, you need to create a user `swd_sk` with sudo rights and swd_sk as default password:
-
 ```shell
 sudo addgroup swd_sk
 sudo useradd -m -s /bin/bash -g swd_sk swd_sk
@@ -177,24 +182,20 @@ sudo apt-get update && sudo apt install swd-system-config-2wheels
 ```
 
 This package will configure your system to start at boot up four new services (with user `swd_sk` account):
-
-- `ezw-stack.service` : initialize can0
-- `ezw-dbus-user-session` : initialize D-Bus session
-- `ezw-swd-left.service` : start left D-Bus service
-- `ezw-swd-right.service` : start right D-Bus service
+* `ezw-stack.service` : initialize can0
+* `ezw-dbus-user-session` : initialize D-Bus session
+* `ezw-swd-left.service` : start left D-Bus service
+* `ezw-swd-right.service` : start right D-Bus service
 
 and add the following config files as specified above :
-
-- `/opt/ezw/data/configuration.json`
-- `/opt/ezw/usr/etc/ezw-smc-core/swd_left_config.ini`
-- `/opt/ezw/usr/etc/ezw-smc-core/swd_right_config.ini`
+* `/opt/ezw/data/configuration.json`
+* `/opt/ezw/usr/etc/ezw-smc-core/swd_left_config.ini`
+* `/opt/ezw/usr/etc/ezw-smc-core/swd_right_config.ini`
 
 This packages comes also with the `commissioning scripts` used for each wheels :
-
-- `/opt/ezw/commissioning/SafetyHub12pts`
+* `/opt/ezw/commissioning/SafetyHub12pts`
 
 You can modify them and do the commissioning using:
-
 ```shell
 cd /opt/ezw/commissioning/SafetyHub12pts
 ./swd_left_4_commissioning.py
