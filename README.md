@@ -50,6 +50,12 @@ sudo apt update && sudo apt install swd-services ros-foxy-swd-ros2-controllers
 sudo apt update && sudo apt install swd-services ros-galactic-swd-ros2-controllers
 ```
 
+### Humble
+
+```shell
+sudo apt update && sudo apt install swd-services ros-humble-swd-ros2-controllers dbus-x11
+```
+
 ### Compiling from source
 
 To compile the package, make sure you have added the ez-Wheel repository to your `/etc/apt/sources.list` as specified above.

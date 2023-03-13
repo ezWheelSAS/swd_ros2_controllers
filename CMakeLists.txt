@@ -23,6 +23,8 @@ find_package(geometry_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(lifecycle_msgs REQUIRED)
+find_package(rclcpp_lifecycle REQUIRED)
 
 find_package(rosidl_default_generators REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
@@ -108,6 +110,8 @@ ament_target_dependencies(swd_diff_drive_controller
   tf2
   tf2_msgs
   tf2_ros
+  lifecycle_msgs
+  rclcpp_lifecycle
 )
 
 rosidl_target_interfaces(swd_diff_drive_controller
