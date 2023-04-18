@@ -46,8 +46,8 @@ def generate_launch_description():
             parameters=[
                         {'use_sim_time': LaunchConfiguration('use_sim_time')},
                         {"baseline_m": LaunchConfiguration('baseline_m')},
-                        {"left_swd_config_file": "/opt/ezw/usr/etc/ezw-smc-core/swd_left_config.ini"},
-                        {"right_swd_config_file": "/opt/ezw/usr/etc/ezw-smc-core/swd_right_config.ini"},
+                        {"left_config_file": "/opt/ezw/usr/etc/ezw-smc-core/swd_left_config.ini"},
+                        {"right_config_file": "/opt/ezw/usr/etc/ezw-smc-core/swd_right_config.ini"},
                         {"pub_freq_hz": 20},
                         {"watchdog_receive_ms": 500},
                         {"base_frame": "base_link"},
