@@ -106,9 +106,9 @@ namespace ezw::swd {
     {
         // Left config file
         auto l_left_config_file = m_left_config_file;
-        m_node->get_parameter("left_config_file", m_left_config_file);
+        m_node->get_parameter("left_swd_config_file", m_left_config_file);
         if (m_left_config_file != l_left_config_file) {
-            RCLCPP_INFO(m_node->get_logger(), "left_config_file : %s", m_left_config_file.c_str());
+            RCLCPP_INFO(m_node->get_logger(), "left_swd_config_file : %s", m_left_config_file.c_str());
         }
         return m_left_config_file;
     }
@@ -117,9 +117,9 @@ namespace ezw::swd {
     {
         // Right config file
         auto l_right_config_file = m_right_config_file;
-        m_node->get_parameter("right_config_file", m_right_config_file);
+        m_node->get_parameter("right_swd_config_file", m_right_config_file);
         if (m_right_config_file != l_right_config_file) {
-            RCLCPP_INFO(m_node->get_logger(), "right_config_file : %s", m_right_config_file.c_str());
+            RCLCPP_INFO(m_node->get_logger(), "right_swd_config_file : %s", m_right_config_file.c_str());
         }
         return m_right_config_file;
     }
