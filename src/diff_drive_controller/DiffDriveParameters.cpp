@@ -30,8 +30,8 @@ namespace ezw::swd {
         {
             rcl_interfaces::msg::ParameterDescriptor descriptor;
             descriptor.read_only = true;
-            m_node->declare_parameter<std::string>("left_config_file", DEFAULT_LEFT_CONFIG_FILE, descriptor);
-            m_node->declare_parameter<std::string>("right_config_file", DEFAULT_RIGHT_CONFIG_FILE, descriptor);
+            m_node->declare_parameter<std::string>("left_swd_config_file", DEFAULT_LEFT_CONFIG_FILE, descriptor);
+            m_node->declare_parameter<std::string>("right_swd_config_file", DEFAULT_RIGHT_CONFIG_FILE, descriptor);
         }
         {
             rcl_interfaces::msg::ParameterDescriptor descriptor;
