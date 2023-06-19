@@ -43,6 +43,11 @@ def generate_launch_description():
             'motor_max_safety_limited_speed_rpm',
             default_value='490'),
 
+        DeclareLaunchArgument(
+            'accurate_odometry',
+            default_value='false',
+            description='Use a more precise odometry of the SWD product'),
+
         Node(
             package='swd_ros2_controllers',
             executable='swd_diff_drive_controller',
@@ -64,6 +69,7 @@ def generate_launch_description():
                         {"have_backward_sls": False},
                         {"left_encoder_relative_error": 0.2},
                         {"right_encoder_relative_error": 0.2},
+                        {'accurate_odometry': LaunchConfiguration('accurate_odometry')},
                         ]
         )
     ])
