@@ -310,16 +310,6 @@ namespace ezw::swd {
 
         // If NMT is operational, check the PDS state
         if (m_nmt_ok) {
-            // Reading STO
-            m_safety_msg_mtx.lock();
-            bool sto_signal = m_safety_msg.safe_torque_off;
-            m_safety_msg_mtx.unlock();
-
-            // If STO detected, exit
-            if (sto_signal) {
-                return;
-            }
-
             // PDS state machine
             err_l = m_left_controller.getPDSState(pds_state_l);
             err_r = m_right_controller.getPDSState(pds_state_r);
@@ -340,12 +330,19 @@ namespace ezw::swd {
 
             pds_ok = (smccore::IPDSService::PDSState::OPERATION_ENABLED == pds_state_l) && (smccore::IPDSService::PDSState::OPERATION_ENABLED == pds_state_r);
 
-            if (smccore::IPDSService::PDSState::OPERATION_ENABLED != pds_state_l) {
-                err_l = m_left_controller.enterInOperationEnabledState();
-            }
+            if (!pds_ok) {
+                // Reading STO
+                m_safety_msg_mtx.lock();
+                bool sto_signal = m_safety_msg.safe_torque_off;
+                m_safety_msg_mtx.unlock();
 
-            if (smccore::IPDSService::PDSState::OPERATION_ENABLED != pds_state_r) {
-                err_r = m_right_controller.enterInOperationEnabledState();
+                if (!sto_signal && smccore::IPDSService::PDSState::OPERATION_ENABLED != pds_state_l) {
+                    err_l = m_left_controller.enterInOperationEnabledState();
+                }
+
+                if (!sto_signal && smccore::IPDSService::PDSState::OPERATION_ENABLED != pds_state_r) {
+                    err_r = m_right_controller.enterInOperationEnabledState();
+                }
             }
         }
 
