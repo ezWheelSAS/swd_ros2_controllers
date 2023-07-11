@@ -601,7 +601,7 @@ namespace ezw::swd {
     }
 
 #define CONF_MAX_DELTA_SPEED_SLS (m_params->getMotorMaxSlsSpeedRpm() / 2)  // in rpm motor
-#define CONF_MAX_DELTA_SPEED (m_params->getMotorMaxSpeedRpm() / 2)         // in rpm motor
+#define CONF_MAX_DELTA_SPEED (m_params->getMotorMaxDeltaSpeedRpm())        // in rpm motor
 
     void DiffDriveController::setSpeeds(int32_t p_left_speed, int32_t p_right_speed)
     {

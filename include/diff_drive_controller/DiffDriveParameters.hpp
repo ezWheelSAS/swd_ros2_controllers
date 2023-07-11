@@ -23,6 +23,7 @@ constexpr auto DEFAULT_PUBLISH_TF = true;
 constexpr auto DEFAULT_PUBLISH_SAFETY_FCNS = true;
 constexpr auto DEFAULT_MOTOR_MAX_SPEED_RPM = 1050;
 constexpr auto DEFAULT_MOTOR_MAX_SLS_RPM = 490;
+constexpr auto DEFAULT_MOTOR_MAX_DELTA_RPM = DEFAULT_MOTOR_MAX_SPEED_RPM / 2;
 constexpr auto DEFAULT_HAVE_BACKWARD_SLS = false;
 constexpr auto DEFAULT_LEFT_RELATIVE_ERROR = 0.2;   // 20% of error
 constexpr auto DEFAULT_RIGHT_RELATIVE_ERROR = 0.2;  // 20% of error
@@ -154,6 +155,13 @@ namespace ezw::swd {
         auto getMotorMaxSlsSpeedRpm() -> int;
 
         /**
+         * @brief Get the Motor Max Delta Speed Rpm betwwen the both motors
+         * 
+         * @return int 
+         */
+        auto getMotorMaxDeltaSpeedRpm() -> int;
+
+        /**
          * @brief Get the Accurate Odometry flag
          * 
          * @return true if accurate odometry shal be used
@@ -170,7 +178,7 @@ namespace ezw::swd {
         std::string m_base_frame, m_odom_frame;
         bool m_publish_odom, m_publish_tf, m_publish_safety, m_have_backward_sls;
         float m_left_encoder_relative_error, m_right_encoder_relative_error;
-        int m_motor_max_speed_rpm, m_motor_max_sls_speed_rpm;
+        int m_motor_max_speed_rpm, m_motor_max_sls_speed_rpm, m_motor_max_delta_speed_rpm;
         bool m_accurate_odometry;
     };
 }  // namespace ezw::swd

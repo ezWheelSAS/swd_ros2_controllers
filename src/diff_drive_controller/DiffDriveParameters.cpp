@@ -74,6 +74,7 @@ namespace ezw::swd {
 
             m_node->declare_parameter<int>("motor_max_speed_rpm", DEFAULT_MOTOR_MAX_SPEED_RPM, descriptor);
             m_node->declare_parameter<int>("motor_max_safety_limited_speed_rpm", DEFAULT_MOTOR_MAX_SLS_RPM, descriptor);
+            m_node->declare_parameter<int>("motor_max_delta_speed_rpm", DEFAULT_MOTOR_MAX_DELTA_RPM, descriptor);
         }
         m_node->declare_parameter<bool>("have_backward_sls", DEFAULT_HAVE_BACKWARD_SLS);
         {
@@ -255,6 +256,17 @@ namespace ezw::swd {
             RCLCPP_INFO(m_node->get_logger(), "motor_max_safety_limited_speed_rpm : %d", m_motor_max_sls_speed_rpm);
         }
         return m_motor_max_sls_speed_rpm;
+    }
+
+    auto DiffDriveParameters::getMotorMaxDeltaSpeedRpm() -> int
+    {
+        // Motor max delta speed rpm between the both motors
+        auto l_motor_max_delta_speed_rpm = m_motor_max_delta_speed_rpm;
+        m_node->get_parameter("motor_max_delta_speed_rpm", m_motor_max_delta_speed_rpm);
+        if (m_motor_max_delta_speed_rpm != l_motor_max_delta_speed_rpm) {
+            RCLCPP_INFO(m_node->get_logger(), "motor_max_delta_speed_rpm : %d", m_motor_max_delta_speed_rpm);
+        }
+        return m_motor_max_delta_speed_rpm;
     }
 
     auto DiffDriveParameters::getAccurateOdometry() -> bool
