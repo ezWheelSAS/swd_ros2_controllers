@@ -1,4 +1,15 @@
-swd-ros2-controllers (1.4.3) unsable; urgency=medium
+swd-ros2-controllers (1.5.0) unstable; urgency=medium
+
+  * Add motor_max_delta_speed_rpm parameter
+  * Improve /odom precision and add accurate_odometry parameter
+  * Fix motors synchronisation when STO is deactivated
+  * Support Humble
+  * Added SLS Parameter
+  * The param name of left config file and right config file is not same as DiffDriveParameters.cpp
+
+ -- Grégory Mermet <g.mermet@ez-wheel.com>  Thu, 20 Jul 2023 12:58:55 +0200
+
+swd-ros2-controllers (1.4.3) unstable; urgency=medium
 
   * Complete README.md with 'Users should regularly inform themselves about updates to this driver (best subscribe under "Watch")'
   * Stop SWD when shutdown is called by pressing Ctrl+c
