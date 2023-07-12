@@ -20,7 +20,7 @@ Some pre-built packages are available for ROS2 Foxy and Galactic on Ubuntu 20.04
 - `SWD firmware` (**`>= 1.0.1`**)
 - Ubuntu 20.04
 - ROS2 Foxy or Galactic
-- `swd-services` (**`>= 0.2.7`**)
+- `swd-services` (**`>= 0.3.0`**)
 
 ### Ubuntu
 
