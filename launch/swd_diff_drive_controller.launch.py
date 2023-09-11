@@ -14,7 +14,6 @@ from launch.actions import DeclareLaunchArgument
 
 
 def generate_launch_description():
-
     # Load specific dbus user session if exists
     session = "/tmp/SYSTEMCTL_dbus.id"
     if os.path.isfile(session):
