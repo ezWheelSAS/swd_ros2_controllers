@@ -30,7 +30,7 @@ def generate_launch_description():
             DeclareLaunchArgument("use_sim_time", default_value="false", description="Use simulation (Gazebo) clock if true"),
             DeclareLaunchArgument("baseline_m", default_value="0.485"),
             DeclareLaunchArgument("motor_max_speed_rpm", default_value="1050"),
-            DeclareLaunchArgument("motor_max_safety_limited_speed_rpm", default_value="490"),
+            DeclareLaunchArgument("motor_max_safety_limited_speed_rpm", default_value="560"),
             DeclareLaunchArgument("motor_max_delta_speed_rpm", default_value="525"),  # motor_max_speed_rpm / 2
             DeclareLaunchArgument("accurate_odometry", default_value="false", description="Use a more precise odometry of the SWD product"),
             Node(
