@@ -2,7 +2,7 @@
 
 ## Overview
 
-This package has been tested on ROS2 Foxy and Galactic. It contains ROS2 nodes to control motors powered by the [ez-Wheel](https://www.ez-wheel.com) Safety Wheel Drive (SWD®) technology.
+This package has been tested on ROS2 Foxy, Galactic and Humble. It contains ROS2 nodes to control motors powered by the [ez-Wheel](https://www.ez-wheel.com) Safety Wheel Drive (SWD®) technology.
 
 | <img src="https://www.ez-wheel.com/storage/image-product/visuels-swd-core-2-0-0.png" width="45%"></img> | <img src="https://www.ez-wheel.com/storage/image-product/roue-electrique-swd-150-2-0-0-0.png" width="45%"></img> | <img src="https://www.ez-wheel.com/storage/image-product/starterkit-ez-wheel-web-0-0-0.png" width="45%"></img>       |
 | ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
@@ -17,10 +17,9 @@ Some pre-built packages are available for ROS2 Foxy and Galactic on Ubuntu 20.04
 ### Prerequisites
 
 - Two SWD® based wheels
-- `SWD firmware` (**`>= 1.0.1`**)
 - Ubuntu 20.04
-- ROS2 Foxy or Galactic
-- `swd-services` (**`>= 0.3.0`**)
+- ROS2 Foxy and Galactic
+- `swd-services` (**`>= 2.0.0`**)
 
 ### Ubuntu
 
