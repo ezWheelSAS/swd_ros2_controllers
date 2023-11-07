@@ -274,7 +274,7 @@ namespace ezw::swd {
         if (ERROR_NONE != err_l) {
             RCLCPP_ERROR(get_logger(),
                          "Failed to get the NMT state for left motor, EZW_ERR: SMCService : "
-                         "Controller::getPDSState() return error code : %d",
+                         "Controller::getNMTState() return error code : %d",
                          (int)err_l);
         }
 
@@ -282,7 +282,7 @@ namespace ezw::swd {
         if (ERROR_NONE != err_r) {
             RCLCPP_ERROR(get_logger(),
                          "Failed to get the NMT state for right motor, EZW_ERR: SMCService : "
-                         "Controller::getPDSState() return error code : %d",
+                         "Controller::getNMTState() return error code : %d",
                          (int)err_r);
         }
 
@@ -415,6 +415,12 @@ namespace ezw::swd {
                          "Failed reading from right motor, EZW_ERR: SMCService : "
                          "Controller::%s() return error code : %d",
                          m_params->getAccurateOdometry() ? "getAccurateOdometryValueTS" : "getOdometryValueTS", (int)err_r);
+            return;
+        }
+
+        if (m_left_timestamp_prev_us == left_timestamp_us || m_right_timestamp_prev_us == right_timestamp_us) {
+            // Nothing to do
+            // Values have not changed (avoid "nan" values in /odom topic)
             return;
         }
 
@@ -785,6 +791,7 @@ namespace ezw::swd {
                          "Error reading SAFEIN_1 control word from left motor, EZW_ERR: SMCService : "
                          "Controller::getSafetyControlWord() return error code : %d",
                          (int)err);
+            return;
         }
         bool safein1_l[6];
         safein1_l[0] = safety_control_word.safety_function_0;
@@ -800,6 +807,7 @@ namespace ezw::swd {
                          "Error reading SAFEIN_1 control word from right motor, EZW_ERR: SMCService : "
                          "Controller::getSafetyControlWord() return error code : %d",
                          (int)err);
+            return;
         }
         bool safein1_r[6];
         safein1_r[0] = safety_control_word.safety_function_0;
