@@ -1,3 +1,11 @@
+swd-ros2-controllers (2.0.0) unstable; urgency=medium
+
+  * Change DEFAULT_MAX_SLS_WHEEL_RPM to 560rpm
+  * Set minimum swd-services version to 2.0.0 in order to support SWD FW >= 2.0.2
+  * Fix nan values into /odom topic when can bus is down
+
+ -- Grégory Mermet <g.mermet@ez-wheel.com>  Tue, 07 Nov 2023 16:43:38 +0000
+
 swd-ros2-controllers (1.5.0) unstable; urgency=medium
 
   * Add motor_max_delta_speed_rpm parameter
