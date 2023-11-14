@@ -598,16 +598,17 @@ namespace ezw::swd {
                     "Twist command (linear.x_requested, angular.z_requested, linear.x_real, angular.z_real); %f;%f;%f;%f; \
                     Calculated speeds (left_requested, right_requested, left_send, right_send); \
                     % d; % d; % d; % d; \
-                    Safety indicators (STO, SDIp, SLS); % d; % d; % d; ",
+                    Safety indicators (STO, SDIp, SLS_1, SLS_2); % d; % d; % d; % d; ",
                     p_cmd_vel->linear.x,
                     p_cmd_vel->angular.z, x, z, left_requested, right_requested, left, right,
-                    (int)m_safety_msg.safe_torque_off, (int)m_safety_msg.safe_direction_indication_forward, (int)m_safety_msg.safety_limited_speed);
+                    (int)m_safety_msg.safe_torque_off, (int)m_safety_msg.safe_direction_indication_forward, (int)m_safety_msg.safety_limited_speed_1, (int)m_safety_msg.safety_limited_speed_2);
 
 #endif
     }
 
-#define CONF_MAX_DELTA_SPEED_SLS (m_params->getMotorMaxSlsSpeedRpm() / 2)  // in rpm motor
-#define CONF_MAX_DELTA_SPEED (m_params->getMotorMaxDeltaSpeedRpm())        // in rpm motor
+#define CONF_MAX_DELTA_SPEED_SLS_1 (m_params->getMotorMaxSls1SpeedRpm() / 2)  // in rpm motor
+#define CONF_MAX_DELTA_SPEED_SLS_2 (m_params->getMotorMaxSls2SpeedRpm() / 2)  // in rpm motor
+#define CONF_MAX_DELTA_SPEED (m_params->getMotorMaxDeltaSpeedRpm())           // in rpm motor
 
     void DiffDriveController::setSpeeds(int32_t p_left_speed, int32_t p_right_speed)
     {
@@ -618,6 +619,7 @@ namespace ezw::swd {
         int32_t speed_limit = -1;
         bool max_limited = false;
         bool sls_limited = false;
+        int8_t enabled_sls_num = -1;
 
         // Limit to the maximum allowed speed
         if (faster_motor_speed > m_params->getMotorMaxSpeedRpm()) {
@@ -625,23 +627,30 @@ namespace ezw::swd {
             max_limited = true;
         }
 
+        // Reading SLS_1/SLS_2
+        m_safety_msg_mtx.lock();
+        bool sls_1_signal = m_safety_msg.safety_limited_speed_1;
+        bool sls_2_signal = m_safety_msg.safety_limited_speed_2;
+        m_safety_msg_mtx.unlock();
+
+        // If SLS detected, impose the safety limited speed (SLS)
+        if (sls_1_signal && (faster_motor_speed > m_params->getMotorMaxSls1SpeedRpm())) {
+            speed_limit = m_params->getMotorMaxSls1SpeedRpm();
+            sls_limited = true;
+            enabled_sls_num = 1;
+        }
+        else if (sls_2_signal && (faster_motor_speed > m_params->getMotorMaxSls2SpeedRpm())) {
+            speed_limit = m_params->getMotorMaxSls2SpeedRpm();
+            sls_limited = true;
+            enabled_sls_num = 2;
+        }
+
         // Impose the safety limited speed (SLS) in backward movement when the robot doesn't have backward SLS signal.
         // For example, if it has only one forward-facing safety LiDAR, when the robot move backwards, there's no
         // safety guarantees, hence speed is limited to SLS, otherwise, the safety limit will be decided by the
         // presence of the SLS signal.
-        if (!m_params->getHaveBackwardSls() && (p_left_speed < 0) && (p_right_speed < 0) && (faster_motor_speed > m_params->getMotorMaxSlsSpeedRpm())) {
-            speed_limit = m_params->getMotorMaxSlsSpeedRpm();
-        }
-
-        // Reading SLS
-        m_safety_msg_mtx.lock();
-        bool sls_signal = m_safety_msg.safety_limited_speed;
-        m_safety_msg_mtx.unlock();
-
-        // If SLS detected, impose the safety limited speed (SLS)
-        if (sls_signal && (faster_motor_speed > m_params->getMotorMaxSlsSpeedRpm())) {
-            speed_limit = m_params->getMotorMaxSlsSpeedRpm();
-            sls_limited = true;
+        if (!m_params->getHaveBackwardSls() && (p_left_speed < 0) && (p_right_speed < 0) && (faster_motor_speed > m_params->getMotorMaxSls1SpeedRpm())) {
+            speed_limit = m_params->getMotorMaxSls1SpeedRpm();
         }
 
         // The left and right motors may have different speeds.
@@ -660,15 +669,15 @@ namespace ezw::swd {
 
             if (max_limited && sls_limited) {
                 RCLCPP_DEBUG(get_logger(),
-                             "The target speed exceeds the MAX/SLS maximum speed limit (%d rpm). "
+                             "The target speed exceeds the MAX/SLS_%d maximum speed limit (%d rpm). "
                              "Set speed to (left, right) (%d, %d) rpm",
-                             speed_limit, p_left_speed, p_right_speed);
+                             enabled_sls_num, speed_limit, p_left_speed, p_right_speed);
             }
             else if (sls_limited) {
                 RCLCPP_DEBUG(get_logger(),
-                             "The target speed exceeds the SLS maximum speed limit (%d rpm). "
+                             "The target speed exceeds the SLS_%d maximum speed limit (%d rpm). "
                              "Set speed to (left, right) (%d, %d) rpm",
-                             speed_limit, p_left_speed, p_right_speed);
+                             enabled_sls_num, speed_limit, p_left_speed, p_right_speed);
             }
             else if (max_limited) {
                 RCLCPP_DEBUG(get_logger(),
@@ -688,8 +697,11 @@ namespace ezw::swd {
         }
 
         // If SLS detected, limit to the maximum allowed delta safety limited speed (SLS)
-        if (sls_signal && (delta_wheel_speed > CONF_MAX_DELTA_SPEED_SLS)) {
-            delta_speed_limit = CONF_MAX_DELTA_SPEED_SLS;
+        if (sls_1_signal && (delta_wheel_speed > CONF_MAX_DELTA_SPEED_SLS_1)) {
+            delta_speed_limit = CONF_MAX_DELTA_SPEED_SLS_1;
+        }
+        else if (sls_2_signal && (delta_wheel_speed > CONF_MAX_DELTA_SPEED_SLS_2)) {
+            delta_speed_limit = CONF_MAX_DELTA_SPEED_SLS_2;
         }
 
         // The left and right wheels may have different speeds.
@@ -864,17 +876,28 @@ namespace ezw::swd {
             RCLCPP_INFO(get_logger(), msg.safe_direction_indication_backward ? "SDIn enabled." : "SDIn disabled.");
         }
 
-        // Reading SLS
+        // Reading SLS_1
+        // When an object is detected in the SLS area, res_r and res_l will be false.
+        // If both or either res_l or res_r are false, set safety_limited_speed to true.
         res_l = m_left_safety_functions.count(ezw::smccore::ISafeMotionService::SafetyFunctionId::SLS_1) ? safein1_l[m_left_safety_functions[ezw::smccore::ISafeMotionService::SafetyFunctionId::SLS_1]] : true;
         res_r = m_right_safety_functions.count(ezw::smccore::ISafeMotionService::SafetyFunctionId::SLS_1) ? safein1_r[m_right_safety_functions[ezw::smccore::ISafeMotionService::SafetyFunctionId::SLS_1]] : true;
 
-        msg.safety_limited_speed = static_cast<uint8_t>(!res_l || !res_r);
-        if (m_first_entry || msg.safety_limited_speed != m_safety_msg.safety_limited_speed) {
-            RCLCPP_INFO(get_logger(), msg.safety_limited_speed ? "SLS enabled." : "SLS disabled.");
+        msg.safety_limited_speed_1 = static_cast<uint8_t>(!res_l || !res_r);
+        if (m_first_entry || msg.safety_limited_speed_1 != m_safety_msg.safety_limited_speed_1) {
+            RCLCPP_INFO(get_logger(), msg.safety_limited_speed_1 ? "SLS_1 enabled." : "SLS_1 disabled.");
+        }
+
+        // Reading SLS_2
+        res_l = m_left_safety_functions.count(ezw::smccore::ISafeMotionService::SafetyFunctionId::SLS_2) ? safein1_l[m_left_safety_functions[ezw::smccore::ISafeMotionService::SafetyFunctionId::SLS_2]] : true;
+        res_r = m_right_safety_functions.count(ezw::smccore::ISafeMotionService::SafetyFunctionId::SLS_2) ? safein1_r[m_right_safety_functions[ezw::smccore::ISafeMotionService::SafetyFunctionId::SLS_2]] : true;
+
+        msg.safety_limited_speed_2 = static_cast<uint8_t>(!res_l || !res_r);
+        if (m_first_entry || msg.safety_limited_speed_2 != m_safety_msg.safety_limited_speed_2) {
+            RCLCPP_INFO(get_logger(), msg.safety_limited_speed_2 ? "SLS_2 enabled." : "SLS_2 disabled.");
         }
 
 #if VERBOSE_OUTPUT
-        RCLCPP_INFO(get_logger(), "STO: %d, SDI+: %d, SDI-: %d, SLS: %d", msg.safe_torque_off, msg.safe_direction_indication_forward, msg.safe_direction_indication_backward, msg.safety_limited_speed);
+        RCLCPP_INFO(get_logger(), "STO: %d, SDI+: %d, SDI-: %d, SLS_1: %d, SLS_2: %d", msg.safe_torque_off, msg.safe_direction_indication_forward, msg.safe_direction_indication_backward, msg.safety_limited_speed_1, msg.safety_limited_speed_2);
 #endif
 
         m_safety_msg_mtx.lock();

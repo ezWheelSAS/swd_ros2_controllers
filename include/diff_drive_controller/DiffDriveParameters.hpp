@@ -22,7 +22,8 @@ constexpr auto DEFAULT_PUBLISH_ODOM = true;
 constexpr auto DEFAULT_PUBLISH_TF = true;
 constexpr auto DEFAULT_PUBLISH_SAFETY_FCNS = true;
 constexpr auto DEFAULT_MOTOR_MAX_SPEED_RPM = 1050;
-constexpr auto DEFAULT_MOTOR_MAX_SLS_RPM = 560;
+constexpr auto DEFAULT_MOTOR_MAX_SLS_1_RPM = 560;
+constexpr auto DEFAULT_MOTOR_MAX_SLS_2_RPM = 680;
 constexpr auto DEFAULT_MOTOR_MAX_DELTA_RPM = DEFAULT_MOTOR_MAX_SPEED_RPM / 2;
 constexpr auto DEFAULT_HAVE_BACKWARD_SLS = false;
 constexpr auto DEFAULT_LEFT_RELATIVE_ERROR = 0.2;   // 20% of error
@@ -148,11 +149,18 @@ namespace ezw::swd {
         auto getMotorMaxSpeedRpm() -> int;
 
         /**
-         * @brief Get the Motor Max SLS Speed Rpm
+         * @brief Get the Motor Max SLS_1 Speed Rpm
          * 
          * @return int 
          */
-        auto getMotorMaxSlsSpeedRpm() -> int;
+        auto getMotorMaxSls1SpeedRpm() -> int;
+
+        /**
+         * @brief Get the Motor Max SLS_2 Speed Rpm
+         * 
+         * @return int 
+         */
+        auto getMotorMaxSls2SpeedRpm() -> int;
 
         /**
          * @brief Get the Motor Max Delta Speed Rpm betwwen the both motors
@@ -178,7 +186,7 @@ namespace ezw::swd {
         std::string m_base_frame, m_odom_frame;
         bool m_publish_odom, m_publish_tf, m_publish_safety, m_have_backward_sls;
         float m_left_encoder_relative_error, m_right_encoder_relative_error;
-        int m_motor_max_speed_rpm, m_motor_max_sls_speed_rpm, m_motor_max_delta_speed_rpm;
+        int m_motor_max_speed_rpm, m_motor_max_sls_1_speed_rpm, m_motor_max_sls_2_speed_rpm, m_motor_max_delta_speed_rpm;
         bool m_accurate_odometry;
     };
 }  // namespace ezw::swd
