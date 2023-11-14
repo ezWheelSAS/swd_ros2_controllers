@@ -233,8 +233,9 @@ This controller drives two ez-Wheel SWD® wheels as a differential-drive robot.
 - `publish_tf` of type **`bool`**: Publish TF messages (default `true`).
 - `publish_safety_functions` of type **`bool`**: Publish **`swd_ros2_controllers::msg::SafetyFunctions`** message (default `true`).
 - `motor_max_speed_rpm` of type **`int`**: Maximum allowed motor speed (in RPM), if a target speed of one of the motor is above this limit, the controller will limit the speed of the two motor without changing the robot's trajectory (default `1050`).
-- `motor_max_safety_limited_speed_rpm` of type **`int`**: Motor safety limited speed (SLS) (in RPM), if an SLS signal is detected (from a security LiDAR for example), the motor will be limited internally to the configured SLS limit. The ROS2 controller uses this value to limit the target speed sent to the motor in the SLS case (default `560`).
-- `have_backward_sls` of type **`bool`**: Specifies if the robot have a backward SLS signal, coming for example from a back-facing security LiDAR. If an SLS signal is available for backward movements, set this to `true` to take it into account. Otherwise, set the parameter to `false`, this will limit all backward movements to the selected `safety_limited_speed_rpm` (default `false`).
+- `motor_max_safety_limited_speed_1_rpm` of type **`int`**: Motor safety limited speed 1 (SLS_1) (in RPM), if an SLS_1 signal is detected (from a security LiDAR for example), the motor will be limited internally to the configured SLS_1 limit. The ROS2 controller uses this value to limit the target speed sent to the motor in the SLS_1 case (default `560`).
+- `motor_max_safety_limited_speed_2_rpm` of type **`int`**: Motor safety limited speed 2 (SLS_2) (in RPM), if an SLS_2 signal is detected (from a security LiDAR for example), the motor will be limited internally to the configured SLS_2 limit. The ROS2 controller uses this value to limit the target speed sent to the motor in the SLS_2 case (default `680`).
+- `have_backward_sls` of type **`bool`**: Specifies if the robot have a backward SLS signal, coming for example from a back-facing security LiDAR. If an SLS signal is available for backward movements, set this to `true` to take it into account. Otherwise, set the parameter to `false`, this will limit all backward movements to the selected `motor_max_safety_limited_speed_1_rpm` (default `false`).
 - `left_encoder_relative_error` of type **`double`**: Relative error for left wheel encoder, used to calculate variances and propagate them to calculate the uncertainties in the odometry message. Each encoder acquisition **`DIFF_LEFT_ENCODER`** is modeled as: **`DIFF_LEFT_ENCODER +/- abs(left_encoder_relative_error * DIFF_LEFT_ENCODER)`** (default `0.2` corresponding to 20% of error).
 - `right_encoder_relative_error` of type **`double`**: Relative error for right wheel encoder, used to calculate variances and propagate them to calculate the uncertainties in the odometry message. Each encoder acquisition **`DIFF_RIGHT_ENCODER`** is modeled as: **`DIFF_RIGHT_ENCODER +/- abs(right_encoder_relative_error * DIFF_RIGHT_ENCODER)`** (default `0.2` corresponding to 20% of error).
 
@@ -247,7 +248,7 @@ This controller drives two ez-Wheel SWD® wheels as a differential-drive robot.
 ### Published Topics
 
 - `/odom` of type **`nav_msgs/msg/Odometry`**: Odometry message based on wheels encoders, containing the pose and velocity of the robot with their's associated uncertainties. Unless disabled by the `publish_tf` parameter, TFs with the same information are also published.
-- `/safety` of type **`swd_ros2_controllers/msg/SafetyFunctions`**: Safety messages communicated by the wheels via CANOpen, the message includes information about Safe Torque Off (STO), Safety Limited Speed (SLS), Safe Direction Indication (forward/backward) (SDI+/-), and Safe Brake Control (SBC).
+- `/safety` of type **`swd_ros2_controllers/msg/SafetyFunctions`**: Safety messages communicated by the wheels via CANOpen, the message includes information about Safe Torque Off (STO), Safety Limited Speed (SLS_1/SLS_2), Safe Direction Indication (forward/backward) (SDI+/-), and Safe Brake Control (SBC).
 
 ## Custom message types
 
@@ -260,7 +261,8 @@ True if the safety drive function is enabled.
 std_msgs/Header header
 bool safe_torque_off                        # Safe Torque Off (STO)
 bool safe_brake_control                     # Safe Brake Control (SBC)
-bool safety_limited_speed                   # Safety Limited Speed (SLS)
+bool safety_limited_speed_1                 # Safety Limited Speed 1 (SLS_1)
+bool safety_limited_speed_2                 # Safety Limited Speed 2 (SLS_2)
 bool safe_direction_indication_forward      # Safe Direction Indication (positive)
 bool safe_direction_indication_backward     # Safe Direction Indication (negative)
 ```

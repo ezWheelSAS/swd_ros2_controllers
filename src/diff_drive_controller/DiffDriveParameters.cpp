@@ -73,7 +73,8 @@ namespace ezw::swd {
             range.step = 1;         // precision value
 
             m_node->declare_parameter<int>("motor_max_speed_rpm", DEFAULT_MOTOR_MAX_SPEED_RPM, descriptor);
-            m_node->declare_parameter<int>("motor_max_safety_limited_speed_rpm", DEFAULT_MOTOR_MAX_SLS_RPM, descriptor);
+            m_node->declare_parameter<int>("motor_max_safety_limited_speed_1_rpm", DEFAULT_MOTOR_MAX_SLS_1_RPM, descriptor);
+            m_node->declare_parameter<int>("motor_max_safety_limited_speed_2_rpm", DEFAULT_MOTOR_MAX_SLS_2_RPM, descriptor);
             m_node->declare_parameter<int>("motor_max_delta_speed_rpm", DEFAULT_MOTOR_MAX_DELTA_RPM, descriptor);
         }
         m_node->declare_parameter<bool>("have_backward_sls", DEFAULT_HAVE_BACKWARD_SLS);
@@ -247,15 +248,26 @@ namespace ezw::swd {
         return m_motor_max_speed_rpm;
     }
 
-    auto DiffDriveParameters::getMotorMaxSlsSpeedRpm() -> int
+    auto DiffDriveParameters::getMotorMaxSls1SpeedRpm() -> int
     {
-        // Motor max speed rpm when SLS enabled
-        auto l_motor_max_sls_speed_rpm = m_motor_max_sls_speed_rpm;
-        m_node->get_parameter("motor_max_safety_limited_speed_rpm", m_motor_max_sls_speed_rpm);
-        if (m_motor_max_sls_speed_rpm != l_motor_max_sls_speed_rpm) {
-            RCLCPP_INFO(m_node->get_logger(), "motor_max_safety_limited_speed_rpm : %d", m_motor_max_sls_speed_rpm);
+        // Motor max speed rpm when SLS_1 enabled
+        auto l_motor_max_sls_1_speed_rpm = m_motor_max_sls_1_speed_rpm;
+        m_node->get_parameter("motor_max_safety_limited_speed_1_rpm", m_motor_max_sls_1_speed_rpm);
+        if (m_motor_max_sls_1_speed_rpm != l_motor_max_sls_1_speed_rpm) {
+            RCLCPP_INFO(m_node->get_logger(), "motor_max_safety_limited_speed_1_rpm : %d", m_motor_max_sls_1_speed_rpm);
         }
-        return m_motor_max_sls_speed_rpm;
+        return m_motor_max_sls_1_speed_rpm;
+    }
+
+    auto DiffDriveParameters::getMotorMaxSls2SpeedRpm() -> int
+    {
+        // Motor max speed rpm when SLS_2 enabled
+        auto l_motor_max_sls_2_speed_rpm = m_motor_max_sls_2_speed_rpm;
+        m_node->get_parameter("motor_max_safety_limited_speed_2_rpm", m_motor_max_sls_2_speed_rpm);
+        if (m_motor_max_sls_2_speed_rpm != l_motor_max_sls_2_speed_rpm) {
+            RCLCPP_INFO(m_node->get_logger(), "motor_max_safety_limited_speed_2_rpm : %d", m_motor_max_sls_2_speed_rpm);
+        }
+        return m_motor_max_sls_2_speed_rpm;
     }
 
     auto DiffDriveParameters::getMotorMaxDeltaSpeedRpm() -> int

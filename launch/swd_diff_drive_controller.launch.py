@@ -29,8 +29,9 @@ def generate_launch_description():
         [
             DeclareLaunchArgument("use_sim_time", default_value="false", description="Use simulation (Gazebo) clock if true"),
             DeclareLaunchArgument("baseline_m", default_value="0.485"),
-            DeclareLaunchArgument("motor_max_speed_rpm", default_value="1050"),
-            DeclareLaunchArgument("motor_max_safety_limited_speed_rpm", default_value="560"),
+            DeclareLaunchArgument("motor_max_speed_rpm", default_value="1050"),                 # 0.49 [m/s]
+            DeclareLaunchArgument("motor_max_safety_limited_speed_1_rpm", default_value="560"), # 0.26 [m/s]
+            DeclareLaunchArgument("motor_max_safety_limited_speed_2_rpm", default_value="680"), # 0.32 [m/s]
             DeclareLaunchArgument("motor_max_delta_speed_rpm", default_value="525"),  # motor_max_speed_rpm / 2
             DeclareLaunchArgument("accurate_odometry", default_value="false", description="Use a more precise odometry of the SWD product"),
             Node(
@@ -51,7 +52,8 @@ def generate_launch_description():
                     {"publish_tf": True},
                     {"publish_safety_functions": True},
                     {"motor_max_speed_rpm": LaunchConfiguration("motor_max_speed_rpm")},
-                    {"motor_max_safety_limited_speed_rpm": LaunchConfiguration("motor_max_safety_limited_speed_rpm")},
+                    {"motor_max_safety_limited_speed_1_rpm": LaunchConfiguration("motor_max_safety_limited_speed_1_rpm")},
+                    {"motor_max_safety_limited_speed_2_rpm": LaunchConfiguration("motor_max_safety_limited_speed_2_rpm")},
                     {"motor_max_delta_speed_rpm": LaunchConfiguration("motor_max_delta_speed_rpm")},
                     {"have_backward_sls": False},
                     {"left_encoder_relative_error": 0.2},
