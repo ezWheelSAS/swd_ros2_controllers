@@ -659,22 +659,22 @@ namespace ezw::swd {
             p_left_speed = static_cast<int32_t>(static_cast<double>(p_left_speed) * speed_ratio);
 
             if (max_limited && sls_limited) {
-                RCLCPP_INFO(get_logger(),
-                            "The target speed exceeds the MAX/SLS maximum speed limit (%d rpm). "
-                            "Set speed to (left, right) (%d, %d) rpm",
-                            speed_limit, p_left_speed, p_right_speed);
+                RCLCPP_DEBUG(get_logger(),
+                             "The target speed exceeds the MAX/SLS maximum speed limit (%d rpm). "
+                             "Set speed to (left, right) (%d, %d) rpm",
+                             speed_limit, p_left_speed, p_right_speed);
             }
             else if (sls_limited) {
-                RCLCPP_INFO(get_logger(),
-                            "The target speed exceeds the SLS maximum speed limit (%d rpm). "
-                            "Set speed to (left, right) (%d, %d) rpm",
-                            speed_limit, p_left_speed, p_right_speed);
+                RCLCPP_DEBUG(get_logger(),
+                             "The target speed exceeds the SLS maximum speed limit (%d rpm). "
+                             "Set speed to (left, right) (%d, %d) rpm",
+                             speed_limit, p_left_speed, p_right_speed);
             }
             else if (max_limited) {
-                RCLCPP_INFO(get_logger(),
-                            "The target speed exceeds the maximum speed limit (%d rpm). "
-                            "Set speed to (left, right) (%d, %d) rpm",
-                            speed_limit, p_left_speed, p_right_speed);
+                RCLCPP_DEBUG(get_logger(),
+                             "The target speed exceeds the maximum speed limit (%d rpm). "
+                             "Set speed to (left, right) (%d, %d) rpm",
+                             speed_limit, p_left_speed, p_right_speed);
             }
         }
 
@@ -705,10 +705,10 @@ namespace ezw::swd {
             // Scale left speed
             p_left_speed = static_cast<int32_t>(static_cast<double>(p_left_speed) * delta_speed_ratio);
 
-            RCLCPP_INFO(get_logger(),
-                        "The target speed exceeds the maximum delta speed limit (%d rpm). "
-                        "Speed set to (left, right) (%d, %d) rpm",
-                        delta_speed_limit, p_left_speed, p_right_speed);
+            RCLCPP_DEBUG(get_logger(),
+                         "The target speed exceeds the maximum delta speed limit (%d rpm). "
+                         "Speed set to (left, right) (%d, %d) rpm",
+                         delta_speed_limit, p_left_speed, p_right_speed);
         }
 
         // If left minimum speed detected, impose the minimum speed
@@ -731,10 +731,10 @@ namespace ezw::swd {
                 p_right_speed = (p_right_speed > 0) ? m_right_min_speed_rpm : -m_right_min_speed_rpm;
             }
 
-            RCLCPP_INFO(get_logger(),
-                        "The target speed falls behind the minimum speed limit (left, right) (%d, %d rpm)."
-                        "Set speed to (left, right) (%d, %d) rpm",
-                        left_speed, right_speed, p_left_speed, p_right_speed);
+            RCLCPP_DEBUG(get_logger(),
+                         "The target speed falls behind the minimum speed limit (left, right) (%d, %d rpm)."
+                         "Set speed to (left, right) (%d, %d) rpm",
+                         left_speed, right_speed, p_left_speed, p_right_speed);
         }
 
         // If the PDS state is not OPERATION_ENABLED, we send a nil speed.
