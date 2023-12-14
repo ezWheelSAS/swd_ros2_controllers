@@ -1,3 +1,9 @@
+swd-ros2-controllers (2.0.1) unstable; urgency=medium
+
+  * Change some log level messages
+
+ -- Grégory Mermet <g.mermet@ez-wheel.com>  Thu, 14 Dec 2023 17:05:25 +0000
+
 swd-ros2-controllers (2.0.0) unstable; urgency=medium
 
   * Change DEFAULT_MAX_SLS_WHEEL_RPM to 560rpm
