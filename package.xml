@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>swd_ros2_controllers</name>
-  <version>2.0.0</version>
+  <version>2.0.1</version>
   <description>Package which control 2 wheels in as a differential drive robot.</description>
 
   <maintainer email="l.david@ez-wheel.com">ez-wheel-dev</maintainer>
