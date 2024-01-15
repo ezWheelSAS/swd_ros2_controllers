@@ -4,11 +4,13 @@
 
 This package has been tested on ROS2 Foxy, Galactic and Humble. It contains ROS2 nodes to control motors powered by the [ez-Wheel](https://www.ez-wheel.com) Safety Wheel Drive (SWD®) technology.
 
-| <img src="https://www.ez-wheel.com/storage/image-product/visuels-swd-core-2-0-0.png" width="45%"></img> | <img src="https://www.ez-wheel.com/storage/image-product/roue-electrique-swd-150-2-0-0-0.png" width="45%"></img> | <img src="https://www.ez-wheel.com/storage/image-product/starterkit-ez-wheel-web-0-0-0.png" width="45%"></img>       |
-| ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| [SWD® Core](https://www.ez-wheel.com/en/safety-gear-motor) <br />Safety gear motor                      | [SWD® 150](https://www.ez-wheel.com/en/swd-150-safety-wheel-drive) <br />Safety wheel drive                      | [SWD® StarterKit](https://www.ez-wheel.com/en/development-kit-for-agv-and-amr) <br />Development kit for AGV and AMR |
+|![SWD-Core](https://www.ez-wheel.com/storage/image-product/visuels-swd-core-2-0-0.png) |![SWD-125](https://www.ez-wheel.com/storage/image-product/ezswd125im-31102023-photo-hd-det.png) |![SWD-150](https://www.ez-wheel.com/storage/image-product/roue-electrique-swd-150-2-0-0-0.png) |![SWD-StarterKit](https://www.ez-wheel.com/storage/image-product/starterkit-ez-wheel-web-0-0-0.png)|
+| ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| [SWD® Core](https://www.ez-wheel.com/en/safety-gear-motor)  | [SWD® 125](https://ez-wheel.com/en/safety-wheel-drive-swd-125) | [SWD® 150](https://www.ez-wheel.com/en/swd-150-safety-wheel-drive) | [SWD® StarterKit](https://www.ez-wheel.com/en/development-kit-for-agv-and-amr) |
+| Safety gear motor                                           | Medium duty Safety Wheel Drive                                 | Heavy duty Safety Wheel Drive                                      | Development kit for AGV and AMR |
 
-Users should regularly inform themselves about updates to this driver (best subscribe under "Watch").
+Users should regularly inform themselves about updates to this driver (Activating GitHub notifications with "Watch", 'All activity' button on the top of this page).
+
 ## Installation
 
 This package has been tested on **x64_86** and **arm64** machines.
@@ -17,8 +19,9 @@ Some pre-built packages are available for ROS2 Foxy and Galactic on Ubuntu 20.04
 ### Prerequisites
 
 - Two SWD® based wheels
-- Ubuntu 20.04
-- ROS2 Foxy and Galactic
+- `SWD firmware` (**`>= 1.0.1`**)
+- Ubuntu 20.04 (Focal Fossa) and ROS2 (Foxy or Galactic)
+- Ubuntu 22.04 (Jammy Jellyfish) and ROS2 (Humble or Iron)
 - `swd-services` (**`>= 2.0.0`**)
 
 ### Ubuntu
@@ -26,7 +29,7 @@ Some pre-built packages are available for ROS2 Foxy and Galactic on Ubuntu 20.04
 In order to install `swd_ros2_controllers`, you need to add the ez-Wheel repository to `/etc/apt/sources.list`.
 
 ```shell
-echo "deb http://packages.ez-wheel.com:8081/apt-repo focal main" | sudo tee -a /etc/apt/sources.list
+echo "deb http://packages.ez-wheel.com:8081/ubuntu $(lsb_release -cs) main" | sudo tee -a /etc/apt/sources.list
 ```
 
 Then download and add the GPG key using following command:
@@ -37,22 +40,8 @@ wget -qO - http://packages.ez-wheel.com:8081/archive.key | sudo apt-key add -
 
 Now, you should be able to install the `swd-ros2-controllers` package using `apt`:
 
-#### Foxy
-
 ```shell
-sudo apt update && sudo apt install swd-services ros-foxy-swd-ros2-controllers
-```
-
-#### Galactic
-
-```shell
-sudo apt update && sudo apt install swd-services ros-galactic-swd-ros2-controllers
-```
-
-### Humble
-
-```shell
-sudo apt update && sudo apt install swd-services ros-humble-swd-ros2-controllers dbus-x11
+sudo apt update && sudo apt install swd-services ros-${ROS_DISTRO}-swd-ros2-controllers
 ```
 
 ### Compiling from source
@@ -93,23 +82,31 @@ You can always use the node with the `ros2 run` command, the minimum required pa
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/ezw/usr/lib
 ros2 run swd_ros2_controllers swd_diff_drive_controller --ros-args -p baseline_m:=0.485
 ```
+
 The corresponding D-Bus services have to be started in order to use the nodes.
 Example for the [SWD® Starter Kit](https://www.ez-wheel.com/en/development-kit-for-agv-and-amr) differential drive robot:
 
-* The service `ezw-dbus-user-session.service` is equivalent to running:
+- The service `ezw-dbus-user-session.service` is equivalent to running:
+
 ```shell
 dbus-launch > /tmp/SYSTEMCTL_dbus.id ## [OPTIONAL]
 ```
-* Prepare the environment
+
+- Prepare the environment
+
 ```shell
 export $(cat /tmp/SYSTEMCTL_dbus.id) ## [OPTIONAL]
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/ezw/usr/lib
 ```
-* The service `ezw-swd-left.service` is equivalent to running:
+
+- The service `ezw-swd-left.service` is equivalent to running:
+
 ```shell
 /opt/ezw/usr/bin/ezw-smc-service /opt/ezw/usr/etc/ezw-smc-core/swd_left_config.ini
 ```
-* The service `ezw-swd-right.service` is equivalent to running:
+
+- The service `ezw-swd-right.service` is equivalent to running:
+
 ```shell
 /opt/ezw/usr/bin/ezw-smc-service /opt/ezw/usr/etc/ezw-smc-core/swd_right_config.ini
 ```
@@ -117,6 +114,7 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/ezw/usr/lib
 Example of configuration files for [SWD® Starter Kit](https://www.ez-wheel.com/en/development-kit-for-agv-and-amr) differential drive robot:
 
 ### `swd_left_config.ini`
+
 ```ini
 # SMC Drive service config file
 contextId = 12
@@ -133,6 +131,7 @@ CANOpenEDSFile = /opt/ezw/usr/etc/ezw-canopen-dico/swd_core.eds
 ```
 
 ### `swd_right_config.ini`
+
 ```ini
 # SMC Drive service config file
 contextId = 12
@@ -149,6 +148,7 @@ CANOpenEDSFile = /opt/ezw/usr/etc/ezw-canopen-dico/swd_core.eds
 ```
 
 ### `configuration.json`
+
 ```json
 [
    {
@@ -168,6 +168,7 @@ As the minimal SWD® Starter Kit config files do not exist on your IPC, you can 
 In this case, make sure you have added the ez-Wheel repository to your `/etc/apt/sources.list` as specified above.
 
 Firstly, you need to create a user `swd_sk` with sudo rights and swd_sk as default password:
+
 ```shell
 sudo addgroup swd_sk
 sudo useradd -m -s /bin/bash -g swd_sk swd_sk
@@ -188,20 +189,24 @@ sudo apt-get update && sudo apt install swd-system-config-2wheels
 ```
 
 This package will configure your system to start at boot up four new services (with user `swd_sk` account):
-* `ezw-stack.service` : initialize can0
-* `ezw-dbus-user-session` : initialize D-Bus session
-* `ezw-swd-left.service` : start left D-Bus service
-* `ezw-swd-right.service` : start right D-Bus service
+
+- `ezw-stack.service` : initialize can0
+- `ezw-dbus-user-session` : initialize D-Bus session
+- `ezw-swd-left.service` : start left D-Bus service
+- `ezw-swd-right.service` : start right D-Bus service
 
 and add the following config files as specified above :
-* `/opt/ezw/data/configuration.json`
-* `/opt/ezw/usr/etc/ezw-smc-core/swd_left_config.ini`
-* `/opt/ezw/usr/etc/ezw-smc-core/swd_right_config.ini`
+
+- `/opt/ezw/data/configuration.json`
+- `/opt/ezw/usr/etc/ezw-smc-core/swd_left_config.ini`
+- `/opt/ezw/usr/etc/ezw-smc-core/swd_right_config.ini`
 
 This packages comes also with the `commissioning scripts` used for each wheels :
-* `/opt/ezw/commissioning/SafetyHub12pts`
+
+- `/opt/ezw/commissioning/SafetyHub12pts`
 
 You can modify them and do the commissioning using:
+
 ```shell
 cd /opt/ezw/commissioning/SafetyHub12pts
 ./swd_left_4_commissioning.py
@@ -250,7 +255,7 @@ This controller drives two ez-Wheel SWD® wheels as a differential-drive robot.
 This message provides information about CiA 402-4 CANopen safety drive functions.
 True if the safety drive function is enabled.
 
-```
+```shell
 std_msgs/Header header
 bool safe_torque_off                        # Safe Torque Off (STO)
 bool safe_brake_control                     # Safe Brake Control (SBC)
