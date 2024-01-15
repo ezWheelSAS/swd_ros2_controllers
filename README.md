@@ -20,8 +20,9 @@ Some pre-built packages are available for ROS2 Foxy and Galactic on Ubuntu 20.04
 
 - Two SWD® based wheels
 - `SWD firmware` (**`>= 1.0.1`**)
-- Ubuntu 20.04 (Focal Fossa) and ROS2 (Foxy or Galactic)
-- Ubuntu 22.04 (Jammy Jellyfish) and ROS2 (Humble or Iron)
+- Ubuntu :
+  - 20.04 (Focal Fossa) and ROS2 (Foxy or Galactic) or,
+  - 22.04 (Jammy Jellyfish) and ROS2 (Humble or Iron)
 - `swd-services` (**`>= 2.0.0`**)
 
 ### Ubuntu
@@ -203,12 +204,12 @@ and add the following config files as specified above :
 
 This packages comes also with the `commissioning scripts` used for each wheels :
 
-- `/opt/ezw/commissioning/SafetyHub12pts`
+- `/opt/ezw/commissioning/`
 
 You can modify them and do the commissioning using:
 
 ```shell
-cd /opt/ezw/commissioning/SafetyHub12pts
+cd /opt/ezw/commissioning/
 ./swd_left_4_commissioning.py
 ./swd_right_5_commissioning.py
 ```
