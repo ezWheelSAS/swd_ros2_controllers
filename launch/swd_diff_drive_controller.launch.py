@@ -37,6 +37,7 @@ def generate_launch_description():
                 package="swd_ros2_controllers",
                 executable="swd_diff_drive_controller",
                 name="swd_diff_drive_controller",
+                output="screen",
                 parameters=[
                     {"use_sim_time": LaunchConfiguration("use_sim_time")},
                     {"baseline_m": LaunchConfiguration("baseline_m")},
