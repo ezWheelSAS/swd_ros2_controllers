@@ -1,3 +1,11 @@
+swd-ros2-controllers (2.0.2) unstable; urgency=medium
+
+  * Fix launch.py : add output='screen'
+  * Update README.md : fix sources.list + add SWD-125 product + remove commissioning_12pts + fix Ubuntu version
+  * Add depend.sh
+
+ -- Grégory Mermet <g.mermet@ez-wheel.com>  Wed, 17 Jan 2024 16:51:59 +0100
+
 swd-ros2-controllers (2.0.1) unstable; urgency=medium
 
   * Change some log level messages
