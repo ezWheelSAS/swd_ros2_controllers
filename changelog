@@ -1,4 +1,4 @@
-swd-ros2-controllers (2.0.2) unstable; urgency=medium
+swd-ros2-controllers (2.1.0) unstable; urgency=medium
 
   * Fix the apt-key deprecation error
   * Support two levels of SLS
