@@ -3,9 +3,8 @@
 <package format="3">
   <name>swd_ros2_controllers</name>
   <version>2.0.1</version>
-  <description>Package which control 2 wheels in as a differential drive robot.</description>
+  <description>Package that interacts with ez-Wheel's SWD DBus services to control 2 wheels for a differential-drive robot.</description>
 
-  <maintainer email="l.david@ez-wheel.com">ez-wheel-dev</maintainer>
   <maintainer email="g.mermet@ez-wheel.com">Gregory MERMET</maintainer>
 
   <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
