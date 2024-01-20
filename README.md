@@ -30,7 +30,7 @@ Some pre-built packages are available for ROS2 Foxy and Galactic on Ubuntu 20.04
 In order to install `swd_ros2_controllers`, you need to add the ez-Wheel repository to `/etc/apt/sources.list`.
 
 ```shell
-echo "deb http://packages.ez-wheel.com:8081/ubuntu $(lsb_release -cs) main" | sudo tee -a /etc/apt/sources.list
+echo "deb http://packages.ez-wheel.com:8081/ubuntu/ $(lsb_release -cs) main" | sudo tee -a /etc/apt/sources.list
 ```
 
 Then download and add the GPG key using following command:
