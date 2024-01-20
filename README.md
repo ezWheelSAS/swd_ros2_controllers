@@ -2,53 +2,57 @@
 
 ## Overview
 
-This package has been tested on ROS2 Foxy, Galactic and Humble. It contains ROS2 nodes to control motors powered by the [ez-Wheel](https://www.ez-wheel.com) Safety Wheel Drive (SWD®) technology.
+This package has been tested on ROS2 Foxy, Galactic, Humble and Iron. It contains ROS2 nodes to control motors powered by the [ez-Wheel](https://www.ez-wheel.com) Safety Wheel Drive (SWD®) technology.
 
 |![SWD-Core](https://www.ez-wheel.com/storage/image-product/visuels-swd-core-2-0-0.png) |![SWD-125](https://www.ez-wheel.com/storage/image-product/ezswd125im-31102023-photo-hd-det.png) |![SWD-150](https://www.ez-wheel.com/storage/image-product/roue-electrique-swd-150-2-0-0-0.png) |![SWD-StarterKit](https://www.ez-wheel.com/storage/image-product/starterkit-ez-wheel-web-0-0-0.png)|
 | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | [SWD® Core](https://www.ez-wheel.com/en/safety-gear-motor)  | [SWD® 125](https://ez-wheel.com/en/safety-wheel-drive-swd-125) | [SWD® 150](https://www.ez-wheel.com/en/swd-150-safety-wheel-drive) | [SWD® StarterKit](https://www.ez-wheel.com/en/development-kit-for-agv-and-amr) |
 | Safety gear motor                                           | Medium duty Safety Wheel Drive                                 | Heavy duty Safety Wheel Drive                                      | Development kit for AGV and AMR |
 
-Users should regularly inform themselves about updates to this driver (Activating GitHub notifications with "Watch", 'All activity' button on the top of this page).
+Users should regularly inform themselves about updates of this driver (Activating GitHub notifications with "Watch", 'All activity' button on top of this page).
 
-## Installation
-
-This package has been tested on **x64_86** and **arm64** machines.
-Some pre-built packages are available for ROS2 Foxy and Galactic on Ubuntu 20.04 (for **x64_86** and **arm64**).
-
-### Prerequisites
+## Prerequisites
 
 - Two SWD® based wheels
 - `SWD firmware` (**`>= 1.0.1`**)
 - Ubuntu :
-  - 20.04 (Focal Fossa) and ROS2 (Foxy or Galactic) or,
+  - 20.04 (Focal Fossa) and ROS2 (Foxy or Galactic)
   - 22.04 (Jammy Jellyfish) and ROS2 (Humble or Iron)
 - `swd-services` (**`>= 2.0.0`**)
 
-### Ubuntu
+## Pre-built debian package
 
-In order to install `swd_ros2_controllers`, you need to add the ez-Wheel repository to `/etc/apt/sources.list`.
+It is available for the following platforms:
+
+- ARM 64-bits, i.e. **arm64** debian packages
+- AMD 64-bits, i.e. **amd64** debian packages, for x86 machines
+
+## Installation
+
+### METHOD 1: Ubuntu package manager
+
+In order to install `swd_ros2_controllers` with apt, you need to add ez-Wheel repository to your Apt sources configuration file as sudo in: `/etc/apt/sources.list`. Type the following command:
 
 ```shell
-echo "deb http://packages.ez-wheel.com:8081/ubuntu $(lsb_release -cs) main" | sudo tee -a /etc/apt/sources.list
+echo "deb http://packages.ez-wheel.com:8081/ubuntu/ $(lsb_release -cs) main" | sudo tee -a /etc/apt/sources.list
 ```
 
-Then download and add the GPG key using following command:
+Then, download and add the GPG key. Type the following command:
 
 ```shell
 wget -qO - http://packages.ez-wheel.com:8081/archive.key | sudo apt-key add -
 ```
 
-Now, you should be able to install the `swd-ros2-controllers` package using `apt`:
+Now, you should be able to install ez-Wheel's packages using `Advanced Packaging Tool (apt)`:
 
 ```shell
 sudo apt update && sudo apt install swd-services ros-${ROS_DISTRO}-swd-ros2-controllers
 ```
 
-### Compiling from source
+### METHOD 2: Compiling from source
 
-To compile the package, make sure you have added the ez-Wheel repository to your `/etc/apt/sources.list` as specified above.
-Then you need to install `swd-services` using:
+To compile the package, make sure you added ez-Wheel repository to your Apt sources configuration file as sudo in: `/etc/apt/sources.list`, as specified above in METHOD 1.
+So that you can install required `swd-services`, by typing:
 
 ```shell
 sudo apt-get update && sudo apt install swd-services
@@ -66,11 +70,13 @@ colcon build
 source ~/ros2_ws/install/setup.bash
 ```
 
-## Usage on a SWD® Starter Kit
+## Usage
 
-The package comes with a preconfigured `.launch` files which can be started using the `ros2 launch` command:
+### A- On the SWD® Starter Kit
 
-- `swd_diff_drive_controller_launch.py`: sample configuration for the [SWD® Starter Kit](https://www.ez-wheel.com/en/development-kit-for-agv-and-amr) differential drive robot. To use it, run the following command:
+The package comes with a preconfigured launchfile which can be started using the `ros2 launch` command:
+
+- `swd_diff_drive_controller_launch.py`: is a launchfile for the [SWD® Starter Kit](https://www.ez-wheel.com/en/development-kit-for-agv-and-amr) which has a differential kinematic. To use it, run the following command:
 
 ```shell
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/ezw/usr/lib
@@ -85,7 +91,8 @@ ros2 run swd_ros2_controllers swd_diff_drive_controller --ros-args -p baseline_m
 ```
 
 The corresponding D-Bus services have to be started in order to use the nodes.
-Example for the [SWD® Starter Kit](https://www.ez-wheel.com/en/development-kit-for-agv-and-amr) differential drive robot:
+
+Example with the [SWD® Starter Kit](https://www.ez-wheel.com/en/development-kit-for-agv-and-amr):
 
 - The service `ezw-dbus-user-session.service` is equivalent to running:
 
@@ -112,7 +119,7 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/ezw/usr/lib
 /opt/ezw/usr/bin/ezw-smc-service /opt/ezw/usr/etc/ezw-smc-core/swd_right_config.ini
 ```
 
-Example of configuration files for [SWD® Starter Kit](https://www.ez-wheel.com/en/development-kit-for-agv-and-amr) differential drive robot:
+Example of configuration files for [SWD® Starter Kit](https://www.ez-wheel.com/en/development-kit-for-agv-and-amr):
 
 ### `swd_left_config.ini`
 
@@ -162,13 +169,13 @@ CANOpenEDSFile = /opt/ezw/usr/etc/ezw-canopen-dico/swd_core.eds
 ]
 ```
 
-## Usage on your own IPC
+### B- On your own IPC
 
 As the minimal SWD® Starter Kit config files do not exist on your IPC, you can install them manually as specified above or install them via a third package.
 
-In this case, make sure you have added the ez-Wheel repository to your `/etc/apt/sources.list` as specified above.
+In this case, make sure you added ez-Wheel repository to your Apt sources configuration file as sudo in: `/etc/apt/sources.list`, as specified above in METHOD 1.
 
-Firstly, you need to create a user `swd_sk` with sudo rights and swd_sk as default password:
+First, create `swd_sk` user with sudo rights, with `swd_sk` as default password:
 
 ```shell
 sudo addgroup swd_sk
@@ -206,7 +213,7 @@ This packages comes also with the `commissioning scripts` used for each wheels :
 
 - `/opt/ezw/commissioning/`
 
-You can modify them and do the commissioning using:
+You can modify them and apply the commissioning using:
 
 ```shell
 cd /opt/ezw/commissioning/
@@ -216,9 +223,9 @@ cd /opt/ezw/commissioning/
 
 Then refer to "Usage on a SWD® Starter Kit" for more information.
 
-## The `swd_diff_drive_controller` node
+## About ROS2 `swd_diff_drive_controller` node
 
-This controller drives two ez-Wheel SWD® wheels as a differential-drive robot.
+This controller manages two ez-Wheel SWD® wheels as a differential kinetic robot.
 
 ### Parameters
 
@@ -249,14 +256,14 @@ This controller drives two ez-Wheel SWD® wheels as a differential-drive robot.
 - `/odom` of type **`nav_msgs/msg/Odometry`**: Odometry message based on wheels encoders, containing the pose and velocity of the robot with their's associated uncertainties. Unless disabled by the `publish_tf` parameter, TFs with the same information are also published.
 - `/safety` of type **`swd_ros2_controllers/msg/SafetyFunctions`**: Safety messages communicated by the wheels via CANOpen, the message includes information about Safe Torque Off (STO), Safety Limited Speed (SLS), Safe Direction Indication (forward/backward) (SDI+/-), and Safe Brake Control (SBC).
 
-## Custom message types
+### Custom message types
 
-### The `swd_ros2_controllers::msg::SafetyFunctions` message
+#### `swd_ros2_controllers::msg::SafetyFunctions` message
 
-This message provides information about CiA 402-4 CANopen safety drive functions.
-True if the safety drive function is enabled.
+This message provides information about the state of the Safety functions.
+The value is `True` if the safety function is enabled.
 
-```shell
+```text
 std_msgs/Header header
 bool safe_torque_off                        # Safe Torque Off (STO)
 bool safe_brake_control                     # Safe Brake Control (SBC)
@@ -271,18 +278,67 @@ The functions SDIp and SDIn enable the motor movement only in the corresponding 
 
 ## Support
 
-For any questions, please [open a GitHub issue](https://github.com/ezWheelSAS/swd_ros2_controllers/issues).
+For any questions, [open a GitHub issue](https://github.com/ezWheelSAS/swd_ros2_controllers/issues).
 
 ## About ez-Wheel®
 
 **ez-Wheel®** is an innovative company founded in 2009 and located in Angoulême, France.
-The ez-Wheel company has developed the first industrial drive wheel, integrating electric traction motor, embedded electronics and rechargeable batteries.
+ez-Wheel has developed the first industrial wheel drive, integrating motorisation, embedded electronics and batteries.
 
 This revolutionary solution, which quickly turns any manually handled platform into an electrically assisted one.
 Our solutions have been adopted by hundreds of end-users to improve productivity and prevent work accidents caused by manual handling.
 Our products are used in a variety of applications, in fields of Automotive, Factory logistics, Warehouses, Food processing, Hospitals and Pharmaceutical industries.
 
-The new SWD® product family targets industrial robotics applications, like Autonomous Mobile Robots (AMRs) and Automatic Guided Vehicles (AGVs).
-It provides a unique solution for safety critical systems, which provides safety features according to the **ISO 3691-4** standard.
+SWD® products tackles industrial robotics applications, like Autonomous Mobile Robots (AMRs) and Automatic Guided Vehicles (AGVs).
+It provides a unique solution for safety critical systems, with safety features related to the **ISO 3691-4** standard.
 
-The [ez-Wheel®](https://www.ez-wheel.com) company has developed a unique know-how in embedded electronics, including safety critical systems, applied to battery powered electric traction.
+[ez-Wheel®](https://www.ez-wheel.com) has developed a unique know-how in embedded electronics, including safety critical systems, applied to battery powered electric traction.
+
+## Troubleshooting
+
+### Update `swd-services`
+
+```shell
+sudo apt update && sudo apt install swd-services
+```
+
+Check if other `swd-packages` can be upgraded:
+
+```shell
+sudo apt search swd-
+```
+
+### Error during commissioning
+
+Before applying commissioning, stop `swd_diff_drive_controller` node.
+Then, execute again python scripts in the commissionning directory:
+
+```shell
+./swd_"[...]"_commissioning.py
+```
+
+### Error with dbus session
+
+```shell
+export LD_LIBRARY_PATH=/opt/ezw/usr/lib
+export $(cat /tmp/SYS*.id)
+```
+
+Then restart ezw-swd-left service and ezw-swd-right service.
+
+### Debug SWD with diagnostic tool
+
+Use `remote.py` script installed with `swd-services` package in `/opt/ezw/usr/sbin` directory, with its dbusNamespace as argument, e.g.:
+
+``` shell
+/opt/ezw/usr/sbin/remote.py smc_drive
+/opt/ezw/usr/sbin/remote.py swd_left
+/opt/ezw/usr/sbin/remote.py swd_right
+```
+
+### CAN socket is not configured
+
+``` shell
+sudo ip link set down can0
+sudo ip link set can0 up type can bitrate 1000000 restart-ms 100
+sudo ip link set can0 txqueuelen 1000
