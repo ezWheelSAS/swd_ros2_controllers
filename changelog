@@ -1,5 +1,6 @@
 swd-ros2-controllers (2.0.2) unstable; urgency=medium
 
+  * Fix the apt-key deprecation error
   * Support two levels of SLS
   * Fix launch.py : add output='screen'
   * Update README.md : fix sources.list + add SWD-125 product + remove commissioning_12pts + fix Ubuntu version
